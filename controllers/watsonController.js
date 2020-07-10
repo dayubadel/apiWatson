@@ -34,7 +34,7 @@ watsonController.ControlMensajes = async (req, res) => {
         {
             console.log(watsonResponse.result.entities,'datos generales')
         }
-       console.log(JSON.stringify(watsonResponse.result.output.generic, null, 4))
+       console.log(JSON.stringify(watsonResponse.result.output.generic8, null, 4))
         res.send(watsonResponse.result.output.generic)
     })
 
