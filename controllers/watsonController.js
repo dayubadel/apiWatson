@@ -3,11 +3,14 @@ const { IamAuthenticator } = require('ibm-watson/auth');
 const sqlController = require('./sqlController.js')
 const config = require("../config/config.js");
 const pedidoModel = require('./../models/pedido.js')
-const id_workspace = config.Watson.id_workspace, apikey = config.Watson.apikey, url = config.Watson.url, version = config.Watson.version
+
+const id_workspace = config.Watson.id_workspace
+const apikey = config.Watson.apikey
+const url = config.Watson.url
+const version = config.Watson.version
+
 const watsonController = {};
-var idChatWhatsApp = ''
-//var idChat = ''
-// constantre para autenticacion en Watson Assitant
+
 const assistant = new AssistantV1({
     version: version,
     authenticator: new IamAuthenticator({
@@ -17,36 +20,56 @@ const assistant = new AssistantV1({
   });
 
 watsonController.ControlMensajes = async (req, res) => {
-    console.log(req.body)
-    let idChat = req.body.idChat
+    // console.log(req.body)
+    let idChat = req.body.idChat //es el idConversacionCanal
     let txtMsg = req.body.textMsg
     let idCanal = req.body.idCanal
 
-    
-    assistant.message({
-        workspaceId: id_workspace,
-        //input: { text: txtMsg},
-        input: { text: 'Necesito un credito'},
-        context: {}
-    })
-    .then( watsonResponse => {
-        if(watsonResponse.result.entities.length>0)
-        {
-            console.log(watsonResponse.result.entities,'datos generales')
-        }
-       console.log(JSON.stringify(watsonResponse.result.output.generic8, null, 4))
+    try {
+
+        let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
+
+        let idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
+
+        let contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
+        
+        let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
+            workspaceId: id_workspace,
+            input: { text: txtMsg},
+            context: contextoAnterior
+        })
+
+        let contexto = watsonResponse.result.context
+
+        objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
+        
+        idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
+        contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
+
+        await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
+        console.log(watsonResponse.result.output.generic)
         res.send(watsonResponse.result.output.generic)
-    })
+        
+    } catch (error) {
+        console.log(error)
+        res.status(400).send('')
+    }
 
-    // console.log(req.body)
-    // var intanciaWhatsapp = req.body.intanciaWhatsapp
-    // var textMensajeReq = req.body.textMensajeReq
-    // var idChat = req.body.idChat
+    
+    // .then(async contextoAnterior => {
+    //     return 
+    // })
+    // .then(async watsonResponse => {
+    //     console.log( JSON.stringify(watsonResponse.result,null, 4))
+        
+    //     // if(watsonResponse.result.entities.length>0)
+    //     // {
+    //     //     console.log(watsonResponse.result.entities,'datos generales')
+    //     // }
+    //     // console.log(JSON.stringify(watsonResponse.result.output.generic8, null, 4))
+    // })
 
-    // var objResToWhatsapp = {
-    //     instancia : intanciaWhatsapp,
-    //     respuesta : ''
-    // }
+
 
     // contextoAnterior = await sqlController.gestionContexto('',idChat,2)
     // .then(async contextoAnterior => {
@@ -260,6 +283,28 @@ watsonController.AccionesNode = async (strAccion, contexto) => {
         return respuesta
     }
  
+}
+
+watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson) => {
+    
+    var textoMsgWatson = '';
+
+    (async () => {
+        for (const item of outputWatson) {
+            if(item.response_type =='text' ){
+                textoMsgWatson = textoMsgWatson + '\n' +  item.text  
+            }else if(item.response_type =='option' ){
+                let respuesta = item.title + '\n'
+                item.options.forEach(element => {
+                    respuesta = respuesta + element.label + '\n'
+                });
+            }else if(item.response_type =='image' ){
+
+            }
+        }
+    })();
+    
+    await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson)
 }
 
 //con esta funcion pueden actualizar entidades en watson directamente desde base de datos
