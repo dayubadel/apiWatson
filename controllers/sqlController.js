@@ -66,7 +66,7 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWats
     // console.log(query)
     await request.query(query)
     .then(async data => {
-        console.log(JSON.stringify(data,null,4))
+     //   console.log(JSON.stringify(data,null,4))
     
         // }
     })
@@ -78,5 +78,40 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWats
 
 }
 
+
+ sqlController.consultarTiendasPorCiudad = async(ciudad) => {
+    let query
+    var resultSQL = []
+    var datos = {}
+    
+    query = `EXEC [dbo].[sp_ConsultarTiendasPorCiudad]
+                @ciudad = ${ciudad}`
+
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+           data.recordset.forEach(element => 
+            {
+               datos = {
+                   idTienda: element.idTienda,
+                   nombreTienda: element.nombreTienda,
+                   direccionEspecifica: element.direccionEspecifica,
+                   telefonos: element.telefonos,
+                   horaApertura: element.horaApertura,
+                   horaCierre: element.horaCierre,
+                   atiendeSabado: element.atiendeSabado,
+                   atiendeDomingo: element.atiendeDomingo
+               }
+               resultSQL.push(datos)
+            })
+          
+        }
+    })
+    .catch(err => {
+        console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
+        console.log(err)
+    })
+    return resultSQL
+}
 
 module.exports = sqlController

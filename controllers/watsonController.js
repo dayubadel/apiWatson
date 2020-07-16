@@ -33,13 +33,27 @@ watsonController.ControlMensajes = async (req, res) => {
 
         let contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
         
+        
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
             input: { text: txtMsg},
             context: contextoAnterior
         })
 
-        let contexto = watsonResponse.result.context
+        var contexto = watsonResponse.result.context
+        var opcionAcionNode =''
+        if(contexto.hasOwnProperty('_actionNode')) 
+        {
+            opcionAcionNode= 'si'
+            let respuesta = await watsonController.AccionesNode(contexto._actionNode,contexto) 
+            console.log(respuesta)
+            respuesta.forEach(element => {  watsonResponse.result.output.generic.push(element)})
+           console.log(watsonResponse.result.output.generic)
+            delete contexto._actionNode
+          
+        }
+
+       // console.log(JSON.stringify(watsonResponse.result,null,4))
 
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
         
@@ -47,242 +61,49 @@ watsonController.ControlMensajes = async (req, res) => {
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
 
         await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
-        console.log(watsonResponse.result.output.generic)
+      //  console.log(watsonResponse.result.output.generic, 'normal')
         res.send(watsonResponse.result.output.generic)
+
+     
+
+        // if(opcionAcionNode=='')
+        // {
+        //     console.log(watsonResponse.result.output.generic, 'normal')
+        //     res.send(watsonResponse.result.output.generic)
+        // }else 
+        // {
+        //     console.log(watsonResponse.result.output.generic, 'node')
+        //     let listaRespuestas=watsonResponse.result.output.generic
+        //     listaRespuestas.forEach(element => {  res.send(element) })
+        // }
+    
         
     } catch (error) {
         console.log(error)
         res.status(400).send('')
     }
-
-    
-    // .then(async contextoAnterior => {
-    //     return 
-    // })
-    // .then(async watsonResponse => {
-    //     console.log( JSON.stringify(watsonResponse.result,null, 4))
-        
-    //     // if(watsonResponse.result.entities.length>0)
-    //     // {
-    //     //     console.log(watsonResponse.result.entities,'datos generales')
-    //     // }
-    //     // console.log(JSON.stringify(watsonResponse.result.output.generic8, null, 4))
-    // })
-
-
-
-    // contextoAnterior = await sqlController.gestionContexto('',idChat,2)
-    // .then(async contextoAnterior => {
-    //     return await assistant.message({
-    //         workspaceId: id_workspace,
-    //         input: { text:textMensajeReq},
-    //         context: contextoAnterior
-    //     })
-
-    // })    
-    // .then(async watsonResponse => {
-    //     const contexto = watsonResponse.result.context
-    //     var respuestaToWhatsAppSQL
-    //     if(contexto.hasOwnProperty("_accionNode")){
-    //         console.log(contexto._accionNode)
-    //         respuestaToWhatsAppSQL = await watsonController.AccionesNode(contexto._accionNode, contexto)
-    //         watsonResponse.result.output.generic.unshift({
-    //             "response_type": "text",
-    //             "text": respuestaToWhatsAppSQL
-    //         })
-            
-    //     }
-
-
-    //     await sqlController.gestionContexto(watsonResponse.result.context,req.body.idChat,1)
-
-    //     //console.log(JSON.stringify(watsonResponse.result, null, 4))
-
-    //     objResToWhatsapp.respuesta = watsonResponse.result.output.generic
-       
-    //     res.send(objResToWhatsapp)
-    // })
-    // .catch(err => {
-
-    //     //aque setear instancia de grupo tecnico de gaia para enviar el error
-    //     console.log(err)
-    //     objResToWhatsapp.respuesta =[{
-    //         "response_type": "text",
-    //         "text": 'tuve un problema interno. Por favor intentalo mas tarde.'
-    //     }]
-    //     res.send(objResToWhatsapp)
-    // })
 }
 
 watsonController.AccionesNode = async (strAccion, contexto) => {
+    var respuesta = []
+    if(strAccion == "consultarTienda"){
+        var ciudad = contexto.Ciudad   
+        var tiendasOrganizadas = {}
 
-    if(strAccion == "consultarDatosClienteYCategorias"){
-        var estado = contexto.estado
-        var cliente = {}
-        var categorias = []
-        var respuesta = ''
-        var numeroLista = 0
-        var nombreCliente='';
-
-
-        cliente = await sqlController.gestionClientes(contexto.codUsuario,1)
-        //console.log('*********************'+cliente+'********************');
-        categorias = await sqlController.gestionCategorias(contexto.codUsuario,1)
-
-        if (estado == 'NO'){
-            if (cliente.nombreCliente == undefined){
-                respuesta = 'El código ingresado es incorrecto. si no tienes codigo o no te acuerdas puedes decirme no tengo código'
-                contexto.conCodigo = 'NO'
-                
-            }
-            else{
-                if(contexto.codUsuario!='CF0000'){
-                    nombreCliente = cliente.nombreCliente
-                    
-                }else{
-                    nombreCliente = contexto.nombreCF
-                    
-                }
-                respuesta = `Que tal ${nombreCliente}.\n¿Los productos de qué categoría deseas ver?\n- Estas son los disponibles para ti:\n` 
-                contexto.conCodigo = 'SI'
-            }
-
-        }
-        else{
-
-            respuesta = `¿Los productos de qué categoría deseas ver?\n - Estas son los disponibles para ti:\n`
-
-
-
-    
-        }
-        
-        
-        categorias.forEach(element => {
-            numeroLista=numeroLista+1;
-            respuesta = respuesta + ' '+numeroLista+'. '+ element + '\n'
-        });
-        
-        if(!contexto.hasOwnProperty("_pedido")){
-            contexto._pedido = new pedidoModel.Pedido()
-            contexto._nombreCliente = cliente.nombreCliente
-            
-        }
-        //Para la seleccion de numeros
-        //crear la variable de contexto para agregar al contexto
-        contexto._numCategoria = categorias.length
-        contexto._arrCategoria = categorias
-
-        contexto._accionNode='NULL'//RESETEAMOS LA VARIABLE _accionNode en Watson
-
-
-       return respuesta
-        
+        sqlController.consultarTiendasPorCiudad(ciudad)
+        .then(data =>{
+            data.forEach(elementTienda =>
+                {
+                    tiendasOrganizadas = {
+                        response_type: 'text',
+                        text: 'Tienda ubicada en '+elementTienda.direccionEspecifica
+                    }
+                    respuesta.push(tiendasOrganizadas)
+            }            
+           )})  
+             
     }
-
-    if(strAccion == 'consultarProductoXCategoria'){
-        var subCategorias = []
-        var imagenCategoria = []
-        var respuestaUrl
-        var respuesta = ''
-        var numWhatsapp = []
-        var numeroListaProductos = 0;
-        
-        //para la seleccion de numeros
-        var nombreCategoria = ''
-        var arrCategoriaProducto
-        var varCategoriaProducto
-        var arrayCategorias = contexto._arrCategoria
-
-        varCategoriaProducto = contexto.categoriaProductos//"SI:SI AND ( OR (3<=3 AND 3>0))"
-        arrCategoriaProducto = varCategoriaProducto.split('(')//sacamos el texto
-        nombreCategoria = arrCategoriaProducto[1].split('OR')
-        nombreCategoria = nombreCategoria[0].trim()
-
-        if(nombreCategoria == ''){
-            arrCategoriaProducto = arrCategoriaProducto[2].split('<')
-            //console.log('Entree*1**'+arrCategoriaProducto+'****')
-            arrCategoriaProducto = parseInt(arrCategoriaProducto[0])
-            //console.log('Entree2***'+arrCategoriaProducto+'****')
-            nombreCategoria = arrayCategorias[arrCategoriaProducto-1];
-            //console.log('Entree3***'+arrCategoriaProducto+'*********'+nombreCategoria+'****************')
-            subCategorias = await sqlController.GestionSubCategorias(contexto.codUsuario,nombreCategoria,1)
-            imagenCategoria = await sqlController.GestionSubCategoriasImg(contexto.codUsuario,nombreCategoria,1)
-            //respuestaUrl = await sqlController.enviaImg(imagenCategoria[0],idChat,nombreCategoria)
-            respuesta = 'image:'+ imagenCategoria[0] + '^'
-        }else{
-            //console.log('Otro Caso **********'+nombreCategoria+'**********')
-            subCategorias = await sqlController.GestionSubCategorias(contexto.codUsuario,nombreCategoria,1)
-            imagenCategoria = await sqlController.GestionSubCategoriasImg(contexto.codUsuario,nombreCategoria,1)
-            //respuestaUrl = await sqlController.enviaImg(imagenCategoria[0],idChat,nombreCategoria)
-            respuesta = 'image:'+ imagenCategoria[0] + '^'
-        }
-
-
-        respuesta = respuesta + `¿Qué producto deseas adquirir?\nLista de Productos:\n`
-        //console.log(subCategorias)
-        subCategorias.forEach(element => {
-            
-            numeroListaProductos=numeroListaProductos+1;
-            respuesta = respuesta+' '+numeroListaProductos+'. ' + element + '\n'
-        });
-
-        contexto._arrSubCategoria = subCategorias
-        contexto._numSubCategoria = subCategorias.length
-       
-        return respuesta
-        
-    }
-
-    if(strAccion == 'consultarVersionesXProducto'){
-        var productos = []
-        var respuesta = ''
-        var imagenSubCategoria1 = []
-        var respuestaUrl1
-        var numeroListaVersion=0
-
-        //para la seleccion de numeros
-        var nombreSubCategoria
-        var arraySubCategoria
-        var subCategoriaProducto
-        var arrSubCategoriaP = contexto._arrSubCategoria
-
-        subCategoriaProducto = contexto.subCategoria
-        arraySubCategoria = subCategoriaProducto.split('(')//sacamos el texto
-        nombreSubCategoria = arraySubCategoria[1].split('OR')
-        nombreSubCategoria = nombreSubCategoria[0].trim()
-
-        if(nombreSubCategoria==''){
-            
-            arraySubCategoria = arraySubCategoria[2].split('<')
-            arraySubCategoria = parseInt(arraySubCategoria[0])
-            nombreSubCategoria = arrSubCategoriaP[arraySubCategoria-1];
-            
-            productos = await sqlController.GestionProductos(contexto.codUsuario,nombreSubCategoria, undefined,1)
-        }else{
-            productos = await sqlController.GestionProductos(contexto.codUsuario,nombreSubCategoria, undefined,1)
-        }
-        
-        imagenSubCategoria1 = await sqlController.GestionProductoImg(contexto.codUsuario,nombreSubCategoria, undefined,1)
-        //respuestaUrl1 = await sqlController.enviaImg(imagenSubCategoria1[0],idChat,contexto.subCategoria)
-        console.log(imagenSubCategoria1,'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-        respuesta = 'image:'+ imagenSubCategoria1[0] + '^'
-        respuesta = respuesta + `¿Qué presentación quieres comprar?\nTenemos las siguientes:\n`
-       
-
-        //console.log(productos)
-        productos.forEach(element => {
-            numeroListaVersion=numeroListaVersion+1
-            respuesta = respuesta+numeroListaVersion+'. ' +  element.nombreProducto  + ' a $' + element.precio + ' \n'
-        });
-
-        contexto._arrProductos = productos
-        contexto._numProductos = productos.length
-        contexto._nombreSubCategoria = nombreSubCategoria
-
-        return respuesta
-    }
- 
+    return respuesta   
 }
 
 watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson) => {
