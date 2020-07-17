@@ -41,14 +41,11 @@ watsonController.ControlMensajes = async (req, res) => {
         })
 
         var contexto = watsonResponse.result.context
-        var opcionAcionNode =''
         if(contexto.hasOwnProperty('_actionNode')) 
         {
-            opcionAcionNode= 'si'
             let respuesta = await watsonController.AccionesNode(contexto._actionNode,contexto) 
-            console.log(respuesta)
             respuesta.forEach(element => {  watsonResponse.result.output.generic.push(element)})
-           console.log(watsonResponse.result.output.generic)
+          // console.log(watsonResponse.result.output.generic)
             delete contexto._actionNode
           
         }
@@ -66,16 +63,6 @@ watsonController.ControlMensajes = async (req, res) => {
 
      
 
-        // if(opcionAcionNode=='')
-        // {
-        //     console.log(watsonResponse.result.output.generic, 'normal')
-        //     res.send(watsonResponse.result.output.generic)
-        // }else 
-        // {
-        //     console.log(watsonResponse.result.output.generic, 'node')
-        //     let listaRespuestas=watsonResponse.result.output.generic
-        //     listaRespuestas.forEach(element => {  res.send(element) })
-        // }
     
         
     } catch (error) {
@@ -90,7 +77,7 @@ watsonController.AccionesNode = async (strAccion, contexto) => {
         var ciudad = contexto.Ciudad   
         var tiendasOrganizadas = {}
 
-        sqlController.consultarTiendasPorCiudad(ciudad)
+       await sqlController.consultarTiendasPorCiudad(ciudad)
         .then(data =>{
             data.forEach(elementTienda =>
                 {
@@ -100,8 +87,7 @@ watsonController.AccionesNode = async (strAccion, contexto) => {
                     }
                     respuesta.push(tiendasOrganizadas)
             }            
-           )})  
-             
+           )})              
     }
     return respuesta   
 }
