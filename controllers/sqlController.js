@@ -80,12 +80,13 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWats
 
 
  sqlController.consultarTiendasPorCiudad = async(ciudad) => {
+     
     let query
     var resultSQL = []
     var datos = {}
     
     query = `EXEC [dbo].[sp_ConsultarTiendasPorCiudad]
-                @ciudad = ${ciudad}`
+                @ciudad = N'${ciudad}'`
 
     await request.query(query)
     .then(async data => {
@@ -100,7 +101,11 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWats
                    horaApertura: element.horaApertura,
                    horaCierre: element.horaCierre,
                    atiendeSabado: element.atiendeSabado,
-                   atiendeDomingo: element.atiendeDomingo
+                   atiendeDomingo: element.atiendeDomingo,
+                   horaAperturaSabado: element.horaAperturaSabado,
+                   horaCierreSabado: element.horaCierreSabado,
+                   horaAperturaDomingo: element.horaAperturaDomingo,
+                   horaCierreDomingo: element.horaCierreDomingo
                }
                resultSQL.push(datos)
             })
@@ -113,5 +118,77 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWats
     })
     return resultSQL
 }
+
+
+sqlController.consultarSectoresAgrupadosPorCiudad = async(ciudad) => {
+    console.log(ciudad)
+   let query
+   var resultSQL = []
+   var datos = {}
+   
+   query = `EXEC [dbo].[sp_ConsultarSectoresAgrupadosPorCiudad]
+               @ciudad = N'${ciudad}'`
+
+   await request.query(query)
+   .then(async data => {
+       if (data.recordset != undefined && data.recordset.length > 0) {
+          data.recordset.forEach(element => 
+           {
+              datos = {
+                  sector: element.sector
+              }
+              resultSQL.push(datos)
+           })
+         
+       }
+   })
+   .catch(err => {
+       console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
+       console.log(err)
+   })
+   return resultSQL
+}
+
+sqlController.consultarTiendasPorCiudadPorSector = async(ciudad, sector) => {
+
+   let query
+   var resultSQL = []
+   var datos = {}
+   
+   query = `EXEC [dbo].[sp_ConsultarTiendaPorCiudadPorSector]
+               @ciudad = N'${ciudad}',
+               @sector = N'${sector}'`
+               
+   await request.query(query)
+   .then(async data => {
+       if (data.recordset != undefined && data.recordset.length > 0) {
+          data.recordset.forEach(element => 
+           {
+              datos = {
+                  idTienda: element.idTienda,
+                  nombreTienda: element.nombreTienda,
+                  direccionEspecifica: element.direccionEspecifica,
+                  telefonos: element.telefonos,
+                  horaApertura: element.horaApertura,
+                  horaCierre: element.horaCierre,
+                  atiendeSabado: element.atiendeSabado,
+                  atiendeDomingo: element.atiendeDomingo,
+                  horaAperturaSabado: element.horaAperturaSabado,
+                  horaCierreSabado: element.horaCierreSabado,
+                  horaAperturaDomingo: element.horaAperturaDomingo,
+                  horaCierreDomingo: element.horaCierreDomingo
+              }
+              resultSQL.push(datos)
+           })
+         
+       }
+   })
+   .catch(err => {
+       console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
+       console.log(err)
+   })
+   return resultSQL
+}
+
 
 module.exports = sqlController

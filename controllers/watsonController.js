@@ -78,19 +78,105 @@ watsonController.AccionesNode = async (strAccion, contexto) => {
         var tiendasOrganizadas = {}
 
        await sqlController.consultarTiendasPorCiudad(ciudad)
-        .then(data =>{
+        .then(data =>{ 
+            let contadorTiendas = data.length
+            var textoGeneral =  'Contamos con una tienda en '+ciudad+':'
+            if(contadorTiendas>1)
+            {
+                textoGeneral =  'A continuación, le presento las '+contadorTiendas+' tiendas disponibles en '+ciudad+':'
+            }
+            tiendasOrganizadas = {
+                response_type: 'text',
+                text: textoGeneral
+            }
+            respuesta.push(tiendasOrganizadas)
             data.forEach(elementTienda =>
                 {
+                    var atencionSabado='No atiende días sábados. '
+                    if(elementTienda.atencionSabado==true)
+                    {
+                        atencionSabado='Atiende todos los sábados desde las '+elementTienda.horaAperturaSabado+
+                        'hasta las '+elementTienda.horaCierreSabado+' . '
+                    }
+                    var atencionDomingo='No atiende días domingos.'
+                    if(elementTienda.atencionSabado==true)
+                    {
+                        atencionDomingo='Atiende todos los domingos desde las '+elementTienda.horaAperturaDomingo+
+                        'hasta las '+elementTienda.horaCierreDomingo+' . '
+                    }
                     tiendasOrganizadas = {
                         response_type: 'text',
-                        text: 'Tienda ubicada en '+elementTienda.direccionEspecifica
+                        text: 'El almacen ubicado en '+elementTienda.direccionEspecifica+' atiende de lunes a viernes desde'+
+                        ' las '+elementTienda.horaApertura+' hasta las '+elementTienda.horaCierre+' Se puede contactar a través de(l): '+
+                        ' '+elementTienda.telefonos+'. '+atencionSabado+atencionDomingo
                     }
                     respuesta.push(tiendasOrganizadas)
             }            
            )})              
     }
+        else if(strAccion == "consultarSectoresAgrupadosPorCiudad"){
+            var ciudad = contexto.Ciudad   
+            var sectores =''
+
+        await sqlController.consultarSectoresAgrupadosPorCiudad(ciudad)
+            .then(data =>{ 
+                data.forEach(element => {
+                     sectores = sectores + element.sector + ' - '
+                })
+                let sectorRespuesta =  {
+                    response_type: 'text',
+                    text: 'En '+ciudad+' tenemos almacenes en los sectores: '+sectores+'. Por favor, indicame en qué sector deseas consultar.'
+                }
+                respuesta.push(sectorRespuesta)
+            })
+        }
+        else   if(strAccion == "consultarTiendasPorCiudadPorSector"){
+            var ciudad = contexto.Ciudad
+            var sector = contexto.Sector  
+            var tiendasOrganizadas = {}
+    
+           await sqlController.consultarTiendasPorCiudadPorSector(ciudad, sector)
+            .then(data =>{ 
+                let contadorTiendas = data.length
+                var textoGeneral =  'Contamos con una tienda en '+ciudad+':'
+                if(contadorTiendas>1)
+                {
+                    textoGeneral =  'A continuación, le presento las '+contadorTiendas+' tiendas disponibles en '+ciudad+':'
+                }
+                tiendasOrganizadas = {
+                    response_type: 'text',
+                    text: textoGeneral
+                }
+                respuesta.push(tiendasOrganizadas)
+                data.forEach(elementTienda =>
+                    {
+                        var atencionSabado='No atiende días sábados. '
+                        if(elementTienda.atencionSabado==true)
+                        {
+                            atencionSabado='Atiende todos los sábados desde las '+elementTienda.horaAperturaSabado+
+                            'hasta las '+elementTienda.horaCierreSabado+' . '
+                        }
+                        var atencionDomingo='No atiende días domingos.'
+                        if(elementTienda.atencionSabado==true)
+                        {
+                            atencionDomingo='Atiende todos los domingos desde las '+elementTienda.horaAperturaDomingo+
+                            'hasta las '+elementTienda.horaCierreDomingo+' . '
+                        }
+                        tiendasOrganizadas = {
+                            response_type: 'text',
+                            text: 'El almacen ubicado en '+elementTienda.direccionEspecifica+' atiende de lunes a viernes desde'+
+                            ' las '+elementTienda.horaApertura+' hasta las '+elementTienda.horaCierre+' Se puede contactar a través de(l): '+
+                            ' '+elementTienda.telefonos+'. '+atencionSabado+atencionDomingo
+                        }
+                        respuesta.push(tiendasOrganizadas)
+                }            
+               )})              
+        }  
+
     return respuesta   
 }
+
+
 
 watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson) => {
     
