@@ -10,6 +10,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
     //opcion = 1 => registrar contexto
     //opcion = 2 => obtener contexto
     //opcion = 3 => eliminar contexto
+    
     var query
     var resultSQL = {}
     if(opcion == 1){
@@ -121,7 +122,6 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWats
 
 
 sqlController.consultarSectoresAgrupadosPorCiudad = async(ciudad) => {
-    console.log(ciudad)
    let query
    var resultSQL = []
    var datos = {}
@@ -189,6 +189,37 @@ sqlController.consultarTiendasPorCiudadPorSector = async(ciudad, sector) => {
    })
    return resultSQL
 }
+
+
+sqlController.ingresarCliente = async(idClienteCanalMensajeria, nombres, cedula, numeroTelefono,
+                                            direccion, correo, clienteVerificado) => {
+
+    let query
+    var resultSQL = []
+    var datos = {}
+    
+    query = `EXEC [dbo].[sp_IngresarCliente]
+                @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+                @nombres = N'${nombres}',
+                @cedula = N'${cedula}',
+                @numeroTelefono = N'${numeroTelefono}',
+                @direccion = N'${direccion}',
+                @correo = N'${correo}',
+                @clienteVerificado = ${clienteVerificado}`
+                
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+           console.log(data)
+          
+        }
+    })
+    .catch(err => {
+        console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
+        console.log(err)
+    })
+    return resultSQL
+ }
 
 
 module.exports = sqlController
