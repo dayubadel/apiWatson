@@ -36,7 +36,10 @@ watsonController.ControlMensajes = async (req, res) => {
         
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
         
-       
+        if(contextoAnterior.hasOwnProperty("_actionNodeEspecial"))
+        {            
+            delete contextoAnterior._actionNodeEspecial 
+        }   
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
             input: { text: txtMsg},
@@ -44,6 +47,7 @@ watsonController.ControlMensajes = async (req, res) => {
         })       
         var contexto = watsonResponse.result.context
        
+
         if(contexto.hasOwnProperty('_actionNode')) 
         {
            let respuesta = await watsonController.AccionesNode(contexto._actionNode,watsonResponse.result) 
@@ -59,6 +63,7 @@ watsonController.ControlMensajes = async (req, res) => {
             objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
             idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
             idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
+            
             if(idCliente!=0 && contexto._actionNodeEspecial=="consultarCliente")
             {
                 let objCliente = await watsonController.gestionCliente(idCliente,null,null,1)
