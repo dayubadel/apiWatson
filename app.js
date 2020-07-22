@@ -28,10 +28,12 @@ mssql.connect(configFile.sql.config_sql, (err) =>{
 
 //routes
 var watsonModule = require("./routes/watsonRoute")
+var productModule = require("./routes/productoRoute")
 
 
 
 app.use("/watson", watsonModule)
+app.use("/producto", productModule)
 
 
 

@@ -2,7 +2,7 @@
 const { IamAuthenticator } = require('ibm-watson/auth');
 const sqlController = require('./sqlController.js')
 const config = require("../config/config.js");
-const pedidoModel = require('./../models/pedido.js')
+// const pedidoModel = require('./../models/pedido.js')
 
 const id_workspace = config.Watson.id_workspace
 const apikey = config.Watson.apikey
