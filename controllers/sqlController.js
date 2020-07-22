@@ -34,6 +34,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
         if (data.recordset != undefined && data.recordset.length > 0) {
             resultSQL = {
                 idClienteCanalMensajeria : data.recordset[0].idClienteCanalMensajeria,
+                idCliente : data.recordset[0].idCliente,
                 contexto : data.recordset[0]. contexto
             }
 
@@ -46,6 +47,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
         console.log("error al gestionar el contexto base")
         console.log(err)
     })
+
 
     return resultSQL
 }
@@ -143,7 +145,7 @@ sqlController.consultarSectoresAgrupadosPorCiudad = async(ciudad) => {
        }
    })
    .catch(err => {
-       console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
+       console.log("Ha ocurrido un error al consultar los sectores agrupados por ciudad")
        console.log(err)
    })
    return resultSQL
@@ -184,22 +186,22 @@ sqlController.consultarTiendasPorCiudadPorSector = async(ciudad, sector) => {
        }
    })
    .catch(err => {
-       console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
+       console.log("Ha ocurrido un error al consultar las tiendas por ciudad y por sector")
        console.log(err)
    })
    return resultSQL
 }
 
 
-sqlController.ingresarCliente = async(idClienteCanalMensajeria, nombres, cedula, numeroTelefono,
+sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefono,
                                             direccion, correo, clienteVerificado) => {
 
     let query
     var resultSQL = []
     var datos = {}
     
-    query = `EXEC [dbo].[sp_IngresarCliente]
-                @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+    query = `EXEC [dbo].[sp_ActualizarCliente]
+                @idCliente = ${idCliente},
                 @nombres = N'${nombres}',
                 @cedula = N'${cedula}',
                 @numeroTelefono = N'${numeroTelefono}',
@@ -210,12 +212,62 @@ sqlController.ingresarCliente = async(idClienteCanalMensajeria, nombres, cedula,
     await request.query(query)
     .then(async data => {
         if (data.recordset != undefined && data.recordset.length > 0) {
-           console.log(data)
+            data.recordset.forEach(element => 
+                {
+                   datos = {
+                       idCliente: element.idCliente,
+                       nombres: element.nombres,
+                       cedula: element.cedula,
+                       numeroTelefono: element.numeroTelefono,
+                       direccion: element.direccion,
+                       correo: element.correo,
+                       fechaRegistro: element.fechaRegistro,
+                       fechaUltimaModificacion: element.fechaUltimaModificacion,
+                       clienteVerificado: element.clienteVerificado,
+                   }
+                   resultSQL.push(datos)
+                })
+        }
+    })
+    .catch(err => {
+        console.log("Ha ocurrido un error al actualizar el cliente")
+        console.log(err)
+    })
+    return resultSQL
+ }
+
+ sqlController.consultarClientePorId = async(idCliente) => {
+
+    let query
+    var resultSQL = []
+    var datos = {}
+    
+    query = `EXEC [dbo].[sp_ConsultarClientePorId]
+                @idCliente = ${idCliente}`
+                
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+           data.recordset.forEach(element => 
+            {
+               datos = {
+                   idCliente: element.idCliente,
+                   nombres: element.nombres,
+                   cedula: element.cedula,
+                   numeroTelefono: element.numeroTelefono,
+                   direccion: element.direccion,
+                   correo: element.correo,
+                   fechaRegistro: element.fechaRegistro,
+                   fechaUltimaModificacion: element.fechaUltimaModificacion,
+                   clienteVerificado: element.clienteVerificado,
+               }
+               resultSQL.push(datos)
+            })
           
         }
     })
     .catch(err => {
-        console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
+        console.log("Error al consultar cliente por id")
         console.log(err)
     })
     return resultSQL
