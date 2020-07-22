@@ -32,44 +32,121 @@ watsonController.ControlMensajes = async (req, res) => {
         let idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
 
         let contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
-  
         
+        
+        var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
+        
+        if(contextoAnterior.hasOwnProperty("_actionNodeEspecial"))
+        {            
+            delete contextoAnterior._actionNodeEspecial 
+        }   
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
             input: { text: txtMsg},
             context: contextoAnterior
-        })
-       
+        })       
         var contexto = watsonResponse.result.context
-  
+       
+
         if(contexto.hasOwnProperty('_actionNode')) 
         {
-            let respuesta = await watsonController.AccionesNode(contexto._actionNode,watsonResponse.result) 
+           let respuesta = await watsonController.AccionesNode(contexto._actionNode,watsonResponse.result) 
             respuesta.forEach(element => {  watsonResponse.result.output.generic.push(element)})
-          // console.log(watsonResponse.result.output.generic)
-            delete contexto._actionNode
-          
+            if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
+            {
+                delete contexto.Ciudad
+            }
+            delete contexto._actionNode          
         }
-
-
+        else if(contexto.hasOwnProperty('_actionNodeEspecial')) 
+        {
+            objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
+            idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
+            idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
+            
+            if(idCliente!=0 && contexto._actionNodeEspecial=="consultarCliente")
+            {
+                let objCliente = await watsonController.gestionCliente(idCliente,null,null,1)
+                objCliente.forEach(elementCliente => {
+                            contexto.nombres = elementCliente.nombres,
+                            contexto.telefono = elementCliente.telefono
+                        }
+                    )                 
+                
+            }
+            else if(idCliente!=0 && contexto._actionNodeEspecial=="guardarNombre") 
+            {
+                let objCliente = await watsonController.gestionCliente(idCliente,contexto._actionNodeEspecial,watsonResponse.result,2)
+                objCliente.forEach(elementCliente => {
+                        contexto.nombres = elementCliente.nombres,
+                        contexto.telefono = elementCliente.telefono
+                        }                    
+                    )
+                delete contexto._actionNodeEspecial    
+                
+            }   
+            watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
+                workspaceId: id_workspace,
+                input: { text: txtMsg},
+                context: contexto
+            })
+        }
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
-        
+
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
-
         await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
-        console.log(watsonResponse, 'normal')
-        res.send(watsonResponse.result.output.generic)
-
-     
-
-    
+        res.send(watsonResponse.result.output.generic)   
         
     } catch (error) {
         console.log(error)
         res.status(400).send('')
     }
 }
+
+watsonController.gestionCliente = async (idCliente, actionNode, result, opcion) => {
+    var respuesta = []
+    var datosCliente = {}
+      
+        if(idCliente!= 0)
+        {  
+            await sqlController.consultarClientePorId(idCliente)
+            .then(data => { 
+                data.forEach(elementCliente => 
+                    {
+                        datosCliente =  
+                        {
+                            nombres: elementCliente.nombres,
+                            telefono: elementCliente.numeroTelefono
+                        }                     
+                    })
+                    }
+                )            
+            
+            if(opcion ==2)
+            {   
+                if(actionNode=="guardarNombre")
+                {
+                    var nombresPersona = result.input.text
+                    await sqlController.actualizarCliente(idCliente,nombresPersona,null,datosCliente.telefono,null,null,0)
+                    .then(data => { 
+                        data.forEach(elementCliente => 
+                            {
+                                datosCliente =  
+                                {
+                                    nombres: elementCliente.nombres,
+                                    telefono: elementCliente.numeroTelefono
+                                }                     
+                            })
+                            }
+                        ) 
+                }
+            }
+        }             
+        respuesta.push(datosCliente)
+        return respuesta
+}
+
 
 watsonController.AccionesNode = async (strAccion, result) => {
     var respuesta = []
@@ -176,21 +253,8 @@ watsonController.AccionesNode = async (strAccion, result) => {
                         contador++
                 }          
                )})              
-        }  
-        else if(strAccion == "guardarDatosUsuario"){    
-            
-            var nombresPersona = result.input.text
-            await sqlController.ingresarCliente(1, nombresPersona, null, null, null, null, 0)
-            .then(data =>{ 
-                
-                let nombreRespuesta =  {
-                    response_type: 'text',
-                    text: 'Mucho gusto, '+nombresPersona
-                }
-                respuesta.push(nombreRespuesta)
-            })
-
-        }
+        }       
+      
     return respuesta   
 }
 
