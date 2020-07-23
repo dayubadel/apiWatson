@@ -25,14 +25,11 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
                     @stockOtroPago = ${objProducto.stockOtroPago},
                     @precioCC = ${objProducto.precioCC},
                     @precioOtroPago = ${objProducto.precioOtroPago},
-                    @interesCC = ${objProducto.interesCC},
-                    @interesOtroPago = ${objProducto.interesOtroPago},
-                    @activo = ${objProducto.activo},
-                    @visible = ${objProducto.visible},
-                    @fechaCreacionWs = N'${objProducto.fechaCreacionWS}',
-                    @fechaModificaWs = N'${objProducto.fechaCreacionWS}',
+                    @cuotasPrecioCC = ${objProducto.cuotasPrecioCC},
+                    @plazoGarantia = ${objProducto.plazoGarantia},
                     @arrImagenes = N'${JSON.stringify(objProducto.imagenes)}',
-                    @arrCaracteristicas = N'${JSON.stringify(objProducto.caracteristicas).replace(/[{}"]+/g,'')}'    
+                    @arrCaracteristicas = N'${JSON.stringify(objProducto.caracteristicas).replace(/[{}"]+/g,'')}',
+                    @arrCategorias = N'${JSON.stringify(objProducto.categorias).replace(/[{\]["]+/g,'').replace(/(},)+/g,'^').replace('}','')}'
 
         `
     });
@@ -57,7 +54,7 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
         console.log(err)
     })
 
-    // console.log(query)
+    console.log(query)
 }
 
 

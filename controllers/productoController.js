@@ -39,7 +39,7 @@ productoController.RegistrarProductos = async (req, res) => {
             var i = 0,
                 objCate = JSON.parse(producto.ProductCategories)
             for (const key in objCate) {
-
+                console.log(producto[`Nivel${i}`])
                 let nivel = (producto.hasOwnProperty(`Nivel${i}`) && producto[`Nivel${i}`] == objCate[key]) ? i : null;
                 //por ahora, el nivel va a definir i por problemas con las tildes
                 arrayCategorias.push(new Categoria(key, objCate[key],i))
@@ -51,11 +51,9 @@ productoController.RegistrarProductos = async (req, res) => {
         objProducto.idVitex = producto.Id
         objProducto.nombre = producto.ProductName
         objProducto.idRefSAP = producto.RefId
-        objProducto.activo = producto.IsActive
-        objProducto.visible = producto.IsVisible
         objProducto.stockOtroPago = producto.stock
         objProducto.stockCC = producto.stockcc
-        objProducto.fechaCreacionWS = producto.Fecha
+        
         objProducto.imagenes = imgArr
         objProducto.caracteristicas = caracteristicas
         objProducto.marca = objMarca
@@ -66,8 +64,9 @@ productoController.RegistrarProductos = async (req, res) => {
 
     });
 
-    await sqlProductoController.gestionProductos(arrayProductos)
+    // await sqlProductoController.gestionProductos(arrayProductos)
     res.send(arrayProductos)
+    res.send({success:1})
 
 
 }
