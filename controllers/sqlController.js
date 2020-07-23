@@ -35,7 +35,9 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
             resultSQL = {
                 idClienteCanalMensajeria : data.recordset[0].idClienteCanalMensajeria,
                 idCliente : data.recordset[0].idCliente,
-                contexto : data.recordset[0]. contexto
+                contexto : data.recordset[0].contexto,
+                nombres : data.recordset[0].nombres,
+                numeroTelefono: data.recordset[0].numeroTelefono
             }
 
         } else {
@@ -268,6 +270,38 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     })
     .catch(err => {
         console.log("Error al consultar cliente por id")
+        console.log(err)
+    })
+    return resultSQL
+ }
+
+ sqlController.insertarValoracion = async(idClienteCanalMensajeria, valor, intencionComentario, comentarioCliente) => {
+
+    let query
+    var resultSQL = []
+    var datos = {}
+    
+    query = `EXEC [dbo].[sp_InsertarValoracion]
+                @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+                @valor = ${valor},
+                @intencionComentario = ${intencionComentario},
+                @comentarioCliente = N'${comentarioCliente}'`
+                
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+           data.recordset.forEach(element => 
+            {
+               datos = {
+                   idValoracion: element.idValoracion
+               }
+               resultSQL.push(datos)
+            })
+          
+        }
+    })
+    .catch(err => {
+        console.log("Ha ocurrido un error al ingresar la valoracion")
         console.log(err)
     })
     return resultSQL
