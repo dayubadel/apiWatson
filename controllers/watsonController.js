@@ -26,7 +26,6 @@ watsonController.ControlMensajes = async (req, res) => {
     let idCanal = req.body.idCanal
 
     try {
-
         let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
 
         let idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
@@ -38,9 +37,18 @@ watsonController.ControlMensajes = async (req, res) => {
             contextoAnterior['nombres'] = objMensajeria.nombres
         }
 
-        if(objMensajeria.numeroTelefono!=null)
+        if(idCanal==1)
+        {
+            contextoAnterior['telefono'] = idChat.split('@')[0]
+        }
+        else if(objMensajeria.numeroTelefono!=null)
         {
             contextoAnterior['telefono'] = objMensajeria.numeroTelefono
+        }
+
+        if(objMensajeria.idClienteCanalMensajeria!=null)
+        {
+            contextoAnterior['idClienteCanalMensajeria'] = objMensajeria.idClienteCanalMensajeria
         }
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
         
@@ -55,12 +63,7 @@ watsonController.ControlMensajes = async (req, res) => {
         var contexto = watsonResponse.result.context
 
         console.log("**************contextoo 1********************")       
-        console.log(watsonResponse.result.output)
-
-        if(contexto.hasOwnProperty('') || contexto.hasOwnProperty('telefono'))
-        {
-           
-        }
+        //console.log(contexto)
 
         if(contexto.hasOwnProperty('_actionNode')) 
         {   
@@ -79,9 +82,9 @@ watsonController.ControlMensajes = async (req, res) => {
             }
             delete contexto._actionNode          
         }      
-
+        //console.log("antes de pasar a base", objMensajeria)
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
-
+       // console.log("despues de pasar por base", objMensajeria)
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
 

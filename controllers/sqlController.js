@@ -29,6 +29,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
                     @opcion = ${opcion}`
     }
 
+
     await request.query(query)
     .then(async data => {
         if (data.recordset != undefined && data.recordset.length > 0) {
@@ -39,7 +40,6 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
                 nombres : data.recordset[0].nombres,
                 numeroTelefono: data.recordset[0].numeroTelefono
             }
-
         } else {
             resultSQL = {}
         }
