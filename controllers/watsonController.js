@@ -32,6 +32,8 @@ watsonController.ControlMensajes = async (req, res) => {
 
         let contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
 
+       
+        console.log("objMensajeria", objMensajeria)
         if(objMensajeria.nombres!=null)
         {
             contextoAnterior['nombres'] = objMensajeria.nombres
@@ -53,7 +55,7 @@ watsonController.ControlMensajes = async (req, res) => {
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
         
         console.log("**************contexto anterior 1^********************")
-        console.log(contextoAnterior)       
+       // console.log(contextoAnterior)       
 
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
@@ -62,8 +64,9 @@ watsonController.ControlMensajes = async (req, res) => {
         })       
         var contexto = watsonResponse.result.context
 
-        console.log("**************contextoo 1********************")       
-        //console.log(contexto)
+        console.log("**************contextoo 1 parseado********************")       
+    //    console.log(JSON.stringify(watsonResponse.result,null,4))
+        console.log("contexto", contexto)
 
         if(contexto.hasOwnProperty('_actionNode')) 
         {   
@@ -213,6 +216,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                )})              
         }       
         else if(strAccion == "insertarValoracion"){
+            console.log("insertar valoracion", contexto)
             var valor = contexto.valorfeedback
             await sqlController.insertarValoracion(idClienteCanalMensajeria,valor,null,null)
             .then(data =>{ 
