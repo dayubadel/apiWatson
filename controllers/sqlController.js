@@ -38,7 +38,8 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
                 idCliente : data.recordset[0].idCliente,
                 contexto : data.recordset[0].contexto,
                 nombres : data.recordset[0].nombres,
-                numeroTelefono: data.recordset[0].numeroTelefono
+                numeroTelefono: data.recordset[0].numeroTelefono,
+                idConversacionWatson : data.recordset[0].idConversacionWatson
             }
         } else {
             resultSQL = {}

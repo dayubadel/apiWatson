@@ -2,6 +2,7 @@
 const { IamAuthenticator } = require('ibm-watson/auth');
 const sqlController = require('./sqlController.js')
 const config = require("../config/config.js");
+const { json } = require('body-parser');
 // const pedidoModel = require('./../models/pedido.js')
 
 const id_workspace = config.Watson.id_workspace
@@ -30,15 +31,17 @@ watsonController.ControlMensajes = async (req, res) => {
 
         let idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
 
-        let contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
+        var contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
 
-       
-        console.log("objMensajeria", objMensajeria)
+        if(Object.keys(contextoAnterior).length === 0 && contextoAnterior.constructor === Object && objMensajeria.idConversacionWatson != null){
+            contextoAnterior['conversation_id'] = objMensajeria.idConversacionWatson
+        }
+
         if(objMensajeria.nombres!=null)
         {
             contextoAnterior['nombres'] = objMensajeria.nombres
         }
-
+        
         if(idCanal==1)
         {
             contextoAnterior['telefono'] = idChat.split('@')[0]
@@ -54,8 +57,6 @@ watsonController.ControlMensajes = async (req, res) => {
         }
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
         
-        console.log("**************contexto anterior 1^********************")
-       // console.log(contextoAnterior)       
 
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
@@ -63,10 +64,8 @@ watsonController.ControlMensajes = async (req, res) => {
             context: contextoAnterior
         })       
         var contexto = watsonResponse.result.context
-
-        console.log("**************contextoo 1 parseado********************")       
-    //    console.log(JSON.stringify(watsonResponse.result,null,4))
-        console.log("contexto", contexto)
+        console.log("*********************************************")
+        console.log(JSON.stringify(watsonResponse.result,null,4))
 
         if(contexto.hasOwnProperty('_actionNode')) 
         {   
@@ -85,9 +84,8 @@ watsonController.ControlMensajes = async (req, res) => {
             }
             delete contexto._actionNode          
         }      
-        //console.log("antes de pasar a base", objMensajeria)
+
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
-       // console.log("despues de pasar por base", objMensajeria)
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
 
@@ -133,21 +131,21 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 data.forEach(elementTienda =>
                     {
                         var atencionSabado='No atiende días sábados. '
-                        if(elementTienda.atencionSabado==true)
+                        if(elementTienda.atiendeSabado==true)
                         {
-                            atencionSabado='Atiende todos los sábados desde las '+elementTienda.horaAperturaSabado+
-                            'hasta las '+elementTienda.horaCierreSabado+' . '
+                            atencionSabado='*Horario sábado:* '+elementTienda.horaAperturaSabado+
+                            ' - '+elementTienda.horaCierreSabado+' . '
                         }
-                        var atencionDomingo='No atiende días domingos.'
-                        if(elementTienda.atencionSabado==true)
+                        var atencionDomingo='No atiende días domingos. '
+                        if(elementTienda.atiendeDomingo==true)
                         {
-                            atencionDomingo='Atiende todos los domingos desde las '+elementTienda.horaAperturaDomingo+
-                            'hasta las '+elementTienda.horaCierreDomingo+' . '
+                            atencionDomingo='*Horario domingo:* '+elementTienda.horaAperturaDomingo+
+                            ' - '+elementTienda.horaCierreDomingo+' . '
                         }
                         tiendasOrganizadas = {
                             response_type: 'text',
-                            text: '*ALMACEN #'+contador+' * ubicado en '+elementTienda.direccionEspecifica+'. Teléfono(s):'+elementTienda.telefonos+'. Horario de lunes a viernes: '+
-                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'. '+atencionSabado+atencionDomingo
+                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                         }
                     
                         respuesta.push(tiendasOrganizadas)
@@ -193,21 +191,21 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 data.forEach(elementTienda =>
                     {
                         var atencionSabado='No atiende días sábados. '
-                        if(elementTienda.atencionSabado==true)
+                        if(elementTienda.atiendeSabado==true)
                         {
-                            atencionSabado='Atiende todos los sábados desde las '+elementTienda.horaAperturaSabado+
-                            'hasta las '+elementTienda.horaCierreSabado+' . '
+                            atencionSabado='*Horario sábado:* '+elementTienda.horaAperturaSabado+
+                            ' - '+elementTienda.horaCierreSabado+' . '
                         }
-                        var atencionDomingo='No atiende días domingos.'
-                        if(elementTienda.atencionSabado==true)
+                        var atencionDomingo='No atiende días domingos. '
+                        if(elementTienda.atiendeDomingo==true)
                         {
-                            atencionDomingo='Atiende todos los domingos desde las '+elementTienda.horaAperturaDomingo+
-                            'hasta las '+elementTienda.horaCierreDomingo+' . '
+                            atencionDomingo='*Horario domingo:* '+elementTienda.horaAperturaDomingo+
+                            ' - '+elementTienda.horaCierreDomingo+' . '
                         }
                         tiendasOrganizadas = {
                             response_type: 'text',
-                            text: '*ALMACEN #'+contador+' * ubicado en '+elementTienda.direccionEspecifica+'. Teléfono(s):'+elementTienda.telefonos+'. Horario de lunes a viernes: '+
-                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'. '+atencionSabado+atencionDomingo
+                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                         }
                       
                         respuesta.push(tiendasOrganizadas)
@@ -216,14 +214,13 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                )})              
         }       
         else if(strAccion == "insertarValoracion"){
-            console.log("insertar valoracion", contexto)
             var valor = contexto.valorfeedback
             await sqlController.insertarValoracion(idClienteCanalMensajeria,valor,null,null)
             .then(data =>{ 
 
                 let valoracionRespuesta =  {
                     response_type: 'text',
-                    text: 'Muchas gracias por su valoracion'
+                    text: 'Muchas gracias por su valoración.'
                 }
                 respuesta.push(valoracionRespuesta)
             })
