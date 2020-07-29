@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 mssql.connect(configFile.sql.config_sql, (err) =>{
   if(err){
     console.log(err);
-  }
+  }else{console.log('Conectado a BD');}
   
 });
 
