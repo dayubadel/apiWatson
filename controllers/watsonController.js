@@ -2,6 +2,7 @@
 const { IamAuthenticator } = require('ibm-watson/auth');
 const sqlController = require('./sqlController.js')
 const config = require("../config/config.js");
+const { json } = require('body-parser');
 // const pedidoModel = require('./../models/pedido.js')
 
 const id_workspace = config.Watson.id_workspace
@@ -26,77 +27,70 @@ watsonController.ControlMensajes = async (req, res) => {
     let idCanal = req.body.idCanal
 
     try {
-
         let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
 
         let idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
 
-        let contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
+        var contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
+
+        if(Object.keys(contextoAnterior).length === 0 && contextoAnterior.constructor === Object && objMensajeria.idConversacionWatson != null){
+            contextoAnterior['conversation_id'] = objMensajeria.idConversacionWatson
+        }
+
+        if(objMensajeria.nombres!=null)
+        {
+            contextoAnterior['nombres'] = objMensajeria.nombres
+        }
         
-        
+        if(idCanal==1)
+        {
+            contextoAnterior['telefono'] = idChat.split('@')[0]
+        }
+        else if(objMensajeria.numeroTelefono!=null)
+        {
+            contextoAnterior['telefono'] = objMensajeria.numeroTelefono
+        }
+
+        if(objMensajeria.idClienteCanalMensajeria!=null)
+        {
+            contextoAnterior['idClienteCanalMensajeria'] = objMensajeria.idClienteCanalMensajeria
+        }
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
         
-        if(contextoAnterior.hasOwnProperty("_actionNodeEspecial"))
-        {            
-            delete contextoAnterior._actionNodeEspecial 
-        }   
+
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
             input: { text: txtMsg},
             context: contextoAnterior
         })       
         var contexto = watsonResponse.result.context
-       
+        console.log("*********************************************")
+        console.log(JSON.stringify(watsonResponse.result,null,4))
 
         if(contexto.hasOwnProperty('_actionNode')) 
-        {
-           let respuesta = await watsonController.AccionesNode(contexto._actionNode,watsonResponse.result) 
-            respuesta.forEach(element => {  watsonResponse.result.output.generic.push(element)})
-            if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
+        {   
+            if(contexto._actionNode == "actualizarCliente")     
             {
-                delete contexto.Ciudad
+                await watsonController.RegistrarCliente(idCliente,contexto) 
+            }
+            else
+            {
+                let respuesta = await watsonController.AccionesNode(contexto._actionNode,watsonResponse.result,idClienteCanalMensajeria) 
+                respuesta.forEach(element => {  watsonResponse.result.output.generic.push(element)})
+                if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
+                {
+                    delete contexto.Ciudad
+                }
             }
             delete contexto._actionNode          
-        }
-        else if(contexto.hasOwnProperty('_actionNodeEspecial')) 
-        {
-            objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
-            idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
-            idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
-            
-            if(idCliente!=0 && contexto._actionNodeEspecial=="consultarCliente")
-            {
-                let objCliente = await watsonController.gestionCliente(idCliente,null,null,1)
-                objCliente.forEach(elementCliente => {
-                            contexto.nombres = elementCliente.nombres,
-                            contexto.telefono = elementCliente.telefono
-                        }
-                    )                 
-                
-            }
-            else if(idCliente!=0 && contexto._actionNodeEspecial=="guardarNombre") 
-            {
-                let objCliente = await watsonController.gestionCliente(idCliente,contexto._actionNodeEspecial,watsonResponse.result,2)
-                objCliente.forEach(elementCliente => {
-                        contexto.nombres = elementCliente.nombres,
-                        contexto.telefono = elementCliente.telefono
-                        }                    
-                    )
-                delete contexto._actionNodeEspecial    
-                
-            }   
-            watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
-                workspaceId: id_workspace,
-                input: { text: txtMsg},
-                context: contexto
-            })
-        }
-        objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
+        }      
 
+        objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
+
         await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
-        res.send(watsonResponse.result.output.generic)   
+        res.send(watsonResponse.result.output.generic)
         
     } catch (error) {
         console.log(error)
@@ -104,95 +98,60 @@ watsonController.ControlMensajes = async (req, res) => {
     }
 }
 
-watsonController.gestionCliente = async (idCliente, actionNode, result, opcion) => {
-    var respuesta = []
-    var datosCliente = {}
-      
-        if(idCliente!= 0)
-        {  
-            await sqlController.consultarClientePorId(idCliente)
-            .then(data => { 
-                data.forEach(elementCliente => 
-                    {
-                        datosCliente =  
-                        {
-                            nombres: elementCliente.nombres,
-                            telefono: elementCliente.numeroTelefono
-                        }                     
-                    })
-                    }
-                )            
-            
-            if(opcion ==2)
-            {   
-                if(actionNode=="guardarNombre")
-                {
-                    var nombresPersona = result.input.text
-                    await sqlController.actualizarCliente(idCliente,nombresPersona,null,datosCliente.telefono,null,null,0)
-                    .then(data => { 
-                        data.forEach(elementCliente => 
-                            {
-                                datosCliente =  
-                                {
-                                    nombres: elementCliente.nombres,
-                                    telefono: elementCliente.numeroTelefono
-                                }                     
-                            })
-                            }
-                        ) 
-                }
-            }
-        }             
-        respuesta.push(datosCliente)
-        return respuesta
+watsonController.RegistrarCliente = async (idCliente, contexto) => 
+{   
+    var nombre =  (contexto.hasOwnProperty("nombres")) ? contexto.nombres : null ; 
+    var telefono = (contexto.hasOwnProperty("telefono") ? contexto.telefono : null ) 
+  
+    await sqlController.actualizarCliente(idCliente,nombre,null,telefono,null,null,0)        
+    
 }
 
-
-watsonController.AccionesNode = async (strAccion, result) => {
+watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajeria) => {
     var respuesta = []
     var contexto = result.context
-    if(strAccion == "consultarTienda"){
-        var ciudad = contexto.Ciudad   
-        var tiendasOrganizadas = {}
+        if(strAccion == "consultarTienda"){
+            var ciudad = contexto.Ciudad   
+            var tiendasOrganizadas = {}
 
-       await sqlController.consultarTiendasPorCiudad(ciudad)
-        .then(data =>{ 
-            let contadorTiendas = data.length
-            var textoGeneral =  'Contamos con una tienda en '+ciudad+':'
-            if(contadorTiendas>1)
-            {
-                textoGeneral =  'A continuación, le presento las '+contadorTiendas+' tiendas disponibles en '+ciudad+':'
-            }
-            tiendasOrganizadas = {
-                response_type: 'text',
-                text: textoGeneral
-            }
-            respuesta.push(tiendasOrganizadas)
-            var contador = 1
-            data.forEach(elementTienda =>
+        await sqlController.consultarTiendasPorCiudad(ciudad)
+            .then(data =>{ 
+                let contadorTiendas = data.length
+                var textoGeneral =  'Contamos con una tienda en '+ciudad+':'
+                if(contadorTiendas>1)
                 {
-                    var atencionSabado='No atiende días sábados. '
-                    if(elementTienda.atencionSabado==true)
+                    textoGeneral =  'A continuación, le presento las '+contadorTiendas+' tiendas disponibles en '+ciudad+':'
+                }
+                tiendasOrganizadas = {
+                    response_type: 'text',
+                    text: textoGeneral
+                }
+                respuesta.push(tiendasOrganizadas)
+                var contador = 1
+                data.forEach(elementTienda =>
                     {
-                        atencionSabado='Atiende todos los sábados desde las '+elementTienda.horaAperturaSabado+
-                        'hasta las '+elementTienda.horaCierreSabado+' . '
-                    }
-                    var atencionDomingo='No atiende días domingos.'
-                    if(elementTienda.atencionSabado==true)
-                    {
-                        atencionDomingo='Atiende todos los domingos desde las '+elementTienda.horaAperturaDomingo+
-                        'hasta las '+elementTienda.horaCierreDomingo+' . '
-                    }
-                    tiendasOrganizadas = {
-                        response_type: 'text',
-                        text: '*ALMACEN #'+contador+' * ubicado en '+elementTienda.direccionEspecifica+'. Teléfono(s):'+elementTienda.telefonos+'. Horario de lunes a viernes: '+
-                        elementTienda.horaApertura+' - '+elementTienda.horaCierre+'. '+atencionSabado+atencionDomingo
-                    }
-                  
-                    respuesta.push(tiendasOrganizadas)
-                    contador++
-            }            
-           )})              
+                        var atencionSabado='No atiende días sábados. '
+                        if(elementTienda.atiendeSabado==true)
+                        {
+                            atencionSabado='*Horario sábado:* '+elementTienda.horaAperturaSabado+
+                            ' - '+elementTienda.horaCierreSabado+' . '
+                        }
+                        var atencionDomingo='No atiende días domingos. '
+                        if(elementTienda.atiendeDomingo==true)
+                        {
+                            atencionDomingo='*Horario domingo:* '+elementTienda.horaAperturaDomingo+
+                            ' - '+elementTienda.horaCierreDomingo+' . '
+                        }
+                        tiendasOrganizadas = {
+                            response_type: 'text',
+                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
+                        }
+                    
+                        respuesta.push(tiendasOrganizadas)
+                        contador++
+                }            
+            )})              
         }
         else if(strAccion == "consultarSectoresAgrupadosPorCiudad"){
             var ciudad = contexto.Ciudad   
@@ -232,21 +191,21 @@ watsonController.AccionesNode = async (strAccion, result) => {
                 data.forEach(elementTienda =>
                     {
                         var atencionSabado='No atiende días sábados. '
-                        if(elementTienda.atencionSabado==true)
+                        if(elementTienda.atiendeSabado==true)
                         {
-                            atencionSabado='Atiende todos los sábados desde las '+elementTienda.horaAperturaSabado+
-                            'hasta las '+elementTienda.horaCierreSabado+' . '
+                            atencionSabado='*Horario sábado:* '+elementTienda.horaAperturaSabado+
+                            ' - '+elementTienda.horaCierreSabado+' . '
                         }
-                        var atencionDomingo='No atiende días domingos.'
-                        if(elementTienda.atencionSabado==true)
+                        var atencionDomingo='No atiende días domingos. '
+                        if(elementTienda.atiendeDomingo==true)
                         {
-                            atencionDomingo='Atiende todos los domingos desde las '+elementTienda.horaAperturaDomingo+
-                            'hasta las '+elementTienda.horaCierreDomingo+' . '
+                            atencionDomingo='*Horario domingo:* '+elementTienda.horaAperturaDomingo+
+                            ' - '+elementTienda.horaCierreDomingo+' . '
                         }
                         tiendasOrganizadas = {
                             response_type: 'text',
-                            text: '*ALMACEN #'+contador+' * ubicado en '+elementTienda.direccionEspecifica+'. Teléfono(s):'+elementTienda.telefonos+'. Horario de lunes a viernes: '+
-                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'. '+atencionSabado+atencionDomingo
+                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                         }
                       
                         respuesta.push(tiendasOrganizadas)
@@ -254,8 +213,19 @@ watsonController.AccionesNode = async (strAccion, result) => {
                 }          
                )})              
         }       
-      
-    return respuesta   
+        else if(strAccion == "insertarValoracion"){
+            var valor = contexto.valorfeedback
+            await sqlController.insertarValoracion(idClienteCanalMensajeria,valor,null,null)
+            .then(data =>{ 
+
+                let valoracionRespuesta =  {
+                    response_type: 'text',
+                    text: 'Muchas gracias por su valoración.'
+                }
+                respuesta.push(valoracionRespuesta)
+            })
+            }
+        return respuesta   
 }
 
 
