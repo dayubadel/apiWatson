@@ -34,7 +34,7 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
         `
     });
 
-
+    // console.log(query)
     await request.query(query)
     .then(async data => {
         // if (data.recordset != undefined && data.recordset.length > 0) {
@@ -50,7 +50,8 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
     .catch(err => {
 
         console.log("error al registrar productos en bd")
-        console.log(err)
+        // console.log(err)
+        throw new Error('Error al registrar en BD')
     })
 
 }

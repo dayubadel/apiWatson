@@ -253,6 +253,7 @@ watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, o
 }
 
 //con esta funcion pueden actualizar entidades en watson directamente desde base de datos
+//esta funcion es obsoleta y debe ser borrada
 watsonController.ActualizarEntidadesProductos = (req, res) => {
     var entitieCategoriasProductos
     var entitieSubCategoriasProductos

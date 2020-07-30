@@ -32,6 +32,7 @@ productoController.RegistrarProductos = async (req, res) => {
 
         prodcutosReq = req.body;
 
+        console.log(req.body)
 
         prodcutosReq.forEach(producto => {
             let objProducto = new Producto({}),
@@ -88,11 +89,10 @@ productoController.RegistrarProductos = async (req, res) => {
 
 
         });
-
-        // await sqlProductoController.gestionProductos(arrayProductos)
+        await sqlProductoController.gestionProductos(arrayProductos)
         //aqui crea otro hilo para que haga actualizacion en watson
 
-        productoController.ActualizarEntidades()
+        // productoController.ActualizarEntidades()
 
         // res.send(arrayProductos)
         res.send({success:1})
