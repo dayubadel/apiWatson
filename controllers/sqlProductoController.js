@@ -37,7 +37,6 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
 
     await request.query(query)
     .then(async data => {
-        // console.log(data)
         // if (data.recordset != undefined && data.recordset.length > 0) {
         //     // resultSQL = {
         //     //     idClienteCanalMensajeria : data.recordset[0].idClienteCanalMensajeria,
@@ -54,8 +53,41 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
         console.log(err)
     })
 
-    console.log(query)
 }
 
+
+sqlProductoController.ObtenerEntidades = async () => {
+    let query = '',
+        resultSQL = [];
+
+    query = 'EXEC [dbo].[sp_ObtenerEntidades]'
+
+
+    await request.query(query)
+    .then(async data => {
+        // console.log(data.recordsets)
+        if (data.recordset != undefined && data.recordset.length > 0) {
+            data.recordsets.forEach(element => {
+                element.forEach(element2 => {
+                    let objSql = {
+                        tipoEntidad : element2.nombreEntidad,
+                        valorEntidad : element2.nombreValor
+                    }
+                    resultSQL.push(objSql)
+                });
+            });
+            
+            
+        } else {
+            resultSQL = []
+        }
+    })
+    .catch(err => {
+
+        console.log("error al obtener entidades desde bd")
+        console.log(err)
+    })
+    return resultSQL
+}
 
 module.exports = sqlProductoController
