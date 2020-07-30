@@ -224,7 +224,26 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 }
                 respuesta.push(valoracionRespuesta)
             })
-            }
+        }
+        else if(strAccion == "consultarCategoriasPorCategoria")
+        {
+            var categoriasHijas = {}
+            var nombreCategoria = contexto.categoria
+            await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
+            .then( 
+                    data => 
+                    {
+                        categoriasHijas =   { response_type: "text", text: 'Subcategorías:'}                      
+                        respuesta.push(categoriasHijas)
+                        data.forEach(
+                        element =>  {
+                            categoriasHijas = { response_type: "text", text: element.nombreCategoriaHija }
+                            respuesta.push(categoriasHijas)
+                            }
+                        )
+                    }
+                )
+        }
         return respuesta   
 }
 
