@@ -65,7 +65,7 @@ watsonController.ControlMensajes = async (req, res) => {
         })       
         var contexto = watsonResponse.result.context
         console.log("*********************************************")
-        console.log(JSON.stringify(watsonResponse.result,null,4))
+        console.log(JSON.stringify(watsonResponse.result.context,null,4))
 
         if(contexto.hasOwnProperty('_actionNode')) 
         {   
@@ -230,19 +230,30 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             var categoriasHijas = {}
             var nombreCategoria = contexto.categoria
             await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
-            .then( 
-                    data => 
-                    {
-                        categoriasHijas =   { response_type: "text", text: 'Subcategorías:'}                      
-                        respuesta.push(categoriasHijas)
-                        data.forEach(
-                        element =>  {
-                            categoriasHijas = { response_type: "text", text: element.nombreCategoriaHija }
-                            respuesta.push(categoriasHijas)
-                            }
-                        )
-                    }
-                )
+            .then(data => {
+                categoriasHijas =   { response_type: "text", text: 'Subcategorías:'}                      
+                respuesta.push(categoriasHijas)
+                data.forEach(element =>  {
+                    categoriasHijas = { response_type: "text", text: element.nombreCategoriaHija }
+                    respuesta.push(categoriasHijas)
+                })
+            })
+        }
+        else if(strAccion == "consultarCategoriasNivelMasBajo"){
+
+            await sqlController.consultarCategoriasNivelMasBajo()
+            .then(sqlResult => {
+                respuesta.push({ response_type: "text", text: 'Tenemos estas categorias para ti:'})
+                sqlResult.forEach(cat => {
+                    respuesta.push(
+                        {
+                            response_type: "text",
+                            text: cat.nombreCategoria
+                        }
+                    )
+                });
+            })
+
         }
         return respuesta   
 }

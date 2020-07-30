@@ -338,4 +338,33 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
  }
 
 
+ sqlController.consultarCategoriasNivelMasBajo = async () => {
+    let query
+    var resultSQL = []
+    var datos = {}
+    
+    query = `EXEC [dbo].[sp_ConsultarCategoriasNivelMasBajo]`
+
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+           data.recordset.forEach(element => 
+            {
+                datos = {
+                    nombreCategoria : element.nombreCategoria 
+                }
+                resultSQL.push(datos)
+            })
+        }
+    })
+    .catch(err => {
+        console.log("Error al ejecutar [dbo][sp_ConsultarCategoriasNivelMasBajo]")
+        console.log(err)
+        throw new Error('Error al registrar en BD')
+
+    })
+    return resultSQL
+ }
+
+
 module.exports = sqlController

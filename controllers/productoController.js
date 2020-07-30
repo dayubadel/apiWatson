@@ -32,12 +32,10 @@ productoController.RegistrarProductos = async (req, res) => {
 
         prodcutosReq = req.body;
 
-        console.log(req.body)
 
         prodcutosReq.forEach(producto => {
             let objProducto = new Producto({}),
                 objMarca = new Marca({}),
-                // arrayCaracteristicas = [],
                 caracteristicas = {},
                 arrayCategorias = [],
                 imgArr;
@@ -46,13 +44,11 @@ productoController.RegistrarProductos = async (req, res) => {
             objMarca.marca = producto.BrandName;
 
             imgArr = JSON.parse(producto.imagen);
-
-            if(producto.especificacion != ''){
+            
+            if(producto.hasOwnProperty("especificacion") && producto.especificacion != ''){
                 caracteristicas = JSON.parse(producto.especificacion)
-                // let objEspe = JSON.parse(producto.especificacion);
                 for (const key in caracteristicas) {
                     caracteristicas[key] = caracteristicas[key].replace(/[,:]+/g,'')
-                    // arrayCaracteristicas.push(new Caracteristica(key,objEspe[key]))
                 }
             }
             
@@ -83,13 +79,16 @@ productoController.RegistrarProductos = async (req, res) => {
             objProducto.caracteristicas = caracteristicas
             objProducto.marca = objMarca
             objProducto.categorias = arrayCategorias
-            objProducto.isMarketPlace = producto.MarketPlace
+            objProducto.isMarketPlace = producto.Marketplace
             objProducto.url = producto.url
             arrayProductos.push(objProducto)
+            // console.log(objProducto)
 
 
         });
+
         await sqlProductoController.gestionProductos(arrayProductos)
+
         //aqui crea otro hilo para que haga actualizacion en watson
 
         // productoController.ActualizarEntidades()

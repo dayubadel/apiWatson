@@ -10,17 +10,16 @@ var sqlProductoController = {}
 sqlProductoController.gestionProductos = async(arrProductos) =>{
     let query = '',
         resultSQL = {};
-
+    // arrProductos = arrProductos.slice(0,40)
     arrProductos.forEach(objProducto => {
         // let objProducto = new Producto({})
         query = `${query}
-
             EXEC [dbo].[sp_GestionProductos]
                     @idMarcaVtex = ${objProducto.marca.idMarca},
                     @nombreMarca = N'${objProducto.marca.marca}',
                     @idVitex = ${objProducto.idVitex},
                     @nombreProducto = N'${objProducto.nombre}',
-                    @idRefSAP = ${objProducto.idRefSAP},
+                    @idRefSAP = N'${objProducto.idRefSAP}',
                     @stockCC = ${objProducto.stockCC},
                     @stockOtroPago = ${objProducto.stockOtroPago},
                     @precioCC = ${objProducto.precioCC},
@@ -30,7 +29,6 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
                     @arrImagenes = N'${JSON.stringify(objProducto.imagenes)}',
                     @arrCaracteristicas = N'${JSON.stringify(objProducto.caracteristicas).replace(/[{}"]+/g,'')}',
                     @arrCategorias = N'${JSON.stringify(objProducto.categorias).replace(/[{\]["]+/g,'').replace(/(},)+/g,'^').replace('}','')}'
-
         `
     });
 
@@ -50,7 +48,7 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
     .catch(err => {
 
         console.log("error al registrar productos en bd")
-        // console.log(err)
+        console.log(err)
         throw new Error('Error al registrar en BD')
     })
 
@@ -86,7 +84,7 @@ sqlProductoController.ObtenerEntidades = async () => {
     .catch(err => {
 
         console.log("error al obtener entidades desde bd")
-        console.log(err)
+        // console.log(err)
     })
     return resultSQL
 }
