@@ -263,7 +263,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({response_type: "text", text:"Disponemos de las siguientes marcas: "})
                 result.forEach(
                     marca => {
-                        respuesta.push({response_type: "text", text:marca.nombreMarca})
+                        respuesta.push({response_type: "text", text:marca.nombreMarca+' ('+marca.totalProductos+') '})
                     }
                 )
             })
