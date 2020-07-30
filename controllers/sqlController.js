@@ -308,5 +308,34 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     return resultSQL
  }
 
+ sqlController.consultarCategoriasPorCategoria = async(nombreCategoria) => {
+
+    let query
+    var resultSQL = []
+    var datos = {}
+    
+    query = `EXEC [dbo].[sp_ConsultarCategoriasPorCategoria]
+    @nombreCategoria = ${nombreCategoria}`
+                
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+           data.recordset.forEach(element => 
+            {
+               datos = {
+                nombreCategoriaHija : element.nombreCategoriaHija 
+               }
+               resultSQL.push(datos)
+            })
+          
+        }
+    })
+    .catch(err => {
+        console.log("Error al consultar categorias hijos por nombre categoria")
+        console.log(err)
+    })
+    return resultSQL
+ }
+
 
 module.exports = sqlController
