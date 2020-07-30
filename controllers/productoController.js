@@ -104,7 +104,7 @@ productoController.RegistrarProductos = async (req, res) => {
 }
 
 
-productoController.ActualizarEntidades = () =>{
+productoController.ActualizarEntidades = (req, res) =>{
     var paramsProducto = {
         workspaceId: id_workspace,
         entity: 'nonbreProductos',
@@ -380,42 +380,46 @@ productoController.ActualizarEntidades = () =>{
                 })
             }
         });
+        res.send(paramsProducto)
+        return
+
         return assistant.updateEntity(paramsProducto)
     })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsMarca)
-    // })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCaracK)
-    // })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCaracV)
-    // })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCateg0)
-    // })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCateg1)
-    // })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCateg2)
-    // })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCateg3)
-    // })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCateg4)
-    // })
-    .then(() => {
-        // console.log(JSON(paramsCategUltimoNivel,null,4))
-        // return assistant.updateEntity(paramsCategUltimoNivel)
+    .then((hola) => {
+        console.log(hola)
+        return assistant.updateEntity(paramsMarca)
     })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCiudad)
-    // })
-    // .then(() => {
-    //     return assistant.updateEntity(paramsCiudadTienda)
-    // })
+    .then(() => {
+        return assistant.updateEntity(paramsCaracK)
+    })
+    .then(() => {
+        return assistant.updateEntity(paramsCaracV)
+    })
+    .then(() => {
+        return assistant.updateEntity(paramsCateg0)
+    })
+    .then(() => {
+        return assistant.updateEntity(paramsCateg1)
+    })
+    .then(() => {
+        return assistant.updateEntity(paramsCateg2)
+    })
+    .then(() => {
+        return assistant.updateEntity(paramsCateg3)
+    })
+    .then(() => {
+        return assistant.updateEntity(paramsCateg4)
+    })
+    .then(() => {
+        console.log(JSON(paramsCategUltimoNivel,null,4))
+        return assistant.updateEntity(paramsCategUltimoNivel)
+    })
+    .then(() => {
+        return assistant.updateEntity(paramsCiudad)
+    })
+    .then(() => {
+        return assistant.updateEntity(paramsCiudadTienda)
+    })
     .catch(err => {
         console.log('Error al actualizar entidades')
         console.log(JSON.stringify(err,null,4))
