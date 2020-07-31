@@ -55,16 +55,15 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
 }
 
 
-sqlProductoController.ObtenerEntidades = async () => {
+sqlProductoController.ObtenerEntidades = async (entidad) => {
     let query = '',
         resultSQL = [];
 
-    query = 'EXEC [dbo].[sp_ObtenerEntidades]'
+    query = `EXEC [dbo].[sp_ObtenerEntidades] @entidad = N'${entidad}'`
 
 
     await request.query(query)
     .then(async data => {
-        // console.log(data.recordsets)
         if (data.recordset != undefined && data.recordset.length > 0) {
             data.recordsets.forEach(element => {
                 element.forEach(element2 => {
