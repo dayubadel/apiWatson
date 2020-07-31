@@ -49,6 +49,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
 
         console.log("error al gestionar el contexto base")
         console.log(err)
+        throw new Error('Error al registrar en BD')
     })
 
 
@@ -80,6 +81,7 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWats
 
         console.log("error al registrar mensaje en bd")
         console.log(err)
+        throw new Error('Error al registrar en BD')
     })
 
 }
@@ -121,6 +123,7 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWats
     .catch(err => {
         console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
         console.log(err)
+        throw new Error('Error al registrar en BD')
     })
     return resultSQL
 }
@@ -150,6 +153,7 @@ sqlController.consultarSectoresAgrupadosPorCiudad = async(ciudad) => {
    .catch(err => {
        console.log("Ha ocurrido un error al consultar los sectores agrupados por ciudad")
        console.log(err)
+       throw new Error('Error al registrar en BD')
    })
    return resultSQL
 }
@@ -191,6 +195,7 @@ sqlController.consultarTiendasPorCiudadPorSector = async(ciudad, sector) => {
    .catch(err => {
        console.log("Ha ocurrido un error al consultar las tiendas por ciudad y por sector")
        console.log(err)
+       throw new Error('Error al registrar en BD')
    })
    return resultSQL
 }
@@ -235,6 +240,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     .catch(err => {
         console.log("Ha ocurrido un error al actualizar el cliente")
         console.log(err)
+        throw new Error('Error al registrar en BD')
     })
     return resultSQL
  }
@@ -272,6 +278,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     .catch(err => {
         console.log("Error al consultar cliente por id")
         console.log(err)
+        throw new Error('Error al registrar en BD')
     })
     return resultSQL
  }
@@ -304,18 +311,18 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     .catch(err => {
         console.log("Ha ocurrido un error al ingresar la valoracion")
         console.log(err)
+        throw new Error('Error al registrar en BD')
     })
     return resultSQL
  }
 
  sqlController.consultarCategoriasPorCategoria = async(nombreCategoria) => {
-
     let query
     var resultSQL = []
     var datos = {}
     
     query = `EXEC [dbo].[sp_ConsultarCategoriasPorCategoria]
-    @nombreCategoria = ${nombreCategoria}`
+    @nombreCategoria = N'${nombreCategoria}'`
                 
     await request.query(query)
     .then(async data => {
@@ -333,6 +340,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     .catch(err => {
         console.log("Error al consultar categorias hijos por nombre categoria")
         console.log(err)
+        throw new Error('Error al registrar en BD')
     })
     return resultSQL
  }
@@ -362,6 +370,36 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
         console.log(err)
         throw new Error('Error al registrar en BD')
 
+    })
+    return resultSQL
+ }
+
+
+ sqlController.consultarMarcasPorCategoriaUltimoNivel = async(nombreCategoriaUltimoNivel) => {
+    let query
+    var resultSQL = []
+    var datos = {}
+    query = `EXEC [dbo].[sp_ConsultarMarcasPorCategoriaUltimoNivel]
+    @categoriaUltimoNivel = N'${nombreCategoriaUltimoNivel}'`
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+           data.recordset.forEach(element => 
+            {
+               datos = {
+                idMarca : element.idMarcaBot,
+                nombreMarca : element.nombreMarca,
+                totalProductos: element.totalProductos 
+               }
+               resultSQL.push(datos)
+            })
+          
+        }
+    })
+    .catch(err => {
+        console.log("Error al consultar marcas por categoria ultimo nivel")
+        console.log(err)
+        throw new Error('Error al registrar en BD')
     })
     return resultSQL
  }

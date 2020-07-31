@@ -231,7 +231,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             var nombreCategoria = contexto.categoria
             await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
             .then(data => {
-                categoriasHijas =   { response_type: "text", text: 'Subcategorías:'}                      
+                categoriasHijas =   { response_type: "text", text: 'Tenemos las siguientes subcategorías:'}                      
                 respuesta.push(categoriasHijas)
                 data.forEach(element =>  {
                     categoriasHijas = { response_type: "text", text: element.nombreCategoriaHija }
@@ -254,6 +254,19 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 });
             })
 
+        }
+        else if(strAccion== "consultarMarcasPorCategoriaUltimoNivel")
+        {
+            var categoriaUltimoNivel = contexto.categoriaUltimoNivel
+            await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
+            .then(result => {
+                respuesta.push({response_type: "text", text:"Disponemos de las siguientes marcas: "})
+                result.forEach(
+                    marca => {
+                        respuesta.push({response_type: "text", text:marca.nombreMarca+' ('+marca.totalProductos+') '})
+                    }
+                )
+            })
         }
         return respuesta   
 }
