@@ -404,5 +404,38 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     return resultSQL
  }
 
+ sqlController.consultarProductosPorMarcaPorCategoriaUltimoNivel = async (categoriaUltimoNivel, marcaProducto) => {
+     let query
+     var resultSQL = []
+     var datos = {}
+     query = `EXEC [dbo].[sp_ConsultarProductosPorMarcaPorCategoriaUltimoNivel]
+     @categoriaUltimoNivel = N'${categoriaUltimoNivel}',
+     @marca = N'${marcaProducto}'`
+     await request.query(query)
+     .then(async data =>{
+        if (data.recordset != undefined && data.recordset.length > 0) {
+            data.recordset.forEach(element => 
+             {
+                datos = {
+                 idProducto : element.idProductoBot,
+                 nombreCaracteristicaK : element.nombreCaracteristicaKey,
+                 caracteristicaValue : element.caracteristicaValue,
+                 idMarcaBot: element.idMarcaBot,
+                 nombreMarca: element.nombreMarca,
+                 tipoResultado: element.tipoResultado,
+                 totalProductos: element.totalProductos
+                }
+                resultSQL.push(datos)
+             }) 
+         }
+     })
+     .catch(err => {
+        console.log("Error al consultar los productos por marca y por categoria ultimo nivel")
+        console.log(err)
+        throw new Error('Error al registrar en BD')
+    })
+    return resultSQL
+ }
+
 
 module.exports = sqlController
