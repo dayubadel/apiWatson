@@ -65,7 +65,7 @@ watsonController.ControlMensajes = async (req, res) => {
         })       
         var contexto = watsonResponse.result.context
         console.log("*********************************************")
-        console.log(JSON.stringify(watsonResponse.result.context,null,4))
+        console.log(JSON.stringify(watsonResponse.result,null,4))
 
         if(contexto.hasOwnProperty('_actionNode')) 
         {   
@@ -81,10 +81,10 @@ watsonController.ControlMensajes = async (req, res) => {
                 {
                     delete contexto.Ciudad
                 }
-                if(contexto.hasOwnProperty('marcaProductos') && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel")
-                {
-                    delete contexto.marcaProductos
-                }
+                // if(contexto.hasOwnProperty('marcaProductos') && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel")
+                // {
+                //     delete contexto.marcaProductos
+                // }
             }
             delete contexto._actionNode          
         }      
@@ -264,7 +264,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             var categoriaUltimoNivel = contexto.categoriaUltimoNivel
             await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
             .then(result => {
-                respuesta.push({response_type: "text", text:"Disponemos de las siguientes marcas: "})
+                respuesta.push({response_type: "text", text:`Disponemos *${categoriaUltimoNivel}* de las siguientes marcas: `})
                 result.forEach(
                     marca => {
                         respuesta.push({response_type: "text", text:marca.nombreMarca+' ('+marca.totalProductos+') '})
@@ -286,7 +286,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 }
                 else 
                 {
-                    respuesta.push({response_type: "text", text:"Disponemos de los siguientes productos:"})
+                    var productosMostrados = []
+                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} ${marcaProductos}* productos:`})
                     let resultMapped = result.reduce((acc, item) => {
                         (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
                             return acc;
@@ -306,15 +307,28 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                else if(elementCaracteristica['nombre']=="nombreProducto")
                                {
                                     nombreProducto = elementCaracteristica['value']
+                                    productosMostrados.push({
+                                        "pocision": num,
+                                        "nombre" : nombreProducto
+                                    })
                                }
                                else
                                {
-                               carTexto = carTexto+' *'+elementCaracteristica['nombre']+':* '+elementCaracteristica['value']+'\n'
+                                    carTexto = `${carTexto} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}\n`
                                }
                             })
-                        respuesta.push({response_type: "text", text:"*"+nombreProducto+":*\n"+carTexto})
+                        respuesta.push({
+                            response_type: "text", 
+                            text: `*${num}) ${nombreProducto}*\n${carTexto}`
+                        })
                         num++;
-                    })           
+                    }) 
+                    
+                    respuesta.push({
+                        response_type: "text", 
+                        text: `Por favor, indicame cual te interesa`
+                    });
+                    contexto['productosMostrados'] = productosMostrados
                 }
             })
         }
