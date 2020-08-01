@@ -265,12 +265,62 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             var categoriaUltimoNivel = contexto.categoriaUltimoNivel
             await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
             .then(result => {
-                respuesta.push({response_type: "text", text:`Disponemos *${categoriaUltimoNivel}* de las siguientes marcas: `})
-                result.forEach(
-                    marca => {
-                        respuesta.push({response_type: "text", text:marca.nombreMarca+' ('+marca.totalProductos+') '})
-                    }
-                )
+                let tipoResultado = result[0].tipoResultado
+                if(tipoResultado=="marcas")
+                {
+                    respuesta.push({response_type: "text", text:`Disponemos *${categoriaUltimoNivel}* de las siguientes marcas: `})
+                    result.forEach(
+                        marca => {
+                            respuesta.push({response_type: "text", text:marca.nombreMarca+' ('+marca.totalProductos+') '})
+                        }
+                    )
+                }
+                else 
+                {
+                    var productosMostrados = []
+                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}*:`})
+                    let resultMapped = result.reduce((acc, item) => {
+                        (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
+                            return acc;
+                        }, []);
+                    var num =1;
+          
+                    resultMapped.forEach(elementProducto => {
+                        var carTexto = "";
+                        var urlImagen ="";
+                        var nombreProducto ="";
+                        elementProducto.forEach(elementCaracteristica => 
+                            {
+                               if(elementCaracteristica['nombre']=="imagen")
+                               {
+                                    urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
+                               }
+                               else if(elementCaracteristica['nombre']=="nombreProducto")
+                               {
+                                    nombreProducto = elementCaracteristica['value']
+                                    productosMostrados.push({
+                                        "pocision": num,
+                                        "nombre" : nombreProducto
+                                    })
+                               }
+                               else
+                               {
+                                    carTexto = `${carTexto} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}\n`
+                               }
+                            })
+                        respuesta.push({
+                            response_type: "text", 
+                            text: `*${num}) ${nombreProducto}*\n${carTexto}`
+                        })
+                        num++;
+                    }) 
+                    
+                    respuesta.push({
+                        response_type: "text", 
+                        text: `Por favor, indicame cual te interesa`
+                    });
+                    contexto['productosMostrados'] = productosMostrados
+                }
             })
         }
         else if(strAccion == "consultarProductosPorMarcaPorCategoriaUltimoNivel")

@@ -389,7 +389,11 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                datos = {
                 idMarca : element.idMarcaBot,
                 nombreMarca : element.nombreMarca,
-                totalProductos: element.totalProductos 
+                totalProductos: element.totalProductos,
+                tipoResultado: element.tipoResultado,
+                idProducto : element.idProductoBot,
+                nombreCaracteristicaK : element.nombreCaracteristicaKey,
+                caracteristicaValue : element.caracteristicaValue
                }
                resultSQL.push(datos)
             })
