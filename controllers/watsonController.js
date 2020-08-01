@@ -79,6 +79,7 @@ watsonController.ControlMensajes = async (req, res) => {
                 respuesta.forEach(element => {  watsonResponse.result.output.generic.push(element)})
                 if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
                 {
+                    console.log(contexto.Ciudad)
                     delete contexto.Ciudad
                 }
                 if(contexto.hasOwnProperty('marcaProductos') && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel")
