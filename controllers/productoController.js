@@ -47,6 +47,15 @@ productoController.RegistrarProductos = async (req, res) => {
             
             if(producto.hasOwnProperty("especificacion") && producto.especificacion != ''){
                 caracteristicas = JSON.parse(producto.especificacion)
+                if(caracteristicas.hasOwnProperty("Resumen")){
+                    delete caracteristicas.Resumen
+                }
+                if(caracteristicas.hasOwnProperty('Specs')){
+                    delete caracteristicas.Specs
+                }
+                if(caracteristicas.hasOwnProperty('VIDEOS')){
+                    delete caracteristicas.VIDEOS
+                }
                 for (const key in caracteristicas) {
                     caracteristicas[key] = caracteristicas[key].replace(/[,:]+/g,'')
                 }
@@ -91,7 +100,7 @@ productoController.RegistrarProductos = async (req, res) => {
 
         //aqui crea otro hilo para que haga actualizacion en watson
 
-        // productoController.ActualizarEntidades()
+        productoController.ActualizarEntidades()
 
         // res.send(arrayProductos)
         res.send({success:1})
@@ -110,8 +119,8 @@ productoController.ActualizarEntidades = async (req, res) =>{
         entidadesArray = [
             'nombreProductos',
             'marcaProductos',
-            // 'caracteristicaKProducto',
-            // 'caracteristicaVProducto',
+            'caracteristicaKProducto',
+            'caracteristicaVProducto',
             'categoriaNivel0',
             'categoriaNivel1',
             'categoriaNivel2',
@@ -145,13 +154,16 @@ productoController.ActualizarEntidades = async (req, res) =>{
                 // console.log(objParams)
 
             }
-            res.send("ok")
+            if(req != undefined){
+                res.send("ok")
+            }
         })();
 
     } catch (error) {
         console.log(error)
-        res.status(500).send("no")
-    
+        if(req != undefined){
+            res.status(500).send("no")
+        }
     }
 }
 
