@@ -64,8 +64,9 @@ watsonController.ControlMensajes = async (req, res) => {
             context: contextoAnterior
         })       
         var contexto = watsonResponse.result.context
-        console.log("*********************************************")
+        console.log("********************este llega de watson*****************")
         console.log(JSON.stringify(watsonResponse.result,null,4))
+        console.log("********************este llega de watson*****************")
 
         if(contexto.hasOwnProperty('_actionNode')) 
         {   
@@ -79,7 +80,6 @@ watsonController.ControlMensajes = async (req, res) => {
                 respuesta.forEach(element => {  watsonResponse.result.output.generic.push(element)})
                 if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
                 {
-                    console.log(contexto.Ciudad)
                     delete contexto.Ciudad
                 }
                 // if(contexto.hasOwnProperty('marcaProductos') && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel")
@@ -90,6 +90,9 @@ watsonController.ControlMensajes = async (req, res) => {
             delete contexto._actionNode          
         }      
 
+        console.log("********************este se va a BD*****************")
+        console.log(JSON.stringify(watsonResponse.result,null,4))
+        console.log("********************este se va a BD*****************")
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
@@ -119,45 +122,45 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             var ciudad = contexto.Ciudad   
             var tiendasOrganizadas = {}
 
-        await sqlController.consultarTiendasPorCiudad(ciudad)
-            .then(data =>{ 
-                let contadorTiendas = data.length
-                var textoGeneral =  'Contamos con una tienda en '+ciudad+':'
-                if(contadorTiendas>1)
-                {
-                    textoGeneral =  'A continuación, le presento las '+contadorTiendas+' tiendas disponibles en '+ciudad+':'
-                }
-                tiendasOrganizadas = {
-                    response_type: 'text',
-                    text: textoGeneral
-                }
-                respuesta.push(tiendasOrganizadas)
-                var contador = 1
-                data.forEach(elementTienda =>
+            await sqlController.consultarTiendasPorCiudad(ciudad)
+                .then(data =>{ 
+                    let contadorTiendas = data.length
+                    var textoGeneral =  'Contamos con una tienda en '+ciudad+':'
+                    if(contadorTiendas>1)
                     {
-                        var atencionSabado='No atiende días sábados. '
-                        if(elementTienda.atiendeSabado==true)
+                        textoGeneral =  'A continuación, le presento las '+contadorTiendas+' tiendas disponibles en '+ciudad+':'
+                    }
+                    tiendasOrganizadas = {
+                        response_type: 'text',
+                        text: textoGeneral
+                    }
+                    respuesta.push(tiendasOrganizadas)
+                    var contador = 1
+                    data.forEach(elementTienda =>
                         {
-                            atencionSabado='*Horario sábado:* '+elementTienda.horaAperturaSabado+
-                            ' - '+elementTienda.horaCierreSabado+' . '
-                        }
-                        var atencionDomingo='No atiende días domingos. '
-                        if(elementTienda.atiendeDomingo==true)
-                        {
-                            atencionDomingo='*Horario domingo:* '+elementTienda.horaAperturaDomingo+
-                            ' - '+elementTienda.horaCierreDomingo+' . '
-                        }
-                        tiendasOrganizadas = {
-                            response_type: 'text',
-                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
-                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
-                        }
-                    
-                        respuesta.push(tiendasOrganizadas)
-                        contador++
-                }            
-            )})              
-        }
+                            var atencionSabado='No atiende días sábados. '
+                            if(elementTienda.atiendeSabado==true)
+                            {
+                                atencionSabado='*Horario sábado:* '+elementTienda.horaAperturaSabado+
+                                ' - '+elementTienda.horaCierreSabado+' . '
+                            }
+                            var atencionDomingo='No atiende días domingos. '
+                            if(elementTienda.atiendeDomingo==true)
+                            {
+                                atencionDomingo='*Horario domingo:* '+elementTienda.horaAperturaDomingo+
+                                ' - '+elementTienda.horaCierreDomingo+' . '
+                            }
+                            tiendasOrganizadas = {
+                                response_type: 'text',
+                                text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                                elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
+                            }
+                        
+                            respuesta.push(tiendasOrganizadas)
+                            contador++
+                    }            
+                )})              
+            }
         else if(strAccion == "consultarSectoresAgrupadosPorCiudad"){
             var ciudad = contexto.Ciudad   
             var sectores =''
@@ -232,32 +235,72 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }
         else if(strAccion == "consultarCategoriasPorCategoria")
         {
-            var categoriasHijas = {}
-            var nombreCategoria = contexto.categoria
+            var txtCategoriasHijas = '',
+                nombreCategoria = contexto.categoria,
+                num = 1,
+                menuMostradoProductos = {
+                    "tipoMenu" : "categoria",
+                    'menuMostrado' : []
+                };
+
             await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
             .then(data => {
-                categoriasHijas =   { response_type: "text", text: 'Tenemos las siguientes subcategorías:'}                      
-                respuesta.push(categoriasHijas)
+                respuesta.push({
+                    response_type: "text",
+                    text: `En *${nombreCategoria}* contamos con las siguientes *Sub Categorías:*`
+                });
                 data.forEach(element =>  {
-                    categoriasHijas = { response_type: "text", text: element.nombreCategoriaHija }
-                    respuesta.push(categoriasHijas)
-                })
-            })
+                    txtCategoriasHijas = `${txtCategoriasHijas}${(txtCategoriasHijas=='') ? '' : '\n'}*${num}) ${element.nombreCategoriaHija}*`
+                    menuMostradoProductos.menuMostrado.push({
+                        "pocision": num,
+                        "nombre" : element.nombreCategoriaHija
+                    });
+                    num++;
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: txtCategoriasHijas
+                });
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
+
+            });
         }
         else if(strAccion == "consultarCategoriasNivelMasBajo"){
 
             await sqlController.consultarCategoriasNivelMasBajo()
             .then(sqlResult => {
-                respuesta.push({ response_type: "text", text: 'Tenemos estas categorias para ti:'})
-                sqlResult.forEach(cat => {
-                    respuesta.push(
-                        {
-                            response_type: "text",
-                            text: cat.nombreCategoria
-                        }
-                    )
+                respuesta.push({
+                    response_type: "text",
+                    text: 'Pensando en tus necesidades, contamos con una gran variedad de productos en las siguientes *categorias:*'
                 });
-            })
+                let arrayCategorias = '',
+                    num = 1
+                    menuMostradoProductos = {
+                        "tipoMenu" : "categoria",
+                        'menuMostrado' : []
+                    };
+                sqlResult.forEach(cat => {
+                    arrayCategorias = `${arrayCategorias}${(arrayCategorias=='') ? '' : '\n'}*${num}) ${cat.nombreCategoria}*`;
+                    menuMostradoProductos.menuMostrado.push({
+                        "pocision": ''+num,
+                        "nombre" : cat.nombreCategoria
+                    });
+                    num++;
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: arrayCategorias//cat.nombreCategoria
+                });
+
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
+                
+            });
 
         }
         else if(strAccion== "consultarMarcasPorCategoriaUltimoNivel")
@@ -265,26 +308,48 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             var categoriaUltimoNivel = contexto.categoriaUltimoNivel
             await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
             .then(result => {
-                let tipoResultado = result[0].tipoResultado
+                var tipoResultado = result[0].tipoResultado,
+                    num = 1
+                    menuMostradoProductos = {
+                        "tipoMenu" : "",
+                        'menuMostrado' : []
+                    };
                 if(tipoResultado=="marcas")
                 {
-                    respuesta.push({response_type: "text", text:`Disponemos *${categoriaUltimoNivel}* de las siguientes marcas: `})
-                    result.forEach(
-                        marca => {
-                            respuesta.push({response_type: "text", text:marca.nombreMarca+' ('+marca.totalProductos+') '})
-                        }
-                    )
+                    menuMostradoProductos.tipoMenu = 'marcaProductos';
+                    var txtMarcas = '';
+                    respuesta.push({
+                        response_type: "text",
+                        text:`Disponemos de las siguientes marcas para *${categoriaUltimoNivel}:* `
+                    })
+                    result.forEach(marca => {
+                        txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
+                        menuMostradoProductos.menuMostrado.push({
+                            "pocision": num,
+                            "nombre" : marca.nombreMarca
+                        });
+                        num++;
+                    });
+                    respuesta.push({
+                        response_type: "text",
+                        text: txtMarcas
+                    });
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
+
                 }
-                else 
-                {
-                    var productosMostrados = []
+                else {
+                    var productosMostrados = [];
+
                     respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}*:`})
+
                     let resultMapped = result.reduce((acc, item) => {
                         (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
                             return acc;
-                        }, []);
-                    var num =1;
-          
+                    }, []);
+                    
                     resultMapped.forEach(elementProducto => {
                         var carTexto = "";
                         var urlImagen ="";
@@ -303,15 +368,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                         "nombre" : nombreProducto
                                     })
                                }
-                               else
+                               else if(elementCaracteristica['nombre']!="idProducto")
                                {
-                                    carTexto = `${carTexto} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}\n`
+                                    carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
                                }
                             })
-                        respuesta.push({
-                            response_type: "text", 
-                            text: `*${num}) ${nombreProducto}*\n${carTexto}`
-                        })
+                            respuesta.push({
+                                response_type: "text", 
+                                text: `*${num}) ${nombreProducto}*\n${carTexto}`
+                            })
                         num++;
                     }) 
                     
@@ -338,7 +403,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 else 
                 {
                     var productosMostrados = []
-                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} ${marcaProductos}* productos:`})
+                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} en la marca ${marcaProductos}* productos:`})
                     let resultMapped = result.reduce((acc, item) => {
                         (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
                             return acc;
@@ -363,15 +428,20 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                         "nombre" : nombreProducto
                                     })
                                }
-                               else
+                               else if(elementCaracteristica['nombre']!="idProducto")
                                {
-                                    carTexto = `${carTexto} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}\n`
+                                    carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
                                }
                             })
                         respuesta.push({
                             response_type: "text", 
                             text: `*${num}) ${nombreProducto}*\n${carTexto}`
                         })
+                        // respuesta.push({
+                        //     response_type: "image", 
+                        //     title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                        //     source: 'https://tr.rbxcdn.com/cf9fd71c5ccac8ed43ac65b8fe4f946f/150/150/AvatarHeadshot/Png'//urlImagen
+                        // })
                         num++;
                     }) 
                     
