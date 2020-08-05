@@ -330,7 +330,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
            data.recordset.forEach(element => 
             {
                datos = {
-                nombreCategoriaHija : element.nombreCategoriaHija 
+                nombreCategoriaHija : element.nombreCategoriaHija,
+                tipoCategoria : element.tipoCategoria
                }
                resultSQL.push(datos)
             })

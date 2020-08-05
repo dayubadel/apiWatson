@@ -61,7 +61,8 @@ watsonController.ControlMensajes = async (req, res) => {
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
             input: { text: txtMsg},
-            context: contextoAnterior
+            context: contextoAnterior,
+            nodesVisitedDetails : true
         })       
         var contexto = watsonResponse.result.context
         console.log("********************este llega de watson*****************")
@@ -253,7 +254,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     txtCategoriasHijas = `${txtCategoriasHijas}${(txtCategoriasHijas=='') ? '' : '\n'}*${num}) ${element.nombreCategoriaHija}*`
                     menuMostradoProductos.menuMostrado.push({
                         "pocision": num,
-                        "nombre" : element.nombreCategoriaHija
+                        "nombre" : element.nombreCategoriaHija,
+                        "tipoCategoria": element.tipoCategoria
                     });
                     num++;
                 });
@@ -286,7 +288,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     arrayCategorias = `${arrayCategorias}${(arrayCategorias=='') ? '' : '\n'}*${num}) ${cat.nombreCategoria}*`;
                     menuMostradoProductos.menuMostrado.push({
                         "pocision": ''+num,
-                        "nombre" : cat.nombreCategoria
+                        "nombre" : cat.nombreCategoria,
+                        "tipoCategoria":"categoria"
                     });
                     num++;
                 });
@@ -326,7 +329,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
                         menuMostradoProductos.menuMostrado.push({
                             "pocision": num,
-                            "nombre" : marca.nombreMarca
+                            "nombre" : marca.nombreMarca,
+                            "tipoCategoria": "marcaProductos"
                         });
                         num++;
                     });
@@ -341,7 +345,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
                 }
                 else {
-                    var productosMostrados = [];
+                    var menuMostradoProductos = {
+                        "tipoMenu" : "",
+                        'menuMostrado' : []
+                    };
 
                     respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}*:`})
 
@@ -363,19 +370,25 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                else if(elementCaracteristica['nombre']=="nombreProducto")
                                {
                                     nombreProducto = elementCaracteristica['value']
-                                    productosMostrados.push({
+                                    menuMostradoProductos.menuMostrado.push({
                                         "pocision": num,
-                                        "nombre" : nombreProducto
-                                    })
+                                        "nombre" : nombreProducto,
+                                        "tipoCategoria": "productosEspecificos"
+                                    });
                                }
                                else if(elementCaracteristica['nombre']!="idProducto")
                                {
                                     carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
                                }
                             })
+                            // respuesta.push({
+                            //     response_type: "text", 
+                            //     text: `*${num}) ${nombreProducto}*\n${carTexto}`
+                            // })
                             respuesta.push({
-                                response_type: "text", 
-                                text: `*${num}) ${nombreProducto}*\n${carTexto}`
+                                response_type: "image", 
+                                title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                                source: 'https://c-sf.smule.com/rs-s73/arr/77/58/49ef94fc-710d-41a6-83f9-7fb16e9f1cbf.jpg'//urlImagen
                             })
                         num++;
                     }) 
@@ -384,7 +397,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         response_type: "text", 
                         text: `Por favor, indicame cual te interesa`
                     });
-                    contexto['productosMostrados'] = productosMostrados
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
                 }
             })
         }
@@ -397,13 +413,28 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 let tipoResultado = result[0].tipoResultado
                 if(tipoResultado=="marcas")
                 {
-                    respuesta.push({response_type: "text", text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes marcas: "})
-                    result.forEach(elementMarca => respuesta.push({response_type: "text", text:elementMarca.nombreMarca+" ("+ elementMarca.totalProductos +") "}) )
+                    respuesta.push({
+                        response_type: "text",
+                        text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes marcas: "
+                    });
+                    respuesta.push({
+                        response_type: "text",
+                        text:"Este probar cuando entra"
+                    });
+                    result.forEach(elementMarca => {
+                        respuesta.push({
+                            response_type: "text",
+                            text:elementMarca.nombreMarca+" ("+ elementMarca.totalProductos +") "
+                        });
+                    });
                 }
                 else 
                 {
-                    var productosMostrados = []
-                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} en la marca ${marcaProductos}* productos:`})
+                    var menuMostradoProductos = {
+                        "tipoMenu" : "",
+                        'menuMostrado' : []
+                    };
+                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} en la marca ${marcaProductos}*:`})
                     let resultMapped = result.reduce((acc, item) => {
                         (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
                             return acc;
@@ -423,25 +454,26 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                else if(elementCaracteristica['nombre']=="nombreProducto")
                                {
                                     nombreProducto = elementCaracteristica['value']
-                                    productosMostrados.push({
+                                    menuMostradoProductos.menuMostrado.push({
                                         "pocision": num,
-                                        "nombre" : nombreProducto
-                                    })
+                                        "nombre" : nombreProducto,
+                                        "tipoCategoria": "productosEspecificos"
+                                    });
                                }
                                else if(elementCaracteristica['nombre']!="idProducto")
                                {
                                     carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
                                }
                             })
-                        respuesta.push({
-                            response_type: "text", 
-                            text: `*${num}) ${nombreProducto}*\n${carTexto}`
-                        })
                         // respuesta.push({
-                        //     response_type: "image", 
-                        //     title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-                        //     source: 'https://tr.rbxcdn.com/cf9fd71c5ccac8ed43ac65b8fe4f946f/150/150/AvatarHeadshot/Png'//urlImagen
+                        //     response_type: "text", 
+                        //     text: `*${num}) ${nombreProducto}*\n${carTexto}`
                         // })
+                        respuesta.push({
+                            response_type: "image", 
+                            title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                            source: 'https://c-sf.smule.com/rs-s73/arr/77/58/49ef94fc-710d-41a6-83f9-7fb16e9f1cbf.jpg'//urlImagen
+                        })
                         num++;
                     }) 
                     
@@ -449,7 +481,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         response_type: "text", 
                         text: `Por favor, indicame cual te interesa`
                     });
-                    contexto['productosMostrados'] = productosMostrados
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
                 }
             })
         }

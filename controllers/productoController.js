@@ -66,6 +66,9 @@ productoController.RegistrarProductos = async (req, res) => {
                     objCate = JSON.parse(producto.ProductCategories)
                 for (const key in objCate) {
                     let nivel = (producto.hasOwnProperty(`Nivel${i}`) && producto[`Nivel${i}`] == objCate[key]) ? i : null;
+                    if(objCate[key] == 'Motos' && i > 0){
+                        objCate[key] = 'Moto'
+                    }
                     //por ahora, el nivel va a definir i por problemas con las tildes
                     arrayCategorias.push(new Categoria(key, objCate[key],i))
 
