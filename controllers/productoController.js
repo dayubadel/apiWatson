@@ -35,6 +35,7 @@ productoController.RegistrarProductos = async (req, res) => {
 
         prodcutosReq.forEach(producto => {
             let objProducto = new Producto({}),
+                modelo = '',
                 objMarca = new Marca({}),
                 caracteristicas = {},
                 arrayCategorias = [],
@@ -53,8 +54,15 @@ productoController.RegistrarProductos = async (req, res) => {
                 if(caracteristicas.hasOwnProperty('Specs')){
                     delete caracteristicas.Specs
                 }
+                if(caracteristicas.hasOwnProperty('Specss')){
+                    delete caracteristicas.Specss
+                }
                 if(caracteristicas.hasOwnProperty('VIDEOS')){
                     delete caracteristicas.VIDEOS
+                }
+                if(caracteristicas.hasOwnProperty('Modelo')){
+                    modelo = caracteristicas.Modelo
+                    delete caracteristicas.modelo
                 }
                 for (const key in caracteristicas) {
                     caracteristicas[key] = caracteristicas[key].replace(/[,:]+/g,'')
@@ -77,6 +85,7 @@ productoController.RegistrarProductos = async (req, res) => {
             }
 
             objProducto.idVitex = producto.Id
+            objProducto.modelo = modelo
             objProducto.nombre = producto.ProductName
             objProducto.idRefSAP = producto.RefId
             objProducto.stockOtroPago = producto.stock
@@ -103,7 +112,7 @@ productoController.RegistrarProductos = async (req, res) => {
 
         //aqui crea otro hilo para que haga actualizacion en watson
 
-        productoController.ActualizarEntidades()
+        // productoController.ActualizarEntidades()
 
         // res.send(arrayProductos)
         res.send({success:1})

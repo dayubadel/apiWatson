@@ -18,6 +18,7 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
                     @idMarcaVtex = ${objProducto.marca.idMarca},
                     @nombreMarca = N'${objProducto.marca.marca}',
                     @idVitex = ${objProducto.idVitex},
+                    @modeloProducto = N'${objProducto.modelo}',
                     @nombreProducto = N'${objProducto.nombre}',
                     @idRefSAP = N'${objProducto.idRefSAP}',
                     @stockCC = ${objProducto.stockCC},
@@ -26,6 +27,8 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
                     @precioOtroPago = ${objProducto.precioOtroPago},
                     @cuotasPrecioCC = ${objProducto.cuotasPrecioCC},
                     @plazoGarantia = ${objProducto.plazoGarantia},
+                    @urlWeb = N'${objProducto.url}',
+                    @isMarketplace = ${objProducto.isMarketPlace},
                     @arrImagenes = N'${JSON.stringify(objProducto.imagenes)}',
                     @arrCaracteristicas = N'${JSON.stringify(objProducto.caracteristicas).replace(/[{}"]+/g,'')}',
                     @arrCategorias = N'${JSON.stringify(objProducto.categorias).replace(/[{\]["]+/g,'').replace(/(},)+/g,'^').replace('}','')}'

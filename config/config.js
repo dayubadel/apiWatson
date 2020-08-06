@@ -30,5 +30,17 @@ module.exports = {
     //            'enableArithAbort': true
     //          }
     //      }
-     }
+    // sql: {
+    //     config_sql : {
+    //         user : 'userGaia',
+    //         password: 'Gaia2020',
+    //         server: '192.168.100.3',
+    //         port: 8282,
+    //         database: 'chatbotComandato',
+    //         options:{
+    //           'encrypt' : true,
+    //           'enableArithAbort': true
+    //         }
+    //     }
+    }
 }

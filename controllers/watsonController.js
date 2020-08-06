@@ -78,15 +78,20 @@ watsonController.ControlMensajes = async (req, res) => {
             else
             {
                 let respuesta = await watsonController.AccionesNode(contexto._actionNode,watsonResponse.result,idClienteCanalMensajeria) 
-                respuesta.forEach(element => {  watsonResponse.result.output.generic.push(element)})
+                respuesta.forEach(element => {  
+                    watsonResponse.result.output.generic.push(element)
+                });
                 if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
                 {
                     delete contexto.Ciudad
                 }
-                // if(contexto.hasOwnProperty('marcaProductos') && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel")
-                // {
-                //     delete contexto.marcaProductos
-                // }
+                if(contexto.hasOwnProperty('marcaProductos') && contexto.hasOwnProperty('categoriaUltimoNivel') 
+                    && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel")
+                {
+                    delete contexto.marcaProductos
+                    delete contexto.categoriaUltimoNivel
+                    delete contexto.categoria
+                }
             }
             delete contexto._actionNode          
         }      
@@ -487,6 +492,28 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contexto['menuMostradoProductos'] = menuMostradoProductos;
                 }
             })
+        }
+        else if(strAccion == 'consultarInfoProducto'){
+            let producto,
+                txtCarac = '';
+
+            producto = await sqlController.consultarInfoProducto(contexto.productoSelected)
+            // console.log(producto)
+            producto.arrayImagenes.forEach(imgItem => {
+                respuesta.push({
+                    response_type: "image", 
+                    // title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                    source: 'https://c-sf.smule.com/rs-s73/arr/77/58/49ef94fc-710d-41a6-83f9-7fb16e9f1cbf.jpg'//imgItem.ImageUrl
+                })
+            });
+            respuesta.push({
+                response_type: "text", 
+                text: `El producto *${producto.nombre}* cuenta con las siguientes *caracteristicas:* ${producto.arrayCarac}`
+            });
+            respuesta.push({
+                response_type: "text", 
+                text: `Puedes adquirir este producto con ${(producto.stockCC > 0 && producto.stockOtroPago > 0) ? '*Crédito Directo Comandato*, *Tarjetas* o *Efectivo*': (producto.stockCC > 0) ? '*Crédito Directo Comandato*' : '*Tarjetas* o *Efectivo*' }`
+            });
         }
         return respuesta   
 }
