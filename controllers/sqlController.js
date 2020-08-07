@@ -330,7 +330,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
            data.recordset.forEach(element => 
             {
                datos = {
-                nombreCategoriaHija : element.nombreCategoriaHija 
+                nombreCategoriaHija : element.nombreCategoriaHija,
+                tipoCategoria : element.tipoCategoria
                }
                resultSQL.push(datos)
             })
@@ -409,14 +410,14 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
  }
 
  sqlController.consultarProductosPorMarcaPorCategoriaUltimoNivel = async (categoriaUltimoNivel, marcaProducto) => {
-     let query
-     var resultSQL = []
-     var datos = {}
-     query = `EXEC [dbo].[sp_ConsultarProductosPorMarcaPorCategoriaUltimoNivel]
-     @categoriaUltimoNivel = N'${categoriaUltimoNivel}',
-     @marca = N'${marcaProducto}'`
-     await request.query(query)
-     .then(async data =>{
+    let query
+    var resultSQL = []
+    var datos = {}
+    query = `EXEC [dbo].[sp_ConsultarProductosPorMarcaPorCategoriaUltimoNivel]
+    @categoriaUltimoNivel = N'${categoriaUltimoNivel}',
+    @marca = N'${marcaProducto}'`
+    await request.query(query)
+    .then(async data =>{
         if (data.recordset != undefined && data.recordset.length > 0) {
             data.recordset.forEach(element => 
              {
@@ -430,6 +431,48 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                  totalProductos: element.totalProductos
                 }
                 resultSQL.push(datos)
+             }) 
+         }
+     })
+     .catch(err => {
+        console.log("Error al consultar los productos por marca y por categoria ultimo nivel")
+        console.log(err)
+        throw new Error('Error al registrar en BD')
+    })
+    return resultSQL
+ }
+
+ sqlController.consultarInfoProducto = async (nombreProducto) => {
+    let query
+    var resultSQL = {}
+    query = `[dbo].[sp_consultarInfoProducto]
+                @nombreProducto = N'${nombreProducto}'`
+    await request.query(query)
+    .then(async data =>{
+        if (data.recordset != undefined && data.recordset.length > 0) {
+            resultSQL = {
+                idProductoBot : data.recordset[0].idProductoBot,
+                nombre : data.recordset[0].nombre,
+                modelo : data.recordset[0].modelo,
+                idVtex : data.recordset[0].idVtex,
+                stockCC : data.recordset[0].stockCC,
+                stockOtroPago : data.recordset[0].stockOtroPago,
+                precioCC : data.recordset[0].precioCC,
+                precioOtroPago : data.recordset[0].precioOtroPago,
+                cuotasPrecioCC : data.recordset[0].cuotasPrecioCC,
+                plazoGarantia : data.recordset[0].plazoGarantia,
+                arrayImagenes : JSON.parse(data.recordset[0].arrayImagenes),
+                arrayCarac : ''
+            }
+
+            data.recordset.forEach(element => 
+             {
+                resultSQL.arrayCarac =  `${resultSQL.arrayCarac}  \n *-${element.nombreCara}:* ${element.caracteristicaValue.replace(/\\/g,' \\')}`
+                // let caracteristicas = {
+                // caracKey : element.nombreCara,
+                // caracVal : element.caracteristicaValue,
+                // }
+                // resultSQL.arrayCarac.push(caracteristicas)
              }) 
          }
      })

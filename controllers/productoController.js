@@ -35,6 +35,7 @@ productoController.RegistrarProductos = async (req, res) => {
 
         prodcutosReq.forEach(producto => {
             let objProducto = new Producto({}),
+                modelo = '',
                 objMarca = new Marca({}),
                 caracteristicas = {},
                 arrayCategorias = [],
@@ -53,8 +54,15 @@ productoController.RegistrarProductos = async (req, res) => {
                 if(caracteristicas.hasOwnProperty('Specs')){
                     delete caracteristicas.Specs
                 }
+                if(caracteristicas.hasOwnProperty('Specss')){
+                    delete caracteristicas.Specss
+                }
                 if(caracteristicas.hasOwnProperty('VIDEOS')){
                     delete caracteristicas.VIDEOS
+                }
+                if(caracteristicas.hasOwnProperty('Modelo')){
+                    modelo = caracteristicas.Modelo
+                    delete caracteristicas.modelo
                 }
                 for (const key in caracteristicas) {
                     caracteristicas[key] = caracteristicas[key].replace(/[,:]+/g,'')
@@ -66,6 +74,9 @@ productoController.RegistrarProductos = async (req, res) => {
                     objCate = JSON.parse(producto.ProductCategories)
                 for (const key in objCate) {
                     let nivel = (producto.hasOwnProperty(`Nivel${i}`) && producto[`Nivel${i}`] == objCate[key]) ? i : null;
+                    if(objCate[key] == 'Motos' && i > 0){
+                        objCate[key] = 'Moto'
+                    }
                     //por ahora, el nivel va a definir i por problemas con las tildes
                     arrayCategorias.push(new Categoria(key, objCate[key],i))
 
@@ -74,6 +85,7 @@ productoController.RegistrarProductos = async (req, res) => {
             }
 
             objProducto.idVitex = producto.Id
+            objProducto.modelo = modelo
             objProducto.nombre = producto.ProductName
             objProducto.idRefSAP = producto.RefId
             objProducto.stockOtroPago = producto.stock
@@ -100,7 +112,7 @@ productoController.RegistrarProductos = async (req, res) => {
 
         //aqui crea otro hilo para que haga actualizacion en watson
 
-        productoController.ActualizarEntidades()
+        // productoController.ActualizarEntidades()
 
         // res.send(arrayProductos)
         res.send({success:1})
