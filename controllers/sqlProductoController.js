@@ -70,10 +70,29 @@ sqlProductoController.ObtenerEntidades = async (entidad) => {
         if (data.recordset != undefined && data.recordset.length > 0) {
             data.recordsets.forEach(element => {
                 element.forEach(element2 => {
-                    let objSql = {
-                        tipoEntidad : element2.nombreEntidad,
-                        valorEntidad : element2.nombreValor
+                    let objSql = {};
+                    if(element2.nombreEntidad == 'categoriaUltimoNivel'){
+                        
+                        let arrSino = []
+                        if(element2.sinonimo != ''){
+                            arrSino = element2.sinonimo.split(',');
+                            // console.log(arrSino)
+                            arrSino.shift();
+                            // console.log(arrSino.shift())
+                        }
+                        objSql = {
+                            tipoEntidad : element2.nombreEntidad,
+                            valorEntidad : element2.nombreValor,
+                            sinonimos: arrSino
+                        }
+
+                    }else{
+                        objSql = {
+                            tipoEntidad : element2.nombreEntidad,
+                            valorEntidad : element2.nombreValor
+                        }
                     }
+                    // console.log(objSql)
                     resultSQL.push(objSql)
                 });
             });
@@ -83,11 +102,12 @@ sqlProductoController.ObtenerEntidades = async (entidad) => {
             resultSQL = []
         }
     })
-    .catch(err => {
+    // .catch(err => {
 
-        console.log("error al obtener entidades desde bd")
-        // console.log(err)
-    })
+    //     console.log("error al obtener entidades desde bd")
+    //     throw new Error('Error al registrar en BD')
+    //     // console.log(err)
+    // })
     return resultSQL
 }
 
