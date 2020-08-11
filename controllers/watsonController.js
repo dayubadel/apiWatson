@@ -96,9 +96,9 @@ watsonController.ControlMensajes = async (req, res) => {
             delete contexto._actionNode          
         }      
 
-        console.log("********************este se va a BD*****************")
-        console.log(JSON.stringify(watsonResponse.result,null,4))
-        console.log("********************este se va a BD*****************")
+        // console.log("********************este se va a BD*****************")
+        // console.log(JSON.stringify(watsonResponse.result,null,4))
+        // console.log("********************este se va a BD*****************")
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
@@ -393,14 +393,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             respuesta.push({
                                 response_type: "image", 
                                 title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-                                source: 'https://c-sf.smule.com/rs-s73/arr/77/58/49ef94fc-710d-41a6-83f9-7fb16e9f1cbf.jpg'//urlImagen
+                                source: urlImagen
                             })
                         num++;
                     }) 
                     
                     respuesta.push({
                         response_type: "text", 
-                        text: `Por favor, indicame cual te interesa`
+                        text: `Por favor, selecciona el número del producto que te interesa`
                     });
                     if(contexto.hasOwnProperty('menuMostradoProductos')){
                         delete contexto.menuMostradoProductos
@@ -477,14 +477,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         respuesta.push({
                             response_type: "image", 
                             title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-                            source: 'https://c-sf.smule.com/rs-s73/arr/77/58/49ef94fc-710d-41a6-83f9-7fb16e9f1cbf.jpg'//urlImagen
+                            source: urlImagen
                         })
                         num++;
                     }) 
                     
                     respuesta.push({
                         response_type: "text", 
-                        text: `Por favor, indicame cual te interesa`
+                        text: `Por favor, selecciona el *número* del producto que te interesa`
                     });
                     if(contexto.hasOwnProperty('menuMostradoProductos')){
                         delete contexto.menuMostradoProductos
@@ -503,7 +503,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({
                     response_type: "image", 
                     // title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-                    source: 'https://c-sf.smule.com/rs-s73/arr/77/58/49ef94fc-710d-41a6-83f9-7fb16e9f1cbf.jpg'//imgItem.ImageUrl
+                    source: imgItem.ImageUrl
                 })
             });
             respuesta.push({
@@ -512,8 +512,22 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             });
             respuesta.push({
                 response_type: "text", 
-                text: `Puedes adquirir este producto con ${(producto.stockCC > 0 && producto.stockOtroPago > 0) ? '*Crédito Directo Comandato*, *Tarjetas* o *Efectivo*': (producto.stockCC > 0) ? '*Crédito Directo Comandato*' : '*Tarjetas* o *Efectivo*' }`
+                text: `¿Deseas conocer el precio de este producto?\nEsta disponible para pagos con:\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Credito o Debito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Credito o Debito*\n *- Efectivo*' }`
             });
+
+            contexto['infoProductoSelected'] = {
+                'idproductoBot' : producto.idProductoBot,
+                'nombreProducto' : producto.nombre,
+                'idVtex' : producto.idVtex,
+                'stockCC' : producto.stockCC,
+                'stockOtroPago' : producto.stockOtroPago,
+                'precioCC' : producto.precioCC,
+                'precioOtroPago' : producto.precioOtroPago,
+                'cuotasPrecioCC' : producto.cuotasPrecioCC,
+                'plazoGarantia' : producto.plazoGarantia,
+                'isMarketplace' : producto.isMarketplace
+            }
+
         }
         return respuesta   
 }
@@ -541,85 +555,7 @@ watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, o
     await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson)
 }
 
-//con esta funcion pueden actualizar entidades en watson directamente desde base de datos
-//esta funcion es obsoleta y debe ser borrada
-watsonController.ActualizarEntidadesProductos = (req, res) => {
-    var entitieCategoriasProductos
-    var entitieSubCategoriasProductos
-    var entitieProductos
 
-    var params = {
-        workspaceId: id_workspace,
-        entity: '',
-        newValues: []
-    };
-    var newValuesArr = []
-
-    sqlController.actualizarEntidadesProducto()
-    .then(data => {
-        entitieCategoriasProductos = data.categoriasProductos
-        entitieSubCategoriasProductos = data.subCategoriasProductos
-        entitieProductos = data.productos
-        //aqui actualizo la entidad categoriasProductos
-        params.entity = 'categoriasProductos'
-
-        entitieCategoriasProductos.forEach(element => {
-            newValuesArr.push({
-                'value': element.nombreCategoria.toString(),
-                'type' : 'synonyms',
-                'synonyms' : [element.nombreCategoria]
-            })
-        });
-
-        params.newValues = newValuesArr
-
-        return assistant.updateEntity(params)
-    })
-    .then(data => {
-        newValuesArr= []
-        //aqui actualizo la entidad categoriasProductos
-        params.entity = 'subCategoriasProductos'
-
-        entitieSubCategoriasProductos.forEach(element => {
-            newValuesArr.push({
-                'value': element.nombreSubCategoria.toString(),
-                'type' : 'synonyms',
-                'synonyms' : [element.nombreSubCategoria]
-            })
-        });
-
-        params.newValues = newValuesArr
-
-        return assistant.updateEntity(params)
-    })
-    .then(data => {
-        newValuesArr= []
-
-        //aqui actualizo la entidad categoriasProductos
-        params.entity = 'productos'
-
-        entitieProductos.forEach(element => {
-            newValuesArr.push({
-                'value': element.productos.toString(),
-                'type' : 'synonyms',
-                'synonyms' : [element.productos]
-            })
-        });
-
-        params.newValues = newValuesArr
-
-        return assistant.updateEntity(params)
-    })
-    .then(data => {
-      //  console.log(JSON.stringify(data.result, null, 2));
-        res.send(data)
-    })
-    .catch(err => {
-        console.log(err)
-        res.send(err)
-    });
-
-}
 
 module.exports = watsonController;
 

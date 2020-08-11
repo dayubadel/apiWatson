@@ -462,7 +462,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                 cuotasPrecioCC : data.recordset[0].cuotasPrecioCC,
                 plazoGarantia : data.recordset[0].plazoGarantia,
                 arrayImagenes : JSON.parse(data.recordset[0].arrayImagenes),
-                arrayCarac : ''
+                arrayCarac : '',
+                isMarketplace : data.recordset[0].isMarketplace
             }
 
             data.recordset.forEach(element => 

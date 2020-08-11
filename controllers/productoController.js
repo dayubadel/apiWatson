@@ -71,17 +71,41 @@ productoController.RegistrarProductos = async (req, res) => {
             
             if(producto.ProductCategories != ''){
                 var i = 0,
-                    objCate = JSON.parse(producto.ProductCategories)
-                for (const key in objCate) {
-                    let nivel = (producto.hasOwnProperty(`Nivel${i}`) && producto[`Nivel${i}`] == objCate[key]) ? i : null;
-                    if(objCate[key] == 'Motos' && i > 0){
-                        objCate[key] = 'Moto'
-                    }
-                    //por ahora, el nivel va a definir i por problemas con las tildes
-                    arrayCategorias.push(new Categoria(key, objCate[key],i))
+                    objCate = [];
+                    arrayCateStr = producto.ProductCategories.replace(/[{}]/g,'').split(',');
+                console.log(arrayCateStr)
 
-                    i += 1
+                for (let index = arrayCateStr.length; index > 0; index--) {
+
+                    varKey = arrayCateStr[index - 1].split(':')[0];
+                    varValue = arrayCateStr[index - 1].split(':')[1];
+                    if(varValue == 'Motos' && index != 0){
+                        varValue = 'Moto'
+                    }
+                    objCate.push(JSON.parse(`{${varKey} : ${varValue}}`))
                 }
+
+                
+                var nivel = 0
+                for (const iterator of objCate) {
+                    arrayCategorias.push(new Categoria(Object.keys(iterator)[0], Object.values(iterator)[0],nivel))
+                    nivel++
+                }
+            //    console.log(arrayCategorias)
+               
+                // console.log(producto.ProductCategories)
+                // for (const key in objCate) {
+
+                //     let nivel = (producto.hasOwnProperty(`Nivel${i}`) && producto[`Nivel${i}`] == objCate[key]) ? i : null;
+
+                //     if(objCate[key] == 'Motos' && i > 0){
+                //         objCate[key] = 'Moto'
+                //     }
+
+                //     arrayCategorias.push(new Categoria(key, objCate[key],i))
+
+                //     i += 1
+                // }
             }
 
             objProducto.idVitex = producto.Id
@@ -153,17 +177,18 @@ productoController.ActualizarEntidades = async (req, res) =>{
                         newValues: []
                     }
                     results.forEach(result => {
+                        let arrSino = (result.hasOwnProperty('sinonimos')) ? result.sinonimos : [result.valorEntidad.toString().split('|')[0].slice(0,63).trim()];
                         params.newValues.push({
                             'value': result.valorEntidad.toString().split('|')[0].slice(0,63).trim(),
                             'type' : 'synonyms',
-                            'synonyms' : [result.valorEntidad.toString().split('|')[0].slice(0,63).trim()]
+                            'synonyms' : arrSino//[result.valorEntidad.toString().split('|')[0].slice(0,63).trim()]
                         })
                     })
                     return params
                 })
                 await assistant.updateEntity(objParams)
 
-                // console.log(objParams)
+                // console.log(JSON.stringify(objParams,null,4))
 
             }
             if(req != undefined){
