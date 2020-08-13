@@ -18,18 +18,18 @@ module.exports = {
     //         }
     //     }
     //   } 
-    //  sql: {
-    //      config_sql : {
-    //          user : 'sa',
-    //          password: 'dayu2020',
-    //          server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
-    //          port: 1433,
-    //          database: 'chatbotComandato',
-    //          options:{
-    //            'encrypt' : true,
-    //            'enableArithAbort': true
-    //          }
-    //      }
+     sql: {
+         config_sql : {
+             user : 'sa',
+             password: 'dayu2020',
+             server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
+             port: 1433,
+             database: 'chatbotComandato',
+             options:{
+               'encrypt' : true,
+               'enableArithAbort': true
+             }
+         }
     // sql: {
     //     config_sql : {
     //         user : 'userGaia',
@@ -42,4 +42,5 @@ module.exports = {
     //           'enableArithAbort': true
     //         }
     //     }
+}
 }

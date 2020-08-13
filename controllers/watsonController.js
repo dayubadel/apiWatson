@@ -390,6 +390,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             //     response_type: "text", 
                             //     text: `*${num}) ${nombreProducto}*\n${carTexto}`
                             // })
+
+                            //comentado por pruebas locales
                             respuesta.push({
                                 response_type: "image", 
                                 title: `*${num}) ${nombreProducto}*\n${carTexto}`,
@@ -474,6 +476,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         //     response_type: "text", 
                         //     text: `*${num}) ${nombreProducto}*\n${carTexto}`
                         // })
+                            
+                        //comentado por pruebas locales
                         respuesta.push({
                             response_type: "image", 
                             title: `*${num}) ${nombreProducto}*\n${carTexto}`,
@@ -499,6 +503,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
             producto = await sqlController.consultarInfoProducto(contexto.productoSelected)
             // console.log(producto)
+
+            //comentado por pruebas locales
             producto.arrayImagenes.forEach(imgItem => {
                 respuesta.push({
                     response_type: "image", 
@@ -528,6 +534,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 'isMarketplace' : producto.isMarketplace
             }
 
+        }
+        else if(strAccion=='agregarProductoAlCarrito')
+        {
+            await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,contexto.infoProductoSelected.idproductoBot,
+                contexto.metodoPago,contexto.cantidadProductos,1)
+            .then(resultQuery =>
+                {
+                respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* en su carrito de compras`})
+                })
         }
         return respuesta   
 }

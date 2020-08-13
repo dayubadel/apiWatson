@@ -485,5 +485,32 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     return resultSQL
  }
 
+sqlController.gestionCarritoCompras = async (idClienteCanalMensajeria, idProductoBot, metodoPago, cantidad, opcion) =>
+{
+    let query
+    let resultSQL = {}
+    query = `[dbo].[sp_GestionCarritoDeCompras]
+            @idClienteCanalMensajeria=${idClienteCanalMensajeria},
+            @idProductoBot=${idProductoBot},
+            @metodoPago=N'${metodoPago}',
+            @cantidad=${cantidad},
+            @opcion=${opcion}`
+
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+            resultSQL = {
+                idDetalleVenta : data.recordset[0].idDetalleVenta
+            }
+        }
+    })
+    .catch(err => {
+        console.log("Error al ingresar el producto al carrito de compras")
+        console.log(err)
+        throw new Error('Error al registrar en BD')
+    })
+    return resultSQL
+}
+
 
 module.exports = sqlController
