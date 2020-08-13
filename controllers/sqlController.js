@@ -485,32 +485,58 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     return resultSQL
  }
 
-sqlController.gestionCarritoCompras = async (idClienteCanalMensajeria, idProductoBot, metodoPago, cantidad, opcion) =>
-{
-    let query
-    let resultSQL = {}
-    query = `[dbo].[sp_GestionCarritoDeCompras]
-            @idClienteCanalMensajeria=${idClienteCanalMensajeria},
-            @idProductoBot=${idProductoBot},
-            @metodoPago=N'${metodoPago}',
-            @cantidad=${cantidad},
-            @opcion=${opcion}`
-
-    await request.query(query)
-    .then(async data => {
-        if (data.recordset != undefined && data.recordset.length > 0) {
-            resultSQL = {
-                idDetalleVenta : data.recordset[0].idDetalleVenta
-            }
-        }
-    })
-    .catch(err => {
-        console.log("Error al ingresar el producto al carrito de compras")
-        console.log(err)
-        throw new Error('Error al registrar en BD')
-    })
-    return resultSQL
-}
-
+ sqlController.gestionCarritoCompras = async (idClienteCanalMensajeria, idProductoBot, metodoPago, cantidad, opcion) =>
+ {
+     let query
+     let datos = {}
+     let resultSQL = []
+     if(opcion==1) //insertar producto al carrito
+     {
+         query = `[dbo].[sp_GestionCarritoDeCompras]
+                 @idClienteCanalMensajeria=${idClienteCanalMensajeria},
+                 @idProductoBot=${idProductoBot},
+                 @metodoPago=N'${metodoPago}',
+                 @cantidad=${cantidad},
+                 @opcion=${opcion}`
+     }
+     else if(opcion==2) //consultar carrito
+     {
+         query = `[dbo].[sp_GestionCarritoDeCompras]
+                 @idClienteCanalMensajeria=${idClienteCanalMensajeria},
+                 @opcion=${opcion}`
+     }
+ 
+     await request.query(query)
+     .then(async data => {
+         if (data.recordset != undefined && data.recordset.length > 0) {
+             if(opcion==1)
+             {
+                 resultSQL.push({idDetalleVenta : data.recordset[0].idDetalleVenta})
+             }
+             else if(opcion==2)
+             {
+                 data.recordset.forEach(element =>
+                     {
+                         datos = {
+                             idProductoBot : element.idProductoBot,
+                             nombreProducto : element.nombreProducto,
+                             cantidad : element.cantidad,
+                             precioProducto : element.precioProducto,
+                             metodoPago : element.metodoPago,
+                             identificadorMetodoPago: element.identificadorMetodoPago
+                         }
+                         resultSQL.push(datos)
+                     })
+             }
+         }
+     })
+     .catch(err => {
+         console.log("Error al ingresar el producto al carrito de compras")
+         console.log(err)
+         throw new Error('Error al registrar en BD')
+     })
+     return resultSQL
+ }
+ 
 
 module.exports = sqlController

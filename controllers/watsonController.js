@@ -540,8 +540,30 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,contexto.infoProductoSelected.idproductoBot,
                 contexto.metodoPago,contexto.cantidadProductos,1)
             .then(resultQuery =>
-                {
+            {
                 respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* en su carrito de compras`})
+                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- quieres *continuar comprando*\n- deseas *finalizar compra*\n o prefieres *ver carrito de compras*'})
+            })
+        }
+        else if(strAccion=='consultarCarritoDeCompras')
+        {
+            await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,null,0,2)
+            .then(resultQuery =>
+                {
+                    if(resultQuery.length==0)
+                    {
+                        respuesta.push({response_type:'text',text:'Actualmente no tiene un carrito de compras activo'})
+                    }
+                    else
+                    {
+                        respuesta.push({response_type:'text',text:`Ud. ha seleccionado el método de pago *${resultQuery[0].metodoPago}*`})
+                        respuesta.push({response_type:'text',text:'Su carrito de compras tiene los siguientes *productos* agregados:'})
+                        resultQuery.forEach(element => {
+                        let total = element.cantidad*element.precioProducto
+                        respuesta.push({response_type:'text',text:`*Cantidad:* ${element.cantidad}\n*Detalle:* ${element.nombreProducto}\n*Precio:* $${element.precioProducto}\n*Total:* $${total}`})
+                        })
+                        respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- quieres *continuar comprando*\n-o deseas *finalizar compra*\n'})
+                    }
                 })
         }
         return respuesta   
