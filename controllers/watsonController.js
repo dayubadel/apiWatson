@@ -81,6 +81,8 @@ watsonController.ControlMensajes = async (req, res) => {
                 respuesta.forEach(element => {  
                     watsonResponse.result.output.generic.push(element)
                 });
+                console.log("respuestaaaaa")
+                console.log(respuesta)
                 if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
                 {
                     delete contexto.Ciudad
@@ -541,8 +543,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 contexto.metodoPago,contexto.cantidadProductos,1)
             .then(resultQuery =>
             {
-                respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* en su *carrito de compras*`})
-                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \nquieres *continuar comprando*\no deseas *finalizar compra*\n o prefieres *ver carrito de compras*'})
+                respuesta.push({response_type:'text', text: `Tiene un *carrito de compras activo* con el *método de pago* ${resultQuery[0].metodoPago}`})
+                respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* exitosamente`})
+                respuesta.push({response_type:'text', text: `*Detalles adicionales:*\n*Cantidad:* ${resultQuery[0].cantidad}\n*Producto:* ${resultQuery[0].nombreProducto}\n*Precio unitario:* $${resultQuery[0].precioProducto}\n*Total:* $${resultQuery[0].precioProducto*resultQuery[0].cantidad}`})
+                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *agregar productos al carrito*\n- *ver carrito de compras*\n- *finalizar compra*\n- *quitar productos del carrito*\n'})
             })
         }
         else if(strAccion=='consultarCarritoDeCompras')
@@ -556,16 +560,16 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     }
                     else
                     {
-                        respuesta.push({response_type:'text',text:`Con el método de pago seleccionado: *${resultQuery[0].metodoPago}*`})
-                        respuesta.push({response_type:'text',text:'Su *carrito de compras* tiene los siguientes *productos* agregados:'})
+                        respuesta.push({response_type:'text',text:`*Método de pago:* ${resultQuery[0].metodoPago}`})
+                        respuesta.push({response_type:'text',text:'Su *carrito de compras* contiene los siguientes *productos*:'})
                         let totalFactura= 0
                         resultQuery.forEach(element => {
                         let total = element.cantidad*element.precioProducto
                         totalFactura=totalFactura+total
-                        respuesta.push({response_type:'text',text:`*Cantidad:* ${element.cantidad}\n*Detalle:* ${element.nombreProducto}\n*Precio unitario:* $${element.precioProducto}\n*Total:* $${total}`})
+                        respuesta.push({response_type:'text',text:`*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${element.precioProducto}\n*Total:* $${total}`})
                         })
-                        respuesta.push({response_type:'text', text: `*Total a pagar:* ${totalFactura}`})
-                        respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \nquieres *continuar comprando*\no deseas *finalizar compra*\n'})
+                        respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)}`})
+                        respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *agregar productos al carrito*\n- *finalizar compra*\n- *quitar productos del carrito*'})
                     }
                 })
         }

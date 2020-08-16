@@ -509,13 +509,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
      await request.query(query)
      .then(async data => {
          if (data.recordset != undefined && data.recordset.length > 0) {
-             if(opcion==1)
-             {
-                 resultSQL.push({idDetalleVenta : data.recordset[0].idDetalleVenta})
-             }
-             else if(opcion==2)
-             {
-                 data.recordset.forEach(element =>
+                data.recordset.forEach(element =>
                      {
                          datos = {
                              idProductoBot : element.idProductoBot,
@@ -526,12 +520,11 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                              identificadorMetodoPago: element.identificadorMetodoPago
                          }
                          resultSQL.push(datos)
-                     })
-             }
-         }
+                     })             
+            }
      })
      .catch(err => {
-         console.log("Error al ingresar el producto al carrito de compras")
+         console.log("Error al gestionar el carrito de compras")
          console.log(err)
          throw new Error('Error al registrar en BD')
      })
