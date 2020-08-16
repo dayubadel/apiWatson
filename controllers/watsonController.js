@@ -3,6 +3,7 @@ const { IamAuthenticator } = require('ibm-watson/auth');
 const sqlController = require('./sqlController.js')
 const config = require("../config/config.js");
 const { json } = require('body-parser');
+const { sql } = require('../config/config.js');
 // const pedidoModel = require('./../models/pedido.js')
 
 const id_workspace = config.Watson.id_workspace
@@ -81,8 +82,6 @@ watsonController.ControlMensajes = async (req, res) => {
                 respuesta.forEach(element => {  
                     watsonResponse.result.output.generic.push(element)
                 });
-                console.log("respuestaaaaa")
-                console.log(respuesta)
                 if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
                 {
                     delete contexto.Ciudad
@@ -104,7 +103,6 @@ watsonController.ControlMensajes = async (req, res) => {
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
-
         await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
         res.send(watsonResponse.result.output.generic)
         
@@ -563,15 +561,75 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         respuesta.push({response_type:'text',text:`*Método de pago:* ${resultQuery[0].metodoPago}`})
                         respuesta.push({response_type:'text',text:'Su *carrito de compras* contiene los siguientes *productos*:'})
                         let totalFactura= 0
+                        let numeroRegistro = 1
                         resultQuery.forEach(element => {
-                        let total = element.cantidad*element.precioProducto
-                        totalFactura=totalFactura+total
-                        respuesta.push({response_type:'text',text:`*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${element.precioProducto}\n*Total:* $${total}`})
+                            let total = element.cantidad*element.precioProducto
+                            totalFactura=totalFactura+total
+                            respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${element.precioProducto}\n*Total:* $${total}`})
+                            numeroRegistro++
                         })
                         respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)}`})
                         respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *agregar productos al carrito*\n- *finalizar compra*\n- *quitar productos del carrito*'})
                     }
                 })
+        }
+        else if(contexto._actionNode=="consultarProductosCarritoParaQuitar")
+        {
+            await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,null,0,2)
+            .then(resultSQL => {
+                if(resultSQL.length==0)
+                {
+                    respuesta.push({response_type: 'text', text: 'Ud. no cuenta con un carrito de compras activo'})
+                }
+                else 
+                {
+                    respuesta.push({response_type: 'text', text: 'Su *carrito de compras* contiene los siguientes *productos*:'})
+                    let totalFactura = 0
+                    let numeroRegistro = 1
+                    carritoActual = []
+                    resultSQL.forEach(element => {
+                        let total = element.cantidad*element.precioProducto
+                        totalFactura=totalFactura+total
+                        carritoActual.push({p : numeroRegistro, idProductoBot : element.idProductoBot})
+                        respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${element.precioProducto}\n*Total:* $${total}`})
+                        numeroRegistro++
+                    })
+                    contexto['carritoActual'] = carritoActual
+                    respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)}`})
+                    respuesta.push({response_type: 'text', text: 'Por favor, seleccione el *número del registro* que desea quitar de su carrito'})
+                }
+            })
+        }
+        else if(contexto._actionNode=="mostrarProductoSelectedParaEliminar")
+        {
+            await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,null,0,2)
+            .then( resultSQL => {
+                if(resultSQL.length==0)
+                {
+                    respuesta.push({response_type: 'text', text: 'Ud. no cuenta con un carrito de compras activo'})
+                }
+                else 
+                {
+                   let productoContexto =  contexto.carritoActual.find(elementCarrito => elementCarrito.p == contexto.opcionCarritoEliminar)
+                   if(productoContexto==undefined)
+                   {
+                        respuesta.push({response_type: 'text', text: 'El número de registro seleccionado no es válido'})
+                   }
+                   else
+                   {
+                       let productoSeleccionado = resultSQL.find(result => result.idProductoBot == productoContexto.idProductoBot)
+                        if(productoSeleccionado==undefined)
+                        {
+                            respuesta.push({response_type: 'text', text: 'El número de registro no existe'})
+                        }
+                        else 
+                        {
+                            respuesta.push({response_type: 'text', text: `¿Está seguro de quitar ${productoSeleccionado.cantidad} ${productoSeleccionado.nombreProducto} de su carrito de compras?`})
+                        }
+                   }
+                }
+            }
+            )
         }
         return respuesta   
 }
