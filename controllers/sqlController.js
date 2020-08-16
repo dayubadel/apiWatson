@@ -485,7 +485,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     return resultSQL
  }
 
- sqlController.gestionCarritoCompras = async (idClienteCanalMensajeria, idProductoBot, metodoPago, cantidad, opcion) =>
+ sqlController.gestionCarritoCompras = async (idClienteCanalMensajeria, idDetalleVenta, idProductoBot, metodoPago, cantidad, opcion) =>
  {
      let query
      let datos = {}
@@ -505,6 +505,13 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                  @idClienteCanalMensajeria=${idClienteCanalMensajeria},
                  @opcion=${opcion}`
      }
+     else if(opcion==3) //eliminar producto de carrito
+     {
+         query = `[dbo].[sp_GestionCarritoDeCompras]
+                 @idClienteCanalMensajeria=${idClienteCanalMensajeria},
+                 @idDetalleVenta=${idDetalleVenta},
+                 @opcion=${opcion}`
+     }
  
      await request.query(query)
      .then(async data => {
@@ -517,7 +524,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                              cantidad : element.cantidad,
                              precioProducto : element.precioProducto,
                              metodoPago : element.metodoPago,
-                             identificadorMetodoPago: element.identificadorMetodoPago
+                             identificadorMetodoPago: element.identificadorMetodoPago,
+                             idDetalleVenta : element.idDetalleVenta
                          }
                          resultSQL.push(datos)
                      })             
