@@ -8,6 +8,14 @@ require('tls').DEFAULT_MIN_VERSION = 'TLSv1'
 
 //middlewares
 const app = express();
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+
 // app.use(
 //   bodyParser.urlencoded({
 //     extended: true
@@ -17,8 +25,12 @@ const app = express();
 
 // app.use(express.json({limit: '50mb'}));
 // app.use(express.urlencoded({limit: '50mb'}));
+
+
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+
+
 
 
 
@@ -34,11 +46,13 @@ mssql.connect(configFile.sql.config_sql, (err) =>{
 //routes
 var watsonModule = require("./routes/watsonRoute")
 var productModule = require("./routes/productoRoute")
+var paymentezModule = require("./routes/paymentezRoute")
 
 
 
 app.use("/watson", watsonModule)
 app.use("/producto", productModule)
+app.use("/pago", paymentezModule)
 
 
 
