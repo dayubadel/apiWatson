@@ -637,6 +637,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 }
             })
         }
+        else if(strAccion=='enviarLinkPago'){
+            console.log(contexto.datosCliente)
+            const datosCP = contexto.datosCliente
+            datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
+            respuesta.push({
+                response_type:'text',
+                text: `http://f98d30e95baf.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
+            })
+        }
         return respuesta   
 }
 
