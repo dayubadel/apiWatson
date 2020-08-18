@@ -549,7 +549,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             {
                 respuesta.push({response_type:'text', text: `Tiene un *carrito de compras activo* con el *método de pago* ${resultQuery[0].metodoPago}`})
                 respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* exitosamente`})
-                respuesta.push({response_type:'text', text: `*Detalles adicionales:*\n*Cantidad:* ${resultQuery[0].cantidad}\n*Producto:* ${resultQuery[0].nombreProducto}\n*Precio unitario:* $${resultQuery[0].precioProducto}\n*Total:* $${resultQuery[0].precioProducto*resultQuery[0].cantidad}`})
+                respuesta.push({response_type:'text', text: `*Detalles adicionales:*\n*Cantidad:* ${resultQuery[0].cantidad}\n*Producto:* ${resultQuery[0].nombreProducto}\n*Precio unitario:* $${(resultQuery[0].precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${((resultQuery[0].precioProducto*1.12)*resultQuery[0].cantidad).toFixed(2)}`})
                 respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *agregar productos al carrito*\n- *ver carrito de compras*\n- *finalizar compra*\n- *quitar productos del carrito*\n'})
             })
         }
@@ -572,13 +572,13 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         let numeroRegistro = 1
                         resultQuery.forEach(element => {
                             carritoActual.push({p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, nombreProducto: element.nombreProducto, cantidad: element.cantidad})
-                            let total = element.cantidad*element.precioProducto
+                            let total = element.cantidad*(element.precioProducto*1.12)
                             totalFactura=totalFactura+total
-                            respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${element.precioProducto}\n*Total:* $${total}`})
+                            respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})
                             numeroRegistro++
                         })
                         contexto['carritoActual'] = carritoActual
-                        respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)}`})
+                        respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
                         respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *agregar productos al carrito*\n- *finalizar compra*\n- *quitar productos del carrito*'})
                     }
                 })
@@ -599,14 +599,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     let numeroRegistro = 1
                     carritoActual = []
                     resultSQL.forEach(element => {
-                        let total = element.cantidad*element.precioProducto
+                        let total = element.cantidad*(element.precioProducto*1.12)
                         totalFactura=totalFactura+total
                         carritoActual.push({p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, nombreProducto: element.nombreProducto, cantidad: element.cantidad})
-                        respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${element.precioProducto}\n*Total:* $${total}`})
+                        respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})
                         numeroRegistro++
                     })
                     contexto['carritoActual'] = carritoActual
-                    respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)}`})
+                    respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
                     respuesta.push({response_type: 'text', text: 'Por favor, seleccione el *número del registro* que desea quitar de su carrito'})
                 }
             })
