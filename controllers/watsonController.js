@@ -56,6 +56,12 @@ watsonController.ControlMensajes = async (req, res) => {
         {
             contextoAnterior['idClienteCanalMensajeria'] = objMensajeria.idClienteCanalMensajeria
         }
+
+        if(objMensajeria.numeroReferencia!=null)
+        {
+            contextoAnterior['numeroReferencia'] = objMensajeria.numeroReferencia
+        }
+
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
         
 
