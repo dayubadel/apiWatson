@@ -5,6 +5,10 @@ module.exports = {
         url: 'https://api.us-south.assistant.watson.cloud.ibm.com',
         version: '2020-07-06'
     },
+    valorGlobales :{
+        IVAPercent : 12,
+        valorEnvio : 3.99
+    },
     sql: {
         config_sql : {
             user : 'sa',

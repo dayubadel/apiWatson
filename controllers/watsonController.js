@@ -638,7 +638,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             })
         }
         else if(strAccion=='enviarLinkPago'){
-            console.log(contexto.datosCliente)
+            
             const datosCP = contexto.datosCliente
             datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
             respuesta.push({
