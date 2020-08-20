@@ -540,5 +540,42 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
      return resultSQL
  }
  
+ sqlController.consultarCategoriasMarcasGeneral = async (marca, nombreCategoria) =>
+ {
+    let resultSQL = []
+    let datos = {}
+    let query
+
+    query = `[dbo].[sp_ConsultaCategoriasMarcasGeneral] 
+            @marca = N'${marca}', @nombreCategoria = N'${nombreCategoria}'`
+
+    await request.query(query)
+    .then(async data =>{
+        if (data.recordset != undefined && data.recordset.length > 0) {
+            data.recordset.forEach(element => 
+             {
+                datos = {
+                 idProducto : element.idProductoBot,
+                 nombreCaracteristicaK : element.nombreCaracteristicaKey,
+                 caracteristicaValue : element.caracteristicaValue,
+                 tipoResultado: element.tipoResultado,
+                 tipoCategoria : element.tipoCategoria,
+                 idMarcaBot: element.idMarcaBot,
+                 nombreMarca: element.nombreMarca,
+                 totalProductos: element.totalProductos,
+                 idCategoriaHija: element.idCategoriaHija,
+                 nombreCategoriaHija: element.nombreCategoriaHija
+                }
+                resultSQL.push(datos)
+             }) 
+         }
+     })     
+     .catch(err => {
+        console.log("Error al consultar categorias marcas generales")
+        console.log(err)
+        throw new Error('Error al registrar en BD')
+    })
+    return resultSQL
+ }
 
 module.exports = sqlController

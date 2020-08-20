@@ -72,7 +72,7 @@ watsonController.ControlMensajes = async (req, res) => {
             nodesVisitedDetails : true
         })       
         var contexto = watsonResponse.result.context
-        console.log("********************este llega de watson*****************")
+       // console.log("********************este llega de watson*****************")
         console.log(JSON.stringify(watsonResponse.result,null,4))
         console.log("********************este llega de watson*****************")
 
@@ -117,6 +117,7 @@ watsonController.ControlMensajes = async (req, res) => {
         res.status(400).send('')
     }
 }
+
 
 watsonController.RegistrarCliente = async (idCliente, contexto) => 
 {   
@@ -245,42 +246,42 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push(valoracionRespuesta)
             })
         }
-        else if(strAccion == "consultarCategoriasPorCategoria")
-        {
-            var txtCategoriasHijas = '',
-                nombreCategoria = contexto.categoria,
-                num = 1,
-                menuMostradoProductos = {
-                    "tipoMenu" : "categoria",
-                    'menuMostrado' : []
-                };
+        // else if(strAccion == "consultarCategoriasPorCategoria")
+        // {
+        //     var txtCategoriasHijas = '',
+        //         nombreCategoria = contexto.categoria,
+        //         num = 1,
+        //         menuMostradoProductos = {
+        //             "tipoMenu" : "categoria",
+        //             'menuMostrado' : []
+        //         };
 
-            await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
-            .then(data => {
-                respuesta.push({
-                    response_type: "text",
-                    text: `En *${nombreCategoria}* contamos con las siguientes *Sub Categorías:*`
-                });
-                data.forEach(element =>  {
-                    txtCategoriasHijas = `${txtCategoriasHijas}${(txtCategoriasHijas=='') ? '' : '\n'}*${num}) ${element.nombreCategoriaHija}*`
-                    menuMostradoProductos.menuMostrado.push({
-                        "pocision": num,
-                        "nombre" : element.nombreCategoriaHija,
-                        "tipoCategoria": element.tipoCategoria
-                    });
-                    num++;
-                });
-                respuesta.push({
-                    response_type: "text",
-                    text: txtCategoriasHijas
-                });
-                if(contexto.hasOwnProperty('menuMostradoProductos')){
-                    delete contexto.menuMostradoProductos
-                }
-                contexto['menuMostradoProductos'] = menuMostradoProductos;
+        //     await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
+        //     .then(data => {
+        //         respuesta.push({
+        //             response_type: "text",
+        //             text: `En *${nombreCategoria}* contamos con las siguientes *Sub Categorías:*`
+        //         });
+        //         data.forEach(element =>  {
+        //             txtCategoriasHijas = `${txtCategoriasHijas}${(txtCategoriasHijas=='') ? '' : '\n'}*${num}) ${element.nombreCategoriaHija}*`
+        //             menuMostradoProductos.menuMostrado.push({
+        //                 "pocision": num,
+        //                 "nombre" : element.nombreCategoriaHija,
+        //                 "tipoCategoria": element.tipoCategoria
+        //             });
+        //             num++;
+        //         });
+        //         respuesta.push({
+        //             response_type: "text",
+        //             text: txtCategoriasHijas
+        //         });
+        //         if(contexto.hasOwnProperty('menuMostradoProductos')){
+        //             delete contexto.menuMostradoProductos
+        //         }
+        //         contexto['menuMostradoProductos'] = menuMostradoProductos;
 
-            });
-        }
+        //     });
+        // }
         else if(strAccion == "consultarCategoriasNivelMasBajo"){
 
             await sqlController.consultarCategoriasNivelMasBajo()
@@ -317,192 +318,192 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             });
 
         }
-        else if(strAccion== "consultarMarcasPorCategoriaUltimoNivel")
-        {
-            var categoriaUltimoNivel = contexto.categoriaUltimoNivel
-            await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
-            .then(result => {
-                var tipoResultado = result[0].tipoResultado,
-                    num = 1
-                    menuMostradoProductos = {
-                        "tipoMenu" : "",
-                        'menuMostrado' : []
-                    };
-                if(tipoResultado=="marcas")
-                {
-                    menuMostradoProductos.tipoMenu = 'marcaProductos';
-                    var txtMarcas = '';
-                    respuesta.push({
-                        response_type: "text",
-                        text:`Disponemos de las siguientes marcas para *${categoriaUltimoNivel}:* `
-                    })
-                    result.forEach(marca => {
-                        txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
-                        menuMostradoProductos.menuMostrado.push({
-                            "pocision": num,
-                            "nombre" : marca.nombreMarca,
-                            "tipoCategoria": "marcaProductos"
-                        });
-                        num++;
-                    });
-                    respuesta.push({
-                        response_type: "text",
-                        text: txtMarcas
-                    });
-                    if(contexto.hasOwnProperty('menuMostradoProductos')){
-                        delete contexto.menuMostradoProductos
-                    }
-                    contexto['menuMostradoProductos'] = menuMostradoProductos;
+        // else if(strAccion== "consultarMarcasPorCategoriaUltimoNivel")
+        // {
+        //     var categoriaUltimoNivel = contexto.categoriaUltimoNivel
+        //     await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
+        //     .then(result => {
+        //         var tipoResultado = result[0].tipoResultado,
+        //             num = 1
+        //             menuMostradoProductos = {
+        //                 "tipoMenu" : "",
+        //                 'menuMostrado' : []
+        //             };
+        //         if(tipoResultado=="marcas")
+        //         {
+        //             menuMostradoProductos.tipoMenu = 'marcaProductos';
+        //             var txtMarcas = '';
+        //             respuesta.push({
+        //                 response_type: "text",
+        //                 text:`Disponemos de las siguientes marcas para *${categoriaUltimoNivel}:* `
+        //             })
+        //             result.forEach(marca => {
+        //                 txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
+        //                 menuMostradoProductos.menuMostrado.push({
+        //                     "pocision": num,
+        //                     "nombre" : marca.nombreMarca,
+        //                     "tipoCategoria": "marcaProductos"
+        //                 });
+        //                 num++;
+        //             });
+        //             respuesta.push({
+        //                 response_type: "text",
+        //                 text: txtMarcas
+        //             });
+        //             if(contexto.hasOwnProperty('menuMostradoProductos')){
+        //                 delete contexto.menuMostradoProductos
+        //             }
+        //             contexto['menuMostradoProductos'] = menuMostradoProductos;
 
-                }
-                else {
-                    var menuMostradoProductos = {
-                        "tipoMenu" : "",
-                        'menuMostrado' : []
-                    };
+        //         }
+        //         else {
+        //             var menuMostradoProductos = {
+        //                 "tipoMenu" : "",
+        //                 'menuMostrado' : []
+        //             };
 
-                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}*:`})
+        //             respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}*:`})
 
-                    let resultMapped = result.reduce((acc, item) => {
-                        (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
-                            return acc;
-                    }, []);
+        //             let resultMapped = result.reduce((acc, item) => {
+        //                 (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
+        //                     return acc;
+        //             }, []);
                     
-                    resultMapped.forEach(elementProducto => {
-                        var carTexto = "";
-                        var urlImagen ="";
-                        var nombreProducto ="";
-                        elementProducto.forEach(elementCaracteristica => 
-                            {
-                               if(elementCaracteristica['nombre']=="imagen")
-                               {
-                                    urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
-                               }
-                               else if(elementCaracteristica['nombre']=="nombreProducto")
-                               {
-                                    nombreProducto = elementCaracteristica['value']
-                                    menuMostradoProductos.menuMostrado.push({
-                                        "pocision": num,
-                                        "nombre" : nombreProducto,
-                                        "tipoCategoria": "productosEspecificos"
-                                    });
-                               }
-                               else if(elementCaracteristica['nombre']!="idProducto")
-                               {
-                                    carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
-                               }
-                            })
-                            // respuesta.push({
-                            //     response_type: "text", 
-                            //     text: `*${num}) ${nombreProducto}*\n${carTexto}`
-                            // })
+        //             resultMapped.forEach(elementProducto => {
+        //                 var carTexto = "";
+        //                 var urlImagen ="";
+        //                 var nombreProducto ="";
+        //                 elementProducto.forEach(elementCaracteristica => 
+        //                     {
+        //                        if(elementCaracteristica['nombre']=="imagen")
+        //                        {
+        //                             urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
+        //                        }
+        //                        else if(elementCaracteristica['nombre']=="nombreProducto")
+        //                        {
+        //                             nombreProducto = elementCaracteristica['value']
+        //                             menuMostradoProductos.menuMostrado.push({
+        //                                 "pocision": num,
+        //                                 "nombre" : nombreProducto,
+        //                                 "tipoCategoria": "productosEspecificos"
+        //                             });
+        //                        }
+        //                        else if(elementCaracteristica['nombre']!="idProducto")
+        //                        {
+        //                             carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
+        //                        }
+        //                     })
+        //                     respuesta.push({
+        //                         response_type: "text", 
+        //                         text: `*${num}) ${nombreProducto}*\n${carTexto}`
+        //                     })
 
-                            //comentado por pruebas locales
-                            respuesta.push({
-                                response_type: "image", 
-                                title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-                                source: urlImagen
-                            })
-                        num++;
-                    }) 
+        //                     comentado por pruebas locales
+        //                     respuesta.push({
+        //                         response_type: "image", 
+        //                         title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+        //                         source: urlImagen
+        //                     })
+        //                 num++;
+        //             }) 
                     
-                    respuesta.push({
-                        response_type: "text", 
-                        text: `Por favor, selecciona el número del producto que te interesa`
-                    });
-                    if(contexto.hasOwnProperty('menuMostradoProductos')){
-                        delete contexto.menuMostradoProductos
-                    }
-                    contexto['menuMostradoProductos'] = menuMostradoProductos;
-                }
-            })
-        }
-        else if(strAccion == "consultarProductosPorMarcaPorCategoriaUltimoNivel")
-        {
-            let categoriaUltimoNivel = contexto.categoriaUltimoNivel
-            let marcaProductos = contexto.marcaProductos
-            await sqlController.consultarProductosPorMarcaPorCategoriaUltimoNivel(categoriaUltimoNivel, marcaProductos)
-            .then(result => {
-                let tipoResultado = result[0].tipoResultado
-                if(tipoResultado=="marcas")
-                {
-                    respuesta.push({
-                        response_type: "text",
-                        text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes marcas: "
-                    });
-                    respuesta.push({
-                        response_type: "text",
-                        text:"Este probar cuando entra"
-                    });
-                    result.forEach(elementMarca => {
-                        respuesta.push({
-                            response_type: "text",
-                            text:elementMarca.nombreMarca+" ("+ elementMarca.totalProductos +") "
-                        });
-                    });
-                }
-                else 
-                {
-                    var menuMostradoProductos = {
-                        "tipoMenu" : "",
-                        'menuMostrado' : []
-                    };
-                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} en la marca ${marcaProductos}*:`})
-                    let resultMapped = result.reduce((acc, item) => {
-                        (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
-                            return acc;
-                        }, []);
-                    var num =1;
+        //             respuesta.push({
+        //                 response_type: "text", 
+        //                 text: `Por favor, selecciona el número del producto que te interesa`
+        //             });
+        //             if(contexto.hasOwnProperty('menuMostradoProductos')){
+        //                 delete contexto.menuMostradoProductos
+        //             }
+        //             contexto['menuMostradoProductos'] = menuMostradoProductos;
+        //         }
+        //     })
+        // }
+        // else if(strAccion == "consultarProductosPorMarcaPorCategoriaUltimoNivel")
+        // {
+        //     let categoriaUltimoNivel = contexto.categoriaUltimoNivel
+        //     let marcaProductos = contexto.marcaProductos
+        //     await sqlController.consultarProductosPorMarcaPorCategoriaUltimoNivel(categoriaUltimoNivel, marcaProductos)
+        //     .then(result => {
+        //         let tipoResultado = result[0].tipoResultado
+        //         if(tipoResultado=="marcas")
+        //         {
+        //             respuesta.push({
+        //                 response_type: "text",
+        //                 text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes marcas: "
+        //             });
+        //             respuesta.push({
+        //                 response_type: "text",
+        //                 text:"Este probar cuando entra"
+        //             });
+        //             result.forEach(elementMarca => {
+        //                 respuesta.push({
+        //                     response_type: "text",
+        //                     text:elementMarca.nombreMarca+" ("+ elementMarca.totalProductos +") "
+        //                 });
+        //             });
+        //         }
+        //         else 
+        //         {
+        //             var menuMostradoProductos = {
+        //                 "tipoMenu" : "",
+        //                 'menuMostrado' : []
+        //             };
+        //             respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} en la marca ${marcaProductos}*:`})
+        //             let resultMapped = result.reduce((acc, item) => {
+        //                 (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
+        //                     return acc;
+        //                 }, []);
+        //             var num =1;
           
-                    resultMapped.forEach(elementProducto => {
-                        var carTexto = "";
-                        var urlImagen ="";
-                        var nombreProducto ="";
-                        elementProducto.forEach(elementCaracteristica => 
-                            {
-                               if(elementCaracteristica['nombre']=="imagen")
-                               {
-                                    urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
-                               }
-                               else if(elementCaracteristica['nombre']=="nombreProducto")
-                               {
-                                    nombreProducto = elementCaracteristica['value']
-                                    menuMostradoProductos.menuMostrado.push({
-                                        "pocision": num,
-                                        "nombre" : nombreProducto,
-                                        "tipoCategoria": "productosEspecificos"
-                                    });
-                               }
-                               else if(elementCaracteristica['nombre']!="idProducto")
-                               {
-                                    carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
-                               }
-                            })
-                        // respuesta.push({
-                        //     response_type: "text", 
-                        //     text: `*${num}) ${nombreProducto}*\n${carTexto}`
-                        // })
+        //             resultMapped.forEach(elementProducto => {
+        //                 var carTexto = "";
+        //                 var urlImagen ="";
+        //                 var nombreProducto ="";
+        //                 elementProducto.forEach(elementCaracteristica => 
+        //                     {
+        //                        if(elementCaracteristica['nombre']=="imagen")
+        //                        {
+        //                             urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
+        //                        }
+        //                        else if(elementCaracteristica['nombre']=="nombreProducto")
+        //                        {
+        //                             nombreProducto = elementCaracteristica['value']
+        //                             menuMostradoProductos.menuMostrado.push({
+        //                                 "pocision": num,
+        //                                 "nombre" : nombreProducto,
+        //                                 "tipoCategoria": "productosEspecificos"
+        //                             });
+        //                        }
+        //                        else if(elementCaracteristica['nombre']!="idProducto")
+        //                        {
+        //                             carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
+        //                        }
+        //                     })
+        //                 respuesta.push({
+        //                     response_type: "text", 
+        //                     text: `*${num}) ${nombreProducto}*\n${carTexto}`
+        //                 })
                             
-                        //comentado por pruebas locales
-                        respuesta.push({
-                            response_type: "image", 
-                            title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-                            source: urlImagen
-                        })
-                        num++;
-                    }) 
+        //                 comentado por pruebas locales
+        //                 respuesta.push({
+        //                     response_type: "image", 
+        //                     title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+        //                     source: urlImagen
+        //                 })
+        //                 num++;
+        //             }) 
                     
-                    respuesta.push({
-                        response_type: "text", 
-                        text: `Por favor, selecciona el *número* del producto que te interesa`
-                    });
-                    if(contexto.hasOwnProperty('menuMostradoProductos')){
-                        delete contexto.menuMostradoProductos
-                    }
-                    contexto['menuMostradoProductos'] = menuMostradoProductos;
-                }
-            })
-        }
+        //             respuesta.push({
+        //                 response_type: "text", 
+        //                 text: `Por favor, selecciona el *número* del producto que te interesa`
+        //             });
+        //             if(contexto.hasOwnProperty('menuMostradoProductos')){
+        //                 delete contexto.menuMostradoProductos
+        //             }
+        //             contexto['menuMostradoProductos'] = menuMostradoProductos;
+        //         }
+        //     })
+        // }
         else if(strAccion == 'consultarInfoProducto'){
             let producto,
                 txtCarac = '';
@@ -650,6 +651,147 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             respuesta.push({
                 response_type:'text',
                 text: `http://f98d30e95baf.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
+            })
+        }
+        else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
+        {            
+            let categoriaUltimoNivel = contexto.categoriaUltimoNivel
+            let marcaProductos = contexto.marcaProductos
+            await sqlController.consultarCategoriasMarcasGeneral(marcaProductos,categoriaUltimoNivel)
+            .then(result => {
+                var tipoResultado = result[0].tipoResultado,
+                num = 1
+                menuMostradoProductos = {
+                    "tipoMenu" : "",
+                    'menuMostrado' : []
+                };
+                console.log(tipoResultado)
+                if(tipoResultado=="categorias")
+                {
+                    var txtCategoriasHijas = '',
+                            //nombreCategoria = contexto.categoria,
+                            num = 1,
+                            menuMostradoProductos = {
+                                "tipoMenu" : "categoria",
+                                'menuMostrado' : []
+                            };
+                    respuesta.push({
+                        response_type: "text",
+                        text: `En *${categoriaUltimoNivel}* contamos con las siguientes *Sub Categorías:*`
+                    });
+                    result.forEach(element =>  {
+                        txtCategoriasHijas = `${txtCategoriasHijas}${(txtCategoriasHijas=='') ? '' : '\n'}*${num}) ${element.nombreCategoriaHija}*`
+                        menuMostradoProductos.menuMostrado.push({
+                            "pocision": num,
+                            "nombre" : element.nombreCategoriaHija,
+                            "tipoCategoria": element.tipoCategoria
+                        });
+                        num++;
+                    });
+                    respuesta.push({
+                        response_type: "text",
+                        text: txtCategoriasHijas
+                    });
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
+    
+                }
+                else if(tipoResultado=="marcas")
+                {
+                    menuMostradoProductos.tipoMenu = 'marcaProductos';
+                    var txtMarcas = '';
+                    if(marcaProductos!=null)
+                    {
+                        respuesta.push({
+                            response_type: "text",
+                            text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes *marcas*: "
+                        });
+                    }
+                    else 
+                    {
+                        respuesta.push({
+                            response_type: "text",
+                            text:`Disponemos de las siguientes marcas para *${categoriaUltimoNivel}:* `
+                        })
+                    }
+                    result.forEach(marca => {
+                        txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
+                        menuMostradoProductos.menuMostrado.push({
+                            "pocision": num,
+                            "nombre" : marca.nombreMarca,
+                            "tipoCategoria": "marcaProductos"
+                        });
+                        num++;
+                    });
+                    respuesta.push({
+                        response_type: "text",
+                        text: txtMarcas
+                    });
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
+
+                }
+                else if  (tipoResultado == "productos"){
+                    var menuMostradoProductos = {
+                        "tipoMenu" : "",
+                        'menuMostrado' : []
+                    };
+
+                    if(marcaProductos ==null)
+                        respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}*:`})
+                    else
+                        respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}* *${marcaProductos}*:`})
+
+                    let resultMapped = result.reduce((acc, item) => {
+                        (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
+                            return acc;
+                    }, []);
+                    
+                    resultMapped.forEach(elementProducto => {
+                        var carTexto = "";
+                        var urlImagen ="";
+                        var nombreProducto ="";
+                        elementProducto.forEach(elementCaracteristica => 
+                            {
+                               if(elementCaracteristica['nombre']=="imagen")
+                               {
+                                    urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
+                               }
+                               else if(elementCaracteristica['nombre']=="nombreProducto")
+                               {
+                                    nombreProducto = elementCaracteristica['value']
+                                    menuMostradoProductos.menuMostrado.push({
+                                        "pocision": num,
+                                        "nombre" : nombreProducto,
+                                        "tipoCategoria": "productosEspecificos"
+                                    });
+                               }
+                               else if(elementCaracteristica['nombre']!="idProducto")
+                               {
+                                    carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
+                               }
+                            })
+                            respuesta.push({
+                                response_type: "image", 
+                                title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                                source: urlImagen
+                            })
+                        num++;
+                    }) 
+                    
+                    respuesta.push({
+                        response_type: "text", 
+                        text: `Por favor, selecciona el número del producto que te interesa`
+                    });
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
+                }
             })
         }
         return respuesta   
