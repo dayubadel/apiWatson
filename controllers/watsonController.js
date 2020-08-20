@@ -42,7 +42,7 @@ watsonController.ControlMensajes = async (req, res) => {
         {
             contextoAnterior['nombres'] = objMensajeria.nombres
         }
-        
+
         if(idCanal==1)
         {
             contextoAnterior['telefono'] = idChat.split('@')[0]
@@ -63,36 +63,36 @@ watsonController.ControlMensajes = async (req, res) => {
         }
 
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
-        
+
 
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
             input: { text: txtMsg},
             context: contextoAnterior,
             nodesVisitedDetails : true
-        })       
+        })
         var contexto = watsonResponse.result.context
        console.log("********************este llega de watson*****************")
         console.log(JSON.stringify(watsonResponse.result,null,4))
         console.log("********************este llega de watson*****************")
 
-        if(contexto.hasOwnProperty('_actionNode')) 
-        {   
-            if(contexto._actionNode == "actualizarCliente")     
+        if(contexto.hasOwnProperty('_actionNode'))
+        {
+            if(contexto._actionNode == "actualizarCliente")
             {
-                await watsonController.RegistrarCliente(idCliente,contexto) 
+                await watsonController.RegistrarCliente(idCliente,contexto)
             }
             else
             {
-                let respuesta = await watsonController.AccionesNode(contexto._actionNode,watsonResponse.result,idClienteCanalMensajeria) 
-                respuesta.forEach(element => {  
+                let respuesta = await watsonController.AccionesNode(contexto._actionNode,watsonResponse.result,idClienteCanalMensajeria)
+                respuesta.forEach(element => {
                     watsonResponse.result.output.generic.push(element)
                 });
                 if(contexto.hasOwnProperty('Ciudad') && contexto._actionNode!="consultarSectoresAgrupadosPorCiudad")
                 {
                     delete contexto.Ciudad
                 }
-                if(contexto.hasOwnProperty('marcaProductos') && contexto.hasOwnProperty('categoriaUltimoNivel') 
+                if(contexto.hasOwnProperty('marcaProductos') && contexto.hasOwnProperty('categoriaUltimoNivel')
                     && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel")
                 {
                     delete contexto.marcaProductos
@@ -100,8 +100,8 @@ watsonController.ControlMensajes = async (req, res) => {
                     delete contexto.categoria
                 }
             }
-            delete contexto._actionNode          
-        }      
+            delete contexto._actionNode
+        }
 
         // console.log("********************este se va a BD*****************")
         // console.log(JSON.stringify(watsonResponse.result,null,4))
@@ -111,7 +111,7 @@ watsonController.ControlMensajes = async (req, res) => {
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
         await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
         res.send(watsonResponse.result.output.generic)
-        
+
     } catch (error) {
         console.log(error)
         res.status(400).send('')
@@ -119,24 +119,24 @@ watsonController.ControlMensajes = async (req, res) => {
 }
 
 
-watsonController.RegistrarCliente = async (idCliente, contexto) => 
-{   
-    var nombre =  (contexto.hasOwnProperty("nombres")) ? contexto.nombres : null ; 
-    var telefono = (contexto.hasOwnProperty("telefono") ? contexto.telefono : null ) 
-  
-    await sqlController.actualizarCliente(idCliente,nombre,null,telefono,null,null,0)        
-    
+watsonController.RegistrarCliente = async (idCliente, contexto) =>
+{
+    var nombre =  (contexto.hasOwnProperty("nombres")) ? contexto.nombres : null ;
+    var telefono = (contexto.hasOwnProperty("telefono") ? contexto.telefono : null )
+
+    await sqlController.actualizarCliente(idCliente,nombre,null,telefono,null,null,0)
+
 }
 
 watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajeria) => {
     var respuesta = []
     var contexto = result.context
         if(strAccion == "consultarTienda"){
-            var ciudad = contexto.Ciudad   
+            var ciudad = contexto.Ciudad
             var tiendasOrganizadas = {}
 
             await sqlController.consultarTiendasPorCiudad(ciudad)
-                .then(data =>{ 
+                .then(data =>{
                     let contadorTiendas = data.length
                     var textoGeneral =  'Contamos con una tienda en '+ciudad+':'
                     if(contadorTiendas>1)
@@ -168,18 +168,18 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                 text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
                                 elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                             }
-                        
+
                             respuesta.push(tiendasOrganizadas)
                             contador++
-                    }            
-                )})              
+                    }
+                )})
             }
         else if(strAccion == "consultarSectoresAgrupadosPorCiudad"){
-            var ciudad = contexto.Ciudad   
+            var ciudad = contexto.Ciudad
             var sectores =''
 
         await sqlController.consultarSectoresAgrupadosPorCiudad(ciudad)
-            .then(data =>{ 
+            .then(data =>{
                 data.forEach(element => {
                      sectores = sectores + element.sector + ' - '
                 })
@@ -192,11 +192,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }
         else   if(strAccion == "consultarTiendasPorCiudadPorSector"){
             var ciudad = contexto.Ciudad
-            var sector = contexto.Sector  
+            var sector = contexto.Sector
             var tiendasOrganizadas = {}
-    
+
            await sqlController.consultarTiendasPorCiudadPorSector(ciudad, sector)
-            .then(data =>{ 
+            .then(data =>{
                 let contadorTiendas = data.length
                 var textoGeneral =  'Contamos con una tienda en el sector '+sector+ ' de '+ciudad+':'
                 if(contadorTiendas>1)
@@ -228,16 +228,16 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
                             elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                         }
-                      
+
                         respuesta.push(tiendasOrganizadas)
                         contador++
-                }          
-               )})              
-        }       
+                }
+               )})
+        }
         else if(strAccion == "insertarValoracion"){
             var valor = contexto.valorfeedback
             await sqlController.insertarValoracion(idClienteCanalMensajeria,valor,null,null)
-            .then(data =>{ 
+            .then(data =>{
 
                 let valoracionRespuesta =  {
                     response_type: 'text',
@@ -246,42 +246,43 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push(valoracionRespuesta)
             })
         }
-        // else if(strAccion == "consultarCategoriasPorCategoria")
-        // {
-        //     var txtCategoriasHijas = '',
-        //         nombreCategoria = contexto.categoria,
-        //         num = 1,
-        //         menuMostradoProductos = {
-        //             "tipoMenu" : "categoria",
-        //             'menuMostrado' : []
-        //         };
+        else if(strAccion == "consultarCategoriasPorCategoria")
+        {
+            var txtCategoriasHijas = '',
+                nombreCategoria = contexto.categoria,
+                num = 1,
+                menuMostradoProductos = {
+                    "tipoMenu" : "categoria",
+                    'menuMostrado' : [],
+                     "actionNodeAnterior" : strAccion
+                };
 
-        //     await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
-        //     .then(data => {
-        //         respuesta.push({
-        //             response_type: "text",
-        //             text: `En *${nombreCategoria}* contamos con las siguientes *Sub Categorías:*`
-        //         });
-        //         data.forEach(element =>  {
-        //             txtCategoriasHijas = `${txtCategoriasHijas}${(txtCategoriasHijas=='') ? '' : '\n'}*${num}) ${element.nombreCategoriaHija}*`
-        //             menuMostradoProductos.menuMostrado.push({
-        //                 "pocision": num,
-        //                 "nombre" : element.nombreCategoriaHija,
-        //                 "tipoCategoria": element.tipoCategoria
-        //             });
-        //             num++;
-        //         });
-        //         respuesta.push({
-        //             response_type: "text",
-        //             text: txtCategoriasHijas
-        //         });
-        //         if(contexto.hasOwnProperty('menuMostradoProductos')){
-        //             delete contexto.menuMostradoProductos
-        //         }
-        //         contexto['menuMostradoProductos'] = menuMostradoProductos;
+            await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
+            .then(data => {
+                respuesta.push({
+                    response_type: "text",
+                    text: `En *${nombreCategoria}* contamos con las siguientes *Sub Categorías:*`
+                });
+                data.forEach(element =>  {
+                    txtCategoriasHijas = `${txtCategoriasHijas}${(txtCategoriasHijas=='') ? '' : '\n'}*${num}) ${element.nombreCategoriaHija}*`
+                    menuMostradoProductos.menuMostrado.push({
+                        "pocision": num,
+                        "nombre" : element.nombreCategoriaHija,
+                        "tipoCategoria": element.tipoCategoria
+                    });
+                    num++;
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: txtCategoriasHijas
+                });
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
 
-        //     });
-        // }
+            });
+        }
         else if(strAccion == "consultarCategoriasNivelMasBajo"){
 
             await sqlController.consultarCategoriasNivelMasBajo()
@@ -294,7 +295,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     num = 1
                     menuMostradoProductos = {
                         "tipoMenu" : "categoria",
-                        'menuMostrado' : []
+                        'menuMostrado' : [],
+                        "actionNodeAnterior" : strAccion
                     };
                 sqlResult.forEach(cat => {
                     arrayCategorias = `${arrayCategorias}${(arrayCategorias=='') ? '' : '\n'}*${num}) ${cat.nombreCategoria}*`;
@@ -314,196 +316,199 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     delete contexto.menuMostradoProductos
                 }
                 contexto['menuMostradoProductos'] = menuMostradoProductos;
-                
+
             });
 
         }
-        // else if(strAccion== "consultarMarcasPorCategoriaUltimoNivel")
-        // {
-        //     var categoriaUltimoNivel = contexto.categoriaUltimoNivel
-        //     await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
-        //     .then(result => {
-        //         var tipoResultado = result[0].tipoResultado,
-        //             num = 1
-        //             menuMostradoProductos = {
-        //                 "tipoMenu" : "",
-        //                 'menuMostrado' : []
-        //             };
-        //         if(tipoResultado=="marcas")
-        //         {
-        //             menuMostradoProductos.tipoMenu = 'marcaProductos';
-        //             var txtMarcas = '';
-        //             respuesta.push({
-        //                 response_type: "text",
-        //                 text:`Disponemos de las siguientes marcas para *${categoriaUltimoNivel}:* `
-        //             })
-        //             result.forEach(marca => {
-        //                 txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
-        //                 menuMostradoProductos.menuMostrado.push({
-        //                     "pocision": num,
-        //                     "nombre" : marca.nombreMarca,
-        //                     "tipoCategoria": "marcaProductos"
-        //                 });
-        //                 num++;
-        //             });
-        //             respuesta.push({
-        //                 response_type: "text",
-        //                 text: txtMarcas
-        //             });
-        //             if(contexto.hasOwnProperty('menuMostradoProductos')){
-        //                 delete contexto.menuMostradoProductos
-        //             }
-        //             contexto['menuMostradoProductos'] = menuMostradoProductos;
+        else if(strAccion== "consultarMarcasPorCategoriaUltimoNivel")
+        {
+            var categoriaUltimoNivel = contexto.categoriaUltimoNivel
+            await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
+            .then(result => {
+                var tipoResultado = result[0].tipoResultado,
+                    num = 1
+                    menuMostradoProductos = {
+                        "tipoMenu" : "",
+                        'menuMostrado' : [],
+                        "actionNodeAnterior" : strAccion
+                    };
+                if(tipoResultado=="marcas")
+                {
+                    menuMostradoProductos.tipoMenu = 'marcaProductos';
+                    var txtMarcas = '';
+                    respuesta.push({
+                        response_type: "text",
+                        text:`Disponemos de las siguientes marcas para *${categoriaUltimoNivel}:* `
+                    })
+                    result.forEach(marca => {
+                        txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
+                        menuMostradoProductos.menuMostrado.push({
+                            "pocision": num,
+                            "nombre" : marca.nombreMarca,
+                            "tipoCategoria": "marcaProductos"
+                        });
+                        num++;
+                    });
+                    respuesta.push({
+                        response_type: "text",
+                        text: txtMarcas
+                    });
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
 
-        //         }
-        //         else {
-        //             var menuMostradoProductos = {
-        //                 "tipoMenu" : "",
-        //                 'menuMostrado' : []
-        //             };
+                }
+                else {
+                    var menuMostradoProductos = {
+                        "tipoMenu" : "",
+                        'menuMostrado' : [],
+                        "actionNodeAnterior" : strAccion
+                    };
 
-        //             respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}*:`})
+                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos en *${categoriaUltimoNivel}*:`})
 
-        //             let resultMapped = result.reduce((acc, item) => {
-        //                 (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
-        //                     return acc;
-        //             }, []);
-                    
-        //             resultMapped.forEach(elementProducto => {
-        //                 var carTexto = "";
-        //                 var urlImagen ="";
-        //                 var nombreProducto ="";
-        //                 elementProducto.forEach(elementCaracteristica => 
-        //                     {
-        //                        if(elementCaracteristica['nombre']=="imagen")
-        //                        {
-        //                             urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
-        //                        }
-        //                        else if(elementCaracteristica['nombre']=="nombreProducto")
-        //                        {
-        //                             nombreProducto = elementCaracteristica['value']
-        //                             menuMostradoProductos.menuMostrado.push({
-        //                                 "pocision": num,
-        //                                 "nombre" : nombreProducto,
-        //                                 "tipoCategoria": "productosEspecificos"
-        //                             });
-        //                        }
-        //                        else if(elementCaracteristica['nombre']!="idProducto")
-        //                        {
-        //                             carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
-        //                        }
-        //                     })
-        //                     respuesta.push({
-        //                         response_type: "text", 
-        //                         text: `*${num}) ${nombreProducto}*\n${carTexto}`
-        //                     })
+                    let resultMapped = result.reduce((acc, item) => {
+                        (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
+                            return acc;
+                    }, []);
 
-        //                     comentado por pruebas locales
-        //                     respuesta.push({
-        //                         response_type: "image", 
-        //                         title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-        //                         source: urlImagen
-        //                     })
-        //                 num++;
-        //             }) 
-                    
-        //             respuesta.push({
-        //                 response_type: "text", 
-        //                 text: `Por favor, selecciona el número del producto que te interesa`
-        //             });
-        //             if(contexto.hasOwnProperty('menuMostradoProductos')){
-        //                 delete contexto.menuMostradoProductos
-        //             }
-        //             contexto['menuMostradoProductos'] = menuMostradoProductos;
-        //         }
-        //     })
-        // }
-        // else if(strAccion == "consultarProductosPorMarcaPorCategoriaUltimoNivel")
-        // {
-        //     let categoriaUltimoNivel = contexto.categoriaUltimoNivel
-        //     let marcaProductos = contexto.marcaProductos
-        //     await sqlController.consultarProductosPorMarcaPorCategoriaUltimoNivel(categoriaUltimoNivel, marcaProductos)
-        //     .then(result => {
-        //         let tipoResultado = result[0].tipoResultado
-        //         if(tipoResultado=="marcas")
-        //         {
-        //             respuesta.push({
-        //                 response_type: "text",
-        //                 text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes marcas: "
-        //             });
-        //             respuesta.push({
-        //                 response_type: "text",
-        //                 text:"Este probar cuando entra"
-        //             });
-        //             result.forEach(elementMarca => {
-        //                 respuesta.push({
-        //                     response_type: "text",
-        //                     text:elementMarca.nombreMarca+" ("+ elementMarca.totalProductos +") "
-        //                 });
-        //             });
-        //         }
-        //         else 
-        //         {
-        //             var menuMostradoProductos = {
-        //                 "tipoMenu" : "",
-        //                 'menuMostrado' : []
-        //             };
-        //             respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} en la marca ${marcaProductos}*:`})
-        //             let resultMapped = result.reduce((acc, item) => {
-        //                 (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
-        //                     return acc;
-        //                 }, []);
-        //             var num =1;
-          
-        //             resultMapped.forEach(elementProducto => {
-        //                 var carTexto = "";
-        //                 var urlImagen ="";
-        //                 var nombreProducto ="";
-        //                 elementProducto.forEach(elementCaracteristica => 
-        //                     {
-        //                        if(elementCaracteristica['nombre']=="imagen")
-        //                        {
-        //                             urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
-        //                        }
-        //                        else if(elementCaracteristica['nombre']=="nombreProducto")
-        //                        {
-        //                             nombreProducto = elementCaracteristica['value']
-        //                             menuMostradoProductos.menuMostrado.push({
-        //                                 "pocision": num,
-        //                                 "nombre" : nombreProducto,
-        //                                 "tipoCategoria": "productosEspecificos"
-        //                             });
-        //                        }
-        //                        else if(elementCaracteristica['nombre']!="idProducto")
-        //                        {
-        //                             carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
-        //                        }
-        //                     })
-        //                 respuesta.push({
-        //                     response_type: "text", 
-        //                     text: `*${num}) ${nombreProducto}*\n${carTexto}`
-        //                 })
-                            
-        //                 comentado por pruebas locales
-        //                 respuesta.push({
-        //                     response_type: "image", 
-        //                     title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-        //                     source: urlImagen
-        //                 })
-        //                 num++;
-        //             }) 
-                    
-        //             respuesta.push({
-        //                 response_type: "text", 
-        //                 text: `Por favor, selecciona el *número* del producto que te interesa`
-        //             });
-        //             if(contexto.hasOwnProperty('menuMostradoProductos')){
-        //                 delete contexto.menuMostradoProductos
-        //             }
-        //             contexto['menuMostradoProductos'] = menuMostradoProductos;
-        //         }
-        //     })
-        // }
+                    resultMapped.forEach(elementProducto => {
+                        var carTexto = "";
+                        var urlImagen ="";
+                        var nombreProducto ="";
+                        elementProducto.forEach(elementCaracteristica =>
+                            {
+                               if(elementCaracteristica['nombre']=="imagen")
+                               {
+                                    urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
+                               }
+                               else if(elementCaracteristica['nombre']=="nombreProducto")
+                               {
+                                    nombreProducto = elementCaracteristica['value']
+                                    menuMostradoProductos.menuMostrado.push({
+                                        "pocision": num,
+                                        "nombre" : nombreProducto,
+                                        "tipoCategoria": "productosEspecificos"
+                                    });
+                               }
+                               else if(elementCaracteristica['nombre']!="idProducto")
+                               {
+                                    carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
+                               }
+                            })
+                            respuesta.push({
+                                response_type: "text",
+                                text: `*${num}) ${nombreProducto}*\n${carTexto}`
+                            })
+
+                            // comentado por pruebas locales
+                            respuesta.push({
+                                response_type: "image",
+                                title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                                source: urlImagen
+                            })
+                        num++;
+                    })
+
+                    respuesta.push({
+                        response_type: "text",
+                        text: `Por favor, selecciona el número del producto que te interesa`
+                    });
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
+                }
+            })
+        }
+        else if(strAccion == "consultarProductosPorMarcaPorCategoriaUltimoNivel")
+        {
+            let categoriaUltimoNivel = contexto.categoriaUltimoNivel
+            let marcaProductos = contexto.marcaProductos
+            await sqlController.consultarProductosPorMarcaPorCategoriaUltimoNivel(categoriaUltimoNivel, marcaProductos)
+            .then(result => {
+                let tipoResultado = result[0].tipoResultado
+                if(tipoResultado=="marcas")
+                {
+                    respuesta.push({
+                        response_type: "text",
+                        text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes marcas: "
+                    });
+                    respuesta.push({
+                        response_type: "text",
+                        text:"Este probar cuando entra"
+                    });
+                    result.forEach(elementMarca => {
+                        respuesta.push({
+                            response_type: "text",
+                            text:elementMarca.nombreMarca+" ("+ elementMarca.totalProductos +") "
+                        });
+                    });
+                }
+                else
+                {
+                    var menuMostradoProductos = {
+                        "tipoMenu" : "",
+                        'menuMostrado' : [],
+                        "actionNodeAnterior" : strAccion
+                    };
+                    respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} en la marca ${marcaProductos}*:`})
+                    let resultMapped = result.reduce((acc, item) => {
+                        (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
+                            return acc;
+                        }, []);
+                    var num =1;
+
+                    resultMapped.forEach(elementProducto => {
+                        var carTexto = "";
+                        var urlImagen ="";
+                        var nombreProducto ="";
+                        elementProducto.forEach(elementCaracteristica =>
+                            {
+                               if(elementCaracteristica['nombre']=="imagen")
+                               {
+                                    urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
+                               }
+                               else if(elementCaracteristica['nombre']=="nombreProducto")
+                               {
+                                    nombreProducto = elementCaracteristica['value']
+                                    menuMostradoProductos.menuMostrado.push({
+                                        "pocision": num,
+                                        "nombre" : nombreProducto,
+                                        "tipoCategoria": "productosEspecificos"
+                                    });
+                               }
+                               else if(elementCaracteristica['nombre']!="idProducto")
+                               {
+                                    carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
+                               }
+                            })
+                        respuesta.push({
+                            response_type: "text",
+                            text: `*${num}) ${nombreProducto}*\n${carTexto}`
+                        })
+
+                        //comentado por pruebas locales
+                        respuesta.push({
+                            response_type: "image",
+                            title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                            source: urlImagen
+                        })
+                        num++;
+                    })
+
+                    respuesta.push({
+                        response_type: "text",
+                        text: `Por favor, selecciona el *número* del producto que te interesa`
+                    });
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
+                }
+            })
+        }
         else if(strAccion == 'consultarInfoProducto'){
             let producto,
                 txtCarac = '';
@@ -513,17 +518,17 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             //comentado por pruebas locales
             producto.arrayImagenes.forEach(imgItem => {
                 respuesta.push({
-                    response_type: "image", 
+                    response_type: "image",
                     // title: `*${num}) ${nombreProducto}*\n${carTexto}`,
                     source: imgItem.ImageUrl
                 })
             });
             respuesta.push({
-                response_type: "text", 
+                response_type: "text",
                 text: `El producto *${producto.nombre}* cuenta con las siguientes *caracteristicas:* ${producto.arrayCarac}`
             });
             respuesta.push({
-                response_type: "text", 
+                response_type: "text",
                 text: `¿Deseas conocer el precio de este producto?\nEsta disponible para pagos con:\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Credito o Debito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Credito o Debito*\n *- Efectivo*' }`
             });
 
@@ -592,7 +597,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     respuesta.push({response_type: 'text', text: 'Ud. no cuenta con un carrito de compras activo'})
                     respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *crear carrito y agregar productos*\n- *ver menú principal*'})
                 }
-                else 
+                else
                 {
                     respuesta.push({response_type: 'text', text: 'Su *carrito de compras* contiene los siguientes *productos*:'})
                     let totalFactura = 0
@@ -644,7 +649,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             })
         }
         else if(strAccion=='enviarLinkPago'){
-            
+
             const datosCP = contexto.datosCliente
             datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
             respuesta.push({
@@ -652,8 +657,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 text: `http://1ffa79554e3b.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
             })
         }
+        /*comentado v 2.0
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
-        {            
+        {
             let categoriaUltimoNivel = contexto.categoriaUltimoNivel
             let marcaProductos = contexto.marcaProductos
             await sqlController.consultarCategoriasMarcasGeneral(marcaProductos,categoriaUltimoNivel)
@@ -673,7 +679,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             num = 1,
                             menuMostradoProductos = {
                                 "tipoMenu" : "categoria",
-                                'menuMostrado' : []
+                                'menuMostrado' : [],
+                                "actionNodeAnterior" : strAccion
                             };
                     respuesta.push({
                         response_type: "text",
@@ -692,12 +699,12 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             text: txtCategoriasHijas
                         });
                     });
-                    
+
                     if(contexto.hasOwnProperty('menuMostradoProductos')){
                         delete contexto.menuMostradoProductos
                     }
                     contexto['menuMostradoProductos'] = menuMostradoProductos;
-    
+
                 }
                 else if(tipoResultado=="marcas")
                 {
@@ -710,7 +717,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes *marcas*: "
                         });
                     }
-                    else 
+                    else
                     {
                         respuesta.push({
                             response_type: "text",
@@ -739,7 +746,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 else if  (tipoResultado == "productos"){
                     var menuMostradoProductos = {
                         "tipoMenu" : "",
-                        'menuMostrado' : []
+                        'menuMostrado' : [],
+                        "actionNodeAnterior" : strAccion
                     };
 
                     if(marcaProductos ==null)
@@ -751,12 +759,12 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
                             return acc;
                     }, []);
-                    
+
                     resultMapped.forEach(elementProducto => {
                         var carTexto = "";
                         var urlImagen ="";
                         var nombreProducto ="";
-                        elementProducto.forEach(elementCaracteristica => 
+                        elementProducto.forEach(elementCaracteristica =>
                             {
                                if(elementCaracteristica['nombre']=="imagen")
                                {
@@ -777,15 +785,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                }
                             })
                             respuesta.push({
-                                response_type: "image", 
+                                response_type: "image",
                                 title: `*${num}) ${nombreProducto}*\n${carTexto}`,
                                 source: urlImagen
                             })
                         num++;
-                    }) 
-                    
+                    })
+
                     respuesta.push({
-                        response_type: "text", 
+                        response_type: "text",
                         text: `Por favor, selecciona el número del producto que te interesa`
                     });
                     if(contexto.hasOwnProperty('menuMostradoProductos')){
@@ -794,20 +802,20 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contexto['menuMostradoProductos'] = menuMostradoProductos;
                 }
             })
-        }
+        }*/
         console.log(respuesta)
-        return respuesta   
+        return respuesta
 }
 
 
 watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson) => {
-    
+
     var textoMsgWatson = '';
 
     (async () => {
         for (const item of outputWatson) {
             if(item.response_type =='text' ){
-                textoMsgWatson = textoMsgWatson + '\n' +  item.text  
+                textoMsgWatson = textoMsgWatson + '\n' +  item.text
             }else if(item.response_type =='option' ){
                 let respuesta = item.title + '\n'
                 item.options.forEach(element => {
@@ -818,7 +826,7 @@ watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, o
             }
         }
     })();
-    
+
     await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson)
 }
 
