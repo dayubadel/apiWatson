@@ -192,14 +192,14 @@ productoController.ActualizarEntidades = async (req, res) =>{
 
             }
             if(req != undefined){
-                res.send("ok")
+                res.send({success:1})
             }
         })();
 
     } catch (error) {
         console.log(error)
         if(req != undefined){
-            res.status(500).send("no")
+            res.status(500).send({success:0})
         }
     }
 }

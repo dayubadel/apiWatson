@@ -93,10 +93,18 @@ watsonController.ControlMensajes = async (req, res) => {
                     delete contexto.Ciudad
                 }
                 if(contexto.hasOwnProperty('marcaProductos') && contexto.hasOwnProperty('categoriaUltimoNivel')
-                    && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel")
+                    && contexto._actionNode=="consultarProductosPorMarcaPorCategoriaUltimoNivel" &&  
+                    (contexto.hasOwnProperty('opcionNoValida') && contexto.opcionNoValida == null ))
                 {
                     delete contexto.marcaProductos
                     delete contexto.categoriaUltimoNivel
+                    delete contexto.categoria
+                    console.log("entro if 1")
+                }
+
+                if(contexto.hasOwnProperty('categoria') && contexto._actionNode=="consultarCategoriasPorCategoria" && (!(contexto.hasOwnProperty('opcionNoValida')) || contexto.opcionNoValida == null ))
+                {
+                    console.log("entro if 2")
                     delete contexto.categoria
                 }
             }
@@ -397,18 +405,13 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                     carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
                                }
                             })
-                            respuesta.push({
-                                response_type: "text",
-                                text: `*${num}) ${nombreProducto}*\n${carTexto}`
-                            })
-
-                            // comentado por pruebas locales
+                            
                             respuesta.push({
                                 response_type: "image",
                                 title: `*${num}) ${nombreProducto}*\n${carTexto}`,
                                 source: urlImagen
                             })
-                        num++;
+                            num++;
                     })
 
                     respuesta.push({
@@ -484,18 +487,13 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                     carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
                                }
                             })
-                        respuesta.push({
-                            response_type: "text",
-                            text: `*${num}) ${nombreProducto}*\n${carTexto}`
-                        })
 
-                        //comentado por pruebas locales
-                        respuesta.push({
-                            response_type: "image",
-                            title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-                            source: urlImagen
-                        })
-                        num++;
+                            respuesta.push({
+                                response_type: "image",
+                                title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                                source: urlImagen
+                            })
+                            num++;
                     })
 
                     respuesta.push({
