@@ -72,7 +72,7 @@ watsonController.ControlMensajes = async (req, res) => {
             nodesVisitedDetails : true
         })       
         var contexto = watsonResponse.result.context
-       // console.log("********************este llega de watson*****************")
+       console.log("********************este llega de watson*****************")
         console.log(JSON.stringify(watsonResponse.result,null,4))
         console.log("********************este llega de watson*****************")
 
@@ -509,7 +509,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 txtCarac = '';
 
             producto = await sqlController.consultarInfoProducto(contexto.productoSelected)
-            // console.log(producto)
 
             //comentado por pruebas locales
             producto.arrayImagenes.forEach(imgItem => {
@@ -650,7 +649,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
             respuesta.push({
                 response_type:'text',
-                text: `http://f98d30e95baf.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
+                text: `http://1ffa79554e3b.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
             })
         }
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
@@ -659,6 +658,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let marcaProductos = contexto.marcaProductos
             await sqlController.consultarCategoriasMarcasGeneral(marcaProductos,categoriaUltimoNivel)
             .then(result => {
+                console.log(result)
                 var tipoResultado = result[0].tipoResultado,
                 num = 1
                 menuMostradoProductos = {
@@ -687,11 +687,12 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             "tipoCategoria": element.tipoCategoria
                         });
                         num++;
+                        respuesta.push({
+                            response_type: "text",
+                            text: txtCategoriasHijas
+                        });
                     });
-                    respuesta.push({
-                        response_type: "text",
-                        text: txtCategoriasHijas
-                    });
+                    
                     if(contexto.hasOwnProperty('menuMostradoProductos')){
                         delete contexto.menuMostradoProductos
                     }
@@ -794,6 +795,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 }
             })
         }
+        console.log(respuesta)
         return respuesta   
 }
 
