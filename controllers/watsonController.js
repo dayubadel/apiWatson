@@ -75,7 +75,8 @@ watsonController.ControlMensajes = async (req, res) => {
                 carritoActual.push({    
                     p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, 
                     nombreProducto: element.nombreProducto, cantidad: element.cantidad,
-                    precioProducto: element.precioProducto, metodoPago : element.metodoPago
+                    precioProducto: element.precioProducto, metodoPago : element.metodoPago,
+                    numeroReferencia : element.numeroReferencia
                 })
                 numeroRegistro++
             })
@@ -651,6 +652,16 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             respuesta.push({
                 response_type:'text',
                 text: `http://1ffa79554e3b.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
+            })
+        }
+        else if(strAccion=='guardarDatosClienteEnCabecera')
+        {
+            await sqlController.gestionCabeceraVenta(idClienteCanalMensajeria,contexto.carritoActual[0].numeroReferencia,contexto.primerNombre,contexto.primerApellido,'cedula',contexto.cedula,contexto.telefono,1)
+            .then(resultSql => {
+                if(resultSql>0)
+                {
+                    console.log(resultSql)
+                }
             })
         }
         /*comentado v 2.0

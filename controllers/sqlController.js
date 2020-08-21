@@ -526,7 +526,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                              precioProducto : element.precioProducto,
                              metodoPago : element.metodoPago,
                              identificadorMetodoPago: element.identificadorMetodoPago,
-                             idDetalleVenta : element.idDetalleVenta
+                             idDetalleVenta : element.idDetalleVenta,
+                             numeroReferencia : element.numeroReferencia
                          }
                          resultSQL.push(datos)
                      })             
@@ -540,42 +541,81 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
      return resultSQL
  }
  
- sqlController.consultarCategoriasMarcasGeneral = async (marca, nombreCategoria) =>
- {
+//  sqlController.consultarCategoriasMarcasGeneral = async (marca, nombreCategoria) =>
+//  {
+//     let resultSQL = []
+//     let datos = {}
+//     let query
+
+//     query = `[dbo].[sp_ConsultaCategoriasMarcasGeneral] 
+//             @marca = N'${marca}', @nombreCategoria = N'${nombreCategoria}'`
+
+//     await request.query(query)
+//     .then(async data =>{
+//         if (data.recordset != undefined && data.recordset.length > 0) {
+//             data.recordset.forEach(element => 
+//              {
+//                 datos = {
+//                  idProducto : element.idProductoBot,
+//                  nombreCaracteristicaK : element.nombreCaracteristicaKey,
+//                  caracteristicaValue : element.caracteristicaValue,
+//                  tipoResultado: element.tipoResultado,
+//                  tipoCategoria : element.tipoCategoria,
+//                  idMarcaBot: element.idMarcaBot,
+//                  nombreMarca: element.nombreMarca,
+//                  totalProductos: element.totalProductos,
+//                  idCategoriaHija: element.idCategoriaHija,
+//                  nombreCategoriaHija: element.nombreCategoriaHija
+//                 }
+//                 resultSQL.push(datos)
+//              }) 
+//          }
+//      })     
+//      .catch(err => {
+//         console.log("Error al consultar categorias marcas generales")
+//         console.log(err)
+//         throw new Error('Error al registrar en BD')
+//     })
+//     return resultSQL
+//  }
+
+sqlController.gestionCabeceraVenta = async (idClienteCanalMensajeria, numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, numeroTelefono, opcion) =>
+{
+    
     let resultSQL = []
     let datos = {}
     let query
 
-    query = `[dbo].[sp_ConsultaCategoriasMarcasGeneral] 
-            @marca = N'${marca}', @nombreCategoria = N'${nombreCategoria}'`
-
+    if(opcion==1)
+    {
+        query =`[dbo].[sp_GestionCabeceraVenta]
+            @numeroReferencia = N'${numeroReferencia}',
+            @nombresCabecera = N'${nombresCabecera}',
+            @apellidosCabecera = N'${apellidosCabecera}',
+            @tipoIdentificacion = N'${tipoIdentificacion}',
+            @numIdentificacion = N'${numIdentificacion}',
+            @numeroTelefono = N'${numeroTelefono}',
+            @opcion = ${opcion}`
+    }
+    
     await request.query(query)
-    .then(async data =>{
-        if (data.recordset != undefined && data.recordset.length > 0) {
-            data.recordset.forEach(element => 
-             {
-                datos = {
-                 idProducto : element.idProductoBot,
-                 nombreCaracteristicaK : element.nombreCaracteristicaKey,
-                 caracteristicaValue : element.caracteristicaValue,
-                 tipoResultado: element.tipoResultado,
-                 tipoCategoria : element.tipoCategoria,
-                 idMarcaBot: element.idMarcaBot,
-                 nombreMarca: element.nombreMarca,
-                 totalProductos: element.totalProductos,
-                 idCategoriaHija: element.idCategoriaHija,
-                 nombreCategoriaHija: element.nombreCategoriaHija
+    .then( async data => {
+         if (data.recordset != undefined && data.recordset.length > 0) {
+                data.recordset.forEach(element => 
+                {
+                    datos = 
+                    {
+                             numeroReferencia : element.numeroReferencia
+                    }
+                    resultSQL.push(datos)
                 }
-                resultSQL.push(datos)
-             }) 
-         }
-     })     
-     .catch(err => {
-        console.log("Error al consultar categorias marcas generales")
-        console.log(err)
-        throw new Error('Error al registrar en BD')
+                )
+        }
     })
-    return resultSQL
- }
-
+    .catch(err => {
+            console.log("Error al gestionar cabecera venta")
+            console.log(err)
+            throw new Error('Error al registrar en BD')
+    })
+}
 module.exports = sqlController
