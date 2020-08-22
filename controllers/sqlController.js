@@ -650,5 +650,6 @@ sqlController.gestionCabeceraVenta = async (idClienteCanalMensajeria, numeroRefe
             console.log(err)
             throw new Error('Error al registrar en BD')
     })
+    return resultSQL
 }
 module.exports = sqlController
