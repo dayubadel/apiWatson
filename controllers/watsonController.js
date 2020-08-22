@@ -75,13 +75,21 @@ watsonController.ControlMensajes = async (req, res) => {
                 carritoActual.push({    
                     p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, 
                     nombreProducto: element.nombreProducto, cantidad: element.cantidad,
-                    precioProducto: element.precioProducto, metodoPago : element.metodoPago,
-                    numeroReferencia : element.numeroReferencia
+                    precioProducto: element.precioProducto, metodoPago : element.metodoPago
                 })
                 numeroRegistro++
             })
             contextoAnterior['carritoActual'] = carritoActual
         } 
+
+        var cabeceraVenta = await sqlController.gestionCabeceraVenta(contextoAnterior.numeroReferencia,null,null,null,null,null,2)
+        if(cabeceraVenta.length>0)
+        {
+            contextoAnterior['primerNombre'] = cabeceraVenta[0].nombresCabecera
+            contextoAnterior['primerApellido'] = cabeceraVenta[0].apellidosCabecera
+            contextoAnterior['telefono'] = cabeceraVenta[0].numeroTelefono
+            contextoAnterior['cedula'] = cabeceraVenta[0].numIdentificacion
+        }
 
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
@@ -717,7 +725,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }        
         else if(strAccion=='guardarDatosClienteEnCabecera')
         {
-            await sqlController.gestionCabeceraVenta(idClienteCanalMensajeria,contexto.carritoActual[0].numeroReferencia,contexto.primerNombre,contexto.primerApellido,'cedula',contexto.cedula,contexto.telefono,1)
+            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,'cedula',contexto.cedula,contexto.telefono,1)
             .then(resultSql => {
                 if(resultSql.length>0)
                 {
@@ -727,7 +735,43 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }        
         else if(strAccion == 'enviarCorreoCompraFinalizada')
         {
-            await mailController.enviarEmail("titulo", "texto")
+            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,'cedula',contexto.cedula,contexto.telefono,1)
+            .then(resultSql => {
+                if(resultSql.length>0)
+                {
+                   // respuesta.push({response_type: 'text', text: 'Sus datos fueron guardados exitosamente.'})
+                }
+            })
+            let titulo = `Compra Finalizada - Factura: #${contexto.numeroReferencia} `
+            let cabecera = `<div>
+                                <p>Referencia: ${contexto.numeroReferencia}</p>
+                                <p>Nombres: ${contexto.primerNombre}</p>
+                                <p>Apellidos: ${contexto.primerApellido}</p>
+                                <p>Tipo Identificación: Cédula</p>
+                                <p>Número Identificación: ${contexto.cedula}</p>
+                            </div>`
+
+            var cabeceraTabla = `<tr>
+                                    <th>N</th>
+                                    <th>Cantidad</th>
+                                    <th>Producto</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Precio Total</th>
+                                </tr>`
+            filaCuerpo = ''
+            contexto.carritoActual.forEach(element =>
+                {
+                    filaCuerpo = filaCuerpo + `<tr>
+                                                    <td>${element.p}</td>
+                                                    <td>${element.cantidad}</td>
+                                                    <td>${element.nombreProducto}</td>
+                                                    <td>${element.precioProducto}</td>
+                                                    <td>${element.cantidad*element.precioProducto.toFixed(2)}</td>
+                                                </tr>`
+                })
+            var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
+            var contenido = `${cabecera}${tabla}`
+            await mailController.enviarEmail(titulo, contenido)
             .then(respuesta => {
                 console.log(respuesta)
             })

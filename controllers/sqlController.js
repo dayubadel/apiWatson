@@ -612,7 +612,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
 //     return resultSQL
 //  }
 
-sqlController.gestionCabeceraVenta = async (idClienteCanalMensajeria, numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, numeroTelefono, opcion) =>
+sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, numeroTelefono, opcion) =>
 {
     
     let resultSQL = []
@@ -630,6 +630,12 @@ sqlController.gestionCabeceraVenta = async (idClienteCanalMensajeria, numeroRefe
             @numeroTelefono = N'${numeroTelefono}',
             @opcion = ${opcion}`
     }
+    else if(opcion==2)
+    {
+        query = `[dbo].[sp_GestionCabeceraVenta]
+        @numeroReferencia = N'${numeroReferencia}',
+        @opcion = ${opcion}`
+    }
     
     await request.query(query)
     .then( async data => {
@@ -638,7 +644,14 @@ sqlController.gestionCabeceraVenta = async (idClienteCanalMensajeria, numeroRefe
                 {
                     datos = 
                     {
-                             numeroReferencia : element.numeroReferencia
+                             numeroReferencia : element.numeroReferencia,
+                             nombresCabecera : element.nombresCabecera,
+                             apellidosCabecera : element.apellidosCabecera,
+                             numeroTelefono : element.numeroTelefono,
+                             tipoIdentificacion : element.tipoIdentificacion,
+                             numIdentificacion : element.numIdentificacion,
+                             fechaUltimaModificacion : element.fechaUltimaModificacion,
+                             fechaFinalizacion : element.fechaFinalizacion
                     }
                     resultSQL.push(datos)
                 }
