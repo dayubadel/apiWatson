@@ -655,6 +655,68 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 text: `http://1ffa79554e3b.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
             })
         }
+        else if(strAccion == "consultarAlternativaProducto"){
+            const metodoPago = contexto.tipoPago
+            const productoSelected = contexto.productoSelected
+            await sqlController.ConsultarProductoAlterno(metodoPago,productoSelected)
+            .then(result => {
+                let tipoResultado = result[0].tipoResultado
+                var menuMostradoProductos = {
+                    "tipoMenu" : "",
+                    'menuMostrado' : [],
+                    "actionNodeAnterior" : strAccion
+                };
+                respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos que te podrían interesar con ese *metodo de pago*:`})
+                let resultMapped = result.reduce((acc, item) => {
+                    (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
+                        return acc;
+                    }, []);
+                var num =1;
+
+                resultMapped.forEach(elementProducto => {
+                    var carTexto = "";
+                    var urlImagen ="";
+                    var nombreProducto ="";
+                    elementProducto.forEach(elementCaracteristica =>
+                        {
+                           if(elementCaracteristica['nombre']=="imagen")
+                           {
+                                urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
+                           }
+                           else if(elementCaracteristica['nombre']=="nombreProducto")
+                           {
+                                nombreProducto = elementCaracteristica['value']
+                                menuMostradoProductos.menuMostrado.push({
+                                    "pocision": num,
+                                    "nombre" : nombreProducto,
+                                    "tipoCategoria": "productosEspecificos"
+                                });
+                           }
+                           else if(elementCaracteristica['nombre']!="idProducto")
+                           {
+                                carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
+                           }
+                        })
+
+                        respuesta.push({
+                            response_type: "image",
+                            title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                            source: urlImagen
+                        })
+                        num++;
+                })
+
+                respuesta.push({
+                    response_type: "text",
+                    text: `Por favor, selecciona el *número* del producto que te interesa`
+                });
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
+            })
+
+        }
         
         /*comentado v 2.0
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
