@@ -1,7 +1,7 @@
 ﻿const AssistantV1 = require('ibm-watson/assistant/v1');
 const { IamAuthenticator } = require('ibm-watson/auth');
 const sqlController = require('./sqlController.js')
-const mailController = requier('./mailConrtroller.js')
+const mailController = require('./mailController.js')
 const config = require("../config/config.js");
 const { json } = require('body-parser');
 const { sql } = require('../config/config.js');
@@ -723,6 +723,13 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 {
                     respuesta.push({response_type: 'text', text: 'Sus datos fueron guardados exitosamente.'})
                 }
+            })
+        }        
+        else if(strAccion == 'enviarCorreoCompraFinalizada')
+        {
+            await mailController.enviarEmail("titulo", "texto")
+            .then(respuesta => {
+                console.log(respuesta)
             })
         }
         /*comentado v 2.0
