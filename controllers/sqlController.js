@@ -57,32 +57,59 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
     return resultSQL
 }
 
-sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWatson) => {
-    let query
-    let resultSQL
+// comentado por nueva version reportes
+// sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWatson) => {
+//     let query
+//     let resultSQL
     
-    query = `EXEC [dbo].[sp_GestionMensajes]
-                @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
-                @textoMensaje = N'${msgUser}',
-                @fromChatbot = 0
+//     query = `EXEC [dbo].[sp_GestionMensajes]
+//                 @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+//                 @textoMensaje = N'${msgUser}',
+//                 @fromChatbot = 0
                 
-            EXEC [dbo].[sp_GestionMensajes]
-                @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
-                @textoMensaje = N'${msgWatson}',
-                @fromChatbot = 1`
+//             EXEC [dbo].[sp_GestionMensajes]
+//                 @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+//                 @textoMensaje = N'${msgWatson}',
+//                 @fromChatbot = 1`
 
-    // console.log(query)
+//     console.log(query)
+//     await request.query(query)
+//     .then(async data => {
+//        console.log(JSON.stringify(data,null,4))
+    
+//         }
+//     })
+//     .catch(err => {
+
+//         console.log("error al registrar mensaje en bd")
+//         console.log(err)
+//         throw new Error('Error al registrar en BD')
+//     })
+
+// }
+
+
+//nueva version reportes
+sqlController.gestionMensajes = async(idClienteCanalMensajeria, textoUsuario, textoWatson,intenciones,coincidecia,entidades,contextoConversacion,comentarioUsuario) => {
+    let query
+    
+    query = `[dbo].[sp_GestionMensajes]
+		@idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+		@textoMensaje = N'${textoUsuario}',
+		@textoWatson = N'${textoWatson}',
+        @intenciones = N'${intenciones}',
+        @coincidencia = ${coincidecia},
+		@entidades = N'${entidades}',
+		@contextoConversasion = N'${contextoConversacion}',
+		@comentarios = 0`
+
     await request.query(query)
     .then(async data => {
-     //   console.log(JSON.stringify(data,null,4))
-    
-        // }
     })
     .catch(err => {
 
         console.log("error al registrar mensaje en bd")
         console.log(err)
-        throw new Error('Error al registrar en BD')
     })
 
 }

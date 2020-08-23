@@ -103,10 +103,21 @@ watsonController.ControlMensajes = async (req, res) => {
             context: contextoAnterior,
             nodesVisitedDetails : true
         })
+
+        //bloque para reportes
+        var contar = watsonResponse.result.output.generic.length
+        contar = contar-1
+        for(i=0;i<=contar;i++){
+            if(watsonResponse.result.output.generic[i].text=="" || watsonResponse.result.output.generic[i].text==" "){
+                watsonResponse.result.output.generic.splice(i,1)
+                console.log('texto '+i+'-delete')
+            }
+        }
+
         var contexto = watsonResponse.result.context
-       console.log("********************este llega de watson*****************")
-        console.log(JSON.stringify(watsonResponse.result,null,4))
-        console.log("********************este llega de watson*****************")
+        //console.log("********************este llega de watson*****************")
+        //console.log(JSON.stringify(watsonResponse.result,null,4))
+        //console.log("********************este llega de watson*****************")
 
         if(contexto.hasOwnProperty('_actionNode'))
         {
@@ -149,7 +160,29 @@ watsonController.ControlMensajes = async (req, res) => {
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
-        await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
+        
+        //anterior a reportes
+        //await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
+        
+        //bloque reportes hasta registar mensaje
+        var inputTextUsuario = watsonResponse.result.input.text
+        var outputWatsonRespuesta = watsonResponse.result.output.generic
+        var intencionesWatson = watsonResponse.result.intents
+        
+        if(Object.entries(intencionesWatson).length === 0){//De esta manera podemos validar rápidamente si el objeto esta vacío o no.
+            intencionesWatson = ' '
+        }
+
+        var entidadesWatson = watsonResponse.result.entities
+
+        if(Object.entries(entidadesWatson).length === 0){
+            entidadesWatson = ' '
+        }
+
+        var contextoConversacion = watsonResponse.result
+        await watsonController.RegistrarMensajes(idClienteCanalMensajeria,inputTextUsuario,outputWatsonRespuesta,intencionesWatson,entidadesWatson,contextoConversacion)
+        
+        
         res.send(watsonResponse.result.output.generic)
 
     } catch (error) {
@@ -939,28 +972,79 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         return respuesta
 }
 
-
-watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson) => {
-
+watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson,intenciones,entidades,contextoConversacion) => {
+    
     var textoMsgWatson = '';
+    var concatenaIntenciones = '';
+    var concatenaEntidades = '';
+    var coincidencia;
+    var respuesta ="";
+    var imagenRespuesta = '';
 
     (async () => {
         for (const item of outputWatson) {
-            if(item.response_type =='text' ){
-                textoMsgWatson = textoMsgWatson + '\n' +  item.text
-            }else if(item.response_type =='option' ){
-                let respuesta = item.title + '\n'
+            if(item.response_type =='text'){
+                textoMsgWatson = textoMsgWatson + '\n' +  item.text  
+            }else if(item.response_type =='option'){
+                respuesta = '-'+item.title
                 item.options.forEach(element => {
-                    respuesta = respuesta + element.label + '\n'
+                    respuesta = respuesta +'+'+ element.label
                 });
             }else if(item.response_type =='image' ){
-
+                    imagenRespuesta = '-titulo:'+item.title+' Url:'+item.source
             }
+            textoMsgWatson = textoMsgWatson +' '+ respuesta+' '+imagenRespuesta
         }
-    })();
 
-    await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson)
+        for(const itemIntents of intenciones){
+            if(itemIntents == ' '){
+                concatenaIntenciones = 'Irrelevante'
+                coincidencia = 0
+            }else{
+                concatenaIntenciones = itemIntents.intent
+                coincidencia = itemIntents.confidence
+            }
+            
+        }  
+        
+            if(entidades == ' '){
+                concatenaEntidades = 'Sin Entidades'
+            }else{
+                entidades.forEach(element => {
+                    concatenaEntidades = concatenaEntidades+'#'+element.entity + ':'+element.value
+                }) 
+            }
+        
+    })();
+    
+    contextoConversacion = JSON.stringify(contextoConversacion)
+
+    await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson,concatenaIntenciones,coincidencia,concatenaEntidades,contextoConversacion,'')
 }
+
+
+//comentado por nueva version reporteria
+// watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson) => {
+
+//     var textoMsgWatson = '';
+
+//     (async () => {
+//         for (const item of outputWatson) {
+//             if(item.response_type =='text' ){
+//                 textoMsgWatson = textoMsgWatson + '\n' +  item.text
+//             }else if(item.response_type =='option' ){
+//                 let respuesta = item.title + '\n'
+//                 item.options.forEach(element => {
+//                     respuesta = respuesta + element.label + '\n'
+//                 });
+//             }else if(item.response_type =='image' ){
+
+//             }
+//         }
+//     })();
+
+//     await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson)
+// }
 
 
 
