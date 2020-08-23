@@ -85,10 +85,16 @@ watsonController.ControlMensajes = async (req, res) => {
         var cabeceraVenta = await sqlController.gestionCabeceraVenta(contextoAnterior.numeroReferencia,null,null,null,null,null,2)
         if(cabeceraVenta.length>0)
         {
-            contextoAnterior['primerNombre'] = cabeceraVenta[0].nombresCabecera
-            contextoAnterior['primerApellido'] = cabeceraVenta[0].apellidosCabecera
-            contextoAnterior['telefono'] = cabeceraVenta[0].numeroTelefono
-            contextoAnterior['cedula'] = cabeceraVenta[0].numIdentificacion
+            if(cabeceraVenta[0].nombresCabecera!=null)
+            { contextoAnterior['primerNombre'] = cabeceraVenta[0].nombresCabecera }
+            if(cabeceraVenta[0].apellidosCabecera!=null)
+            { contextoAnterior['primerApellido'] = cabeceraVenta[0].apellidosCabecera }
+            if(cabeceraVenta[0].numeroTelefono!=null)
+            { contextoAnterior['telefono'] = cabeceraVenta[0].numeroTelefono }
+            if(cabeceraVenta[0].numIdentificacion!=null)
+            { contextoAnterior['numIdentificacion'] = cabeceraVenta[0].numIdentificacion }
+            if(cabeceraVenta[0].tipoIdentificacion!=null)
+            { contextoAnterior['tipoIdentificacion'] = cabeceraVenta[0].tipoIdentificacion }
         }
 
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
@@ -722,59 +728,66 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 contexto['menuMostradoProductos'] = menuMostradoProductos;
             })
 
-        }        
-        else if(strAccion=='guardarDatosClienteEnCabecera')
-        {
-            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,'cedula',contexto.cedula,contexto.telefono,1)
-            .then(resultSql => {
-                if(resultSql.length>0)
-                {
-                    respuesta.push({response_type: 'text', text: 'Sus datos fueron guardados exitosamente.'})
-                }
-            })
-        }        
+        }           
         else if(strAccion == 'enviarCorreoCompraFinalizada')
         {
-            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,'cedula',contexto.cedula,contexto.telefono,1)
+            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,1)
             .then(resultSql => {
                 if(resultSql.length>0)
-                {
-                   // respuesta.push({response_type: 'text', text: 'Sus datos fueron guardados exitosamente.'})
-                }
-            })
-            let titulo = `Compra Finalizada - Factura: #${contexto.numeroReferencia} `
-            let cabecera = `<div>
-                                <p>Referencia: ${contexto.numeroReferencia}</p>
-                                <p>Nombres: ${contexto.primerNombre}</p>
-                                <p>Apellidos: ${contexto.primerApellido}</p>
-                                <p>Tipo Identificación: Cédula</p>
-                                <p>Número Identificación: ${contexto.cedula}</p>
-                            </div>`
+                {            
+                    let current_datetime = resultSql[0].fechaFinalizacion
+                    let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds() 
+                    let titulo = `Compra Finalizada - Factura: #${contexto.numeroReferencia} `
+                    let cabecera = `<div>               
+                                        <h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>                        
+                                        <p>Referencia: ${contexto.numeroReferencia}</p>
+                                        <p>Fecha de finalización: ${formattedDate}</p>
+                                        <p>Nombres: ${contexto.primerNombre}</p>
+                                        <p>Apellidos: ${contexto.primerApellido}</p>
+                                        <p>${contexto.tipoIdentificacion}: ${contexto.numIdentificacion}</p>
+                                    </div>`
 
-            var cabeceraTabla = `<tr>
-                                    <th>N</th>
-                                    <th>Cantidad</th>
-                                    <th>Producto</th>
-                                    <th>Precio Unitario</th>
-                                    <th>Precio Total</th>
-                                </tr>`
-            filaCuerpo = ''
-            contexto.carritoActual.forEach(element =>
-                {
-                    filaCuerpo = filaCuerpo + `<tr>
-                                                    <td>${element.p}</td>
-                                                    <td>${element.cantidad}</td>
-                                                    <td>${element.nombreProducto}</td>
-                                                    <td>${element.precioProducto}</td>
-                                                    <td>${element.cantidad*element.precioProducto.toFixed(2)}</td>
+                    var cabeceraTabla = `<tr>
+                                            <th>N</th>
+                                            <th>Cantidad</th>
+                                            <th>Producto</th>
+                                            <th>Precio Unitario</th>
+                                            <th>Precio Total</th>
+                                        </tr>`
+                    filaCuerpo = ''
+                    var totalFactura = 0
+                    contexto.carritoActual.forEach(element =>
+                        {
+                            let total = element.cantidad*element.precioProducto
+                            filaCuerpo = filaCuerpo + `<tr>
+                                                            <td>${element.p}</td>
+                                                            <td>${element.cantidad}</td>
+                                                            <td>${element.nombreProducto}</td>
+                                                            <td>${element.precioProducto}</td>
+                                                            <td>${total.toFixed(2)}</td>
+                                                        </tr>`
+                            totalFactura = totalFactura + total
+                        })
+                    filaCuerpo = filaCuerpo +  `<tr>
+                                                    <td colspan="3">SUBTOTAL</td>
+                                                    <td colspan="3">${totalFactura.toFixed(2)}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">IVA</td>
+                                                    <td colspan="3">${(totalFactura*0.12).toFixed(2)}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">TOTAL A PAGAR</td>
+                                                    <td colspan="3">${(totalFactura*1.12).toFixed(2)}</td>
                                                 </tr>`
-                })
-            var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
-            var contenido = `${cabecera}${tabla}`
-            await mailController.enviarEmail(titulo, contenido)
-            .then(respuesta => {
-                console.log(respuesta)
-            })
+                    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
+                    var contenido = `${cabecera}${tabla}`
+                        mailController.enviarEmail(titulo, contenido)
+                    .then(respuesta => {
+                        console.log(respuesta)
+                    })
+            }
+        })
         }
         /*comentado v 2.0
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
