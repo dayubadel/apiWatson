@@ -75,13 +75,27 @@ watsonController.ControlMensajes = async (req, res) => {
                 carritoActual.push({    
                     p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, 
                     nombreProducto: element.nombreProducto, cantidad: element.cantidad,
-                    precioProducto: element.precioProducto, metodoPago : element.metodoPago,
-                    numeroReferencia : element.numeroReferencia
+                    precioProducto: element.precioProducto, metodoPago : element.metodoPago
                 })
                 numeroRegistro++
             })
             contextoAnterior['carritoActual'] = carritoActual
         } 
+
+        var cabeceraVenta = await sqlController.gestionCabeceraVenta(contextoAnterior.numeroReferencia,null,null,null,null,null,2)
+        if(cabeceraVenta.length>0)
+        {
+            if(cabeceraVenta[0].nombresCabecera!=null)
+            { contextoAnterior['primerNombre'] = cabeceraVenta[0].nombresCabecera }
+            if(cabeceraVenta[0].apellidosCabecera!=null)
+            { contextoAnterior['primerApellido'] = cabeceraVenta[0].apellidosCabecera }
+            if(cabeceraVenta[0].numeroTelefono!=null)
+            { contextoAnterior['telefono'] = cabeceraVenta[0].numeroTelefono }
+            if(cabeceraVenta[0].numIdentificacion!=null)
+            { contextoAnterior['numIdentificacion'] = cabeceraVenta[0].numIdentificacion }
+            if(cabeceraVenta[0].tipoIdentificacion!=null)
+            { contextoAnterior['tipoIdentificacion'] = cabeceraVenta[0].tipoIdentificacion }
+        }
 
         let watsonResponse = await assistant.message({ //emite mensaje a watson y asigna su respuesta
             workspaceId: id_workspace,
@@ -89,10 +103,21 @@ watsonController.ControlMensajes = async (req, res) => {
             context: contextoAnterior,
             nodesVisitedDetails : true
         })
+
+        //bloque para reportes
+        var contar = watsonResponse.result.output.generic.length
+        contar = contar-1
+        for(i=0;i<=contar;i++){
+            if(watsonResponse.result.output.generic[i].text=="" || watsonResponse.result.output.generic[i].text==" "){
+                watsonResponse.result.output.generic.splice(i,1)
+                console.log('texto '+i+'-delete')
+            }
+        }
+
         var contexto = watsonResponse.result.context
-       console.log("********************este llega de watson*****************")
-        console.log(JSON.stringify(watsonResponse.result,null,4))
-        console.log("********************este llega de watson*****************")
+        //console.log("********************este llega de watson*****************")
+        //console.log(JSON.stringify(watsonResponse.result,null,4))
+        //console.log("********************este llega de watson*****************")
 
         if(contexto.hasOwnProperty('_actionNode'))
         {
@@ -135,7 +160,29 @@ watsonController.ControlMensajes = async (req, res) => {
         objMensajeria = await sqlController.gestionContexto(contexto, idClienteCanalMensajeria, idCanal,idChat,2) //actualiza el contexto recibido
         idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
         contextoAnterior = (objMensajeria.contexto == undefined) ? {} : JSON.parse(objMensajeria.contexto);
-        await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
+        
+        //anterior a reportes
+        //await watsonController.RegistrarMensajes(idClienteCanalMensajeria,watsonResponse.result.input.text,watsonResponse.result.output.generic)
+        
+        //bloque reportes hasta registar mensaje
+        var inputTextUsuario = watsonResponse.result.input.text
+        var outputWatsonRespuesta = watsonResponse.result.output.generic
+        var intencionesWatson = watsonResponse.result.intents
+        
+        if(Object.entries(intencionesWatson).length === 0){//De esta manera podemos validar rápidamente si el objeto esta vacío o no.
+            intencionesWatson = ' '
+        }
+
+        var entidadesWatson = watsonResponse.result.entities
+
+        if(Object.entries(entidadesWatson).length === 0){
+            entidadesWatson = ' '
+        }
+
+        var contextoConversacion = watsonResponse.result
+        await watsonController.RegistrarMensajes(idClienteCanalMensajeria,inputTextUsuario,outputWatsonRespuesta,intencionesWatson,entidadesWatson,contextoConversacion)
+        
+        
         res.send(watsonResponse.result.output.generic)
 
     } catch (error) {
@@ -714,23 +761,66 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 contexto['menuMostradoProductos'] = menuMostradoProductos;
             })
 
-        }        
-        else if(strAccion=='guardarDatosClienteEnCabecera')
-        {
-            await sqlController.gestionCabeceraVenta(idClienteCanalMensajeria,contexto.carritoActual[0].numeroReferencia,contexto.primerNombre,contexto.primerApellido,'cedula',contexto.cedula,contexto.telefono,1)
-            .then(resultSql => {
-                if(resultSql.length>0)
-                {
-                    respuesta.push({response_type: 'text', text: 'Sus datos fueron guardados exitosamente.'})
-                }
-            })
-        }        
+        }           
         else if(strAccion == 'enviarCorreoCompraFinalizada')
         {
-            await mailController.enviarEmail("titulo", "texto")
-            .then(respuesta => {
-                console.log(respuesta)
-            })
+            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,1)
+            .then(resultSql => {
+                if(resultSql.length>0)
+                {            
+                    let current_datetime = resultSql[0].fechaFinalizacion
+                    let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds() 
+                    let titulo = `Compra Finalizada - Factura: #${contexto.numeroReferencia} `
+                    let cabecera = `<div>               
+                                        <h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>                        
+                                        <p>Referencia: ${contexto.numeroReferencia}</p>
+                                        <p>Fecha de finalización: ${formattedDate}</p>
+                                        <p>Nombres: ${contexto.primerNombre}</p>
+                                        <p>Apellidos: ${contexto.primerApellido}</p>
+                                        <p>${contexto.tipoIdentificacion}: ${contexto.numIdentificacion}</p>
+                                    </div>`
+
+                    var cabeceraTabla = `<tr>
+                                            <th>N</th>
+                                            <th>Cantidad</th>
+                                            <th>Producto</th>
+                                            <th>Precio Unitario</th>
+                                            <th>Precio Total</th>
+                                        </tr>`
+                    filaCuerpo = ''
+                    var totalFactura = 0
+                    contexto.carritoActual.forEach(element =>
+                        {
+                            let total = element.cantidad*element.precioProducto
+                            filaCuerpo = filaCuerpo + `<tr>
+                                                            <td>${element.p}</td>
+                                                            <td>${element.cantidad}</td>
+                                                            <td>${element.nombreProducto}</td>
+                                                            <td>${element.precioProducto}</td>
+                                                            <td>${total.toFixed(2)}</td>
+                                                        </tr>`
+                            totalFactura = totalFactura + total
+                        })
+                    filaCuerpo = filaCuerpo +  `<tr>
+                                                    <td colspan="3">SUBTOTAL</td>
+                                                    <td colspan="3">${totalFactura.toFixed(2)}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">IVA</td>
+                                                    <td colspan="3">${(totalFactura*0.12).toFixed(2)}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">TOTAL A PAGAR</td>
+                                                    <td colspan="3">${(totalFactura*1.12).toFixed(2)}</td>
+                                                </tr>`
+                    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
+                    var contenido = `${cabecera}${tabla}`
+                        mailController.enviarEmail(titulo, contenido)
+                    .then(respuesta => {
+                        console.log(respuesta)
+                    })
+            }
+        })
         }
         /*comentado v 2.0
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
@@ -882,28 +972,79 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         return respuesta
 }
 
-
-watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson) => {
-
+watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson,intenciones,entidades,contextoConversacion) => {
+    
     var textoMsgWatson = '';
+    var concatenaIntenciones = '';
+    var concatenaEntidades = '';
+    var coincidencia;
+    var respuesta ="";
+    var imagenRespuesta = '';
 
     (async () => {
         for (const item of outputWatson) {
-            if(item.response_type =='text' ){
-                textoMsgWatson = textoMsgWatson + '\n' +  item.text
-            }else if(item.response_type =='option' ){
-                let respuesta = item.title + '\n'
+            if(item.response_type =='text'){
+                textoMsgWatson = textoMsgWatson + '\n' +  item.text  
+            }else if(item.response_type =='option'){
+                respuesta = '-'+item.title
                 item.options.forEach(element => {
-                    respuesta = respuesta + element.label + '\n'
+                    respuesta = respuesta +'+'+ element.label
                 });
             }else if(item.response_type =='image' ){
-
+                    imagenRespuesta = '-titulo:'+item.title+' Url:'+item.source
             }
+            textoMsgWatson = textoMsgWatson +' '+ respuesta+' '+imagenRespuesta
         }
-    })();
 
-    await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson)
+        for(const itemIntents of intenciones){
+            if(itemIntents == ' '){
+                concatenaIntenciones = 'Irrelevante'
+                coincidencia = 0
+            }else{
+                concatenaIntenciones = itemIntents.intent
+                coincidencia = itemIntents.confidence
+            }
+            
+        }  
+        
+            if(entidades == ' '){
+                concatenaEntidades = 'Sin Entidades'
+            }else{
+                entidades.forEach(element => {
+                    concatenaEntidades = concatenaEntidades+'#'+element.entity + ':'+element.value
+                }) 
+            }
+        
+    })();
+    
+    contextoConversacion = JSON.stringify(contextoConversacion)
+
+    await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson,concatenaIntenciones,coincidencia,concatenaEntidades,contextoConversacion,'')
 }
+
+
+//comentado por nueva version reporteria
+// watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, outputWatson) => {
+
+//     var textoMsgWatson = '';
+
+//     (async () => {
+//         for (const item of outputWatson) {
+//             if(item.response_type =='text' ){
+//                 textoMsgWatson = textoMsgWatson + '\n' +  item.text
+//             }else if(item.response_type =='option' ){
+//                 let respuesta = item.title + '\n'
+//                 item.options.forEach(element => {
+//                     respuesta = respuesta + element.label + '\n'
+//                 });
+//             }else if(item.response_type =='image' ){
+
+//             }
+//         }
+//     })();
+
+//     await sqlController.gestionMensajes(idClienteCanalMensajeria,msgUser,textoMsgWatson)
+// }
 
 
 

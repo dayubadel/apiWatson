@@ -57,32 +57,59 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
     return resultSQL
 }
 
-sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWatson) => {
-    let query
-    let resultSQL
+// comentado por nueva version reportes
+// sqlController.gestionMensajes = async(idClienteCanalMensajeria, msgUser, msgWatson) => {
+//     let query
+//     let resultSQL
     
-    query = `EXEC [dbo].[sp_GestionMensajes]
-                @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
-                @textoMensaje = N'${msgUser}',
-                @fromChatbot = 0
+//     query = `EXEC [dbo].[sp_GestionMensajes]
+//                 @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+//                 @textoMensaje = N'${msgUser}',
+//                 @fromChatbot = 0
                 
-            EXEC [dbo].[sp_GestionMensajes]
-                @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
-                @textoMensaje = N'${msgWatson}',
-                @fromChatbot = 1`
+//             EXEC [dbo].[sp_GestionMensajes]
+//                 @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+//                 @textoMensaje = N'${msgWatson}',
+//                 @fromChatbot = 1`
 
-    // console.log(query)
+//     console.log(query)
+//     await request.query(query)
+//     .then(async data => {
+//        console.log(JSON.stringify(data,null,4))
+    
+//         }
+//     })
+//     .catch(err => {
+
+//         console.log("error al registrar mensaje en bd")
+//         console.log(err)
+//         throw new Error('Error al registrar en BD')
+//     })
+
+// }
+
+
+//nueva version reportes
+sqlController.gestionMensajes = async(idClienteCanalMensajeria, textoUsuario, textoWatson,intenciones,coincidecia,entidades,contextoConversacion,comentarioUsuario) => {
+    let query
+    
+    query = `[dbo].[sp_GestionMensajes]
+		@idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+		@textoMensaje = N'${textoUsuario}',
+		@textoWatson = N'${textoWatson}',
+        @intenciones = N'${intenciones}',
+        @coincidencia = ${coincidecia},
+		@entidades = N'${entidades}',
+		@contextoConversasion = N'${contextoConversacion}',
+		@comentarios = 0`
+
     await request.query(query)
     .then(async data => {
-     //   console.log(JSON.stringify(data,null,4))
-    
-        // }
     })
     .catch(err => {
 
         console.log("error al registrar mensaje en bd")
         console.log(err)
-        throw new Error('Error al registrar en BD')
     })
 
 }
@@ -612,7 +639,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
 //     return resultSQL
 //  }
 
-sqlController.gestionCabeceraVenta = async (idClienteCanalMensajeria, numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, numeroTelefono, opcion) =>
+sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, numeroTelefono, opcion) =>
 {
     
     let resultSQL = []
@@ -630,6 +657,12 @@ sqlController.gestionCabeceraVenta = async (idClienteCanalMensajeria, numeroRefe
             @numeroTelefono = N'${numeroTelefono}',
             @opcion = ${opcion}`
     }
+    else if(opcion==2)
+    {
+        query = `[dbo].[sp_GestionCabeceraVenta]
+        @numeroReferencia = N'${numeroReferencia}',
+        @opcion = ${opcion}`
+    }
     
     await request.query(query)
     .then( async data => {
@@ -638,7 +671,14 @@ sqlController.gestionCabeceraVenta = async (idClienteCanalMensajeria, numeroRefe
                 {
                     datos = 
                     {
-                             numeroReferencia : element.numeroReferencia
+                             numeroReferencia : element.numeroReferencia,
+                             nombresCabecera : element.nombresCabecera,
+                             apellidosCabecera : element.apellidosCabecera,
+                             numeroTelefono : element.numeroTelefono,
+                             tipoIdentificacion : element.tipoIdentificacion,
+                             numIdentificacion : element.numIdentificacion,
+                             fechaUltimaModificacion : element.fechaUltimaModificacion,
+                             fechaFinalizacion : element.fechaFinalizacion
                     }
                     resultSQL.push(datos)
                 }

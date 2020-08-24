@@ -11,13 +11,14 @@ var transporter = nodemailer.createTransport({
 });
 
 
-mailController.enviarEmail = async (subject, text) =>
+mailController.enviarEmail = async (subject, content) =>
 {
+    console.log(subject, content)
     var mailOptions = {
         from: 'helenbailon95@gmail.com',
-        to: 'dayana_bailon@outlook.com',
+        to: 'helenbailon95@gmail.com',
         subject: subject,
-        text: text
+        html: content
       };
 
     await transporter.sendMail(mailOptions, function(error, info){
