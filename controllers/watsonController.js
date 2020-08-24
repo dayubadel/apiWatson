@@ -780,14 +780,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     let titulo = `Compra Finalizada - Factura: #${contexto.numeroReferencia} `
                     let cabecera = `<div>    
                                         <p>Estimados</p>           
-                                        <p>A continuacion se muestran los datos de una intención de compra a través del asistente virtual Dora:</p>
+                                        <p>A continuación se muestran los datos de una intención de compra a través del asistente virtual Dora:</p>
                                         <br>           
                                         <p>Referencia: ${contexto.numeroReferencia}</p>
                                         <p>Fecha de finalización: ${formattedDate}</p>
                                         <p>Nombres: ${contexto.primerNombre}</p>
                                         <p>Apellidos: ${contexto.primerApellido}</p>
                                         <p>${contexto.tipoIdentificacion}: ${contexto.numIdentificacion}</p>
-                                        <p>Metodo de pago: ${contexto.metodoPago}</p>
+                                        <p>Metodo de pago: ${contexto.carritoActual[0].metodoPago}</p>
                                         </div>`
 
                     var cabeceraTabla = `<tr>
