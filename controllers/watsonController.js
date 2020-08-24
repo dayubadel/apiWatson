@@ -434,7 +434,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
                     respuesta.push({
                         response_type: "text",
-                        text: `Por favor, selecciona el número del producto que te interesa`
+                        text: `Por favor, selecciona el *número* del producto que te interesa`
                     });
                     if(contexto.hasOwnProperty('menuMostradoProductos')){
                         delete contexto.menuMostradoProductos
