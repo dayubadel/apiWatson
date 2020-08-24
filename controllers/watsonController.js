@@ -769,16 +769,19 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 if(resultSql.length>0)
                 {            
                     let current_datetime = resultSql[0].fechaFinalizacion
-                    let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds() 
+                    let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
                     let titulo = `Compra Finalizada - Factura: #${contexto.numeroReferencia} `
-                    let cabecera = `<div>               
-                                        <h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>                        
+                    let cabecera = `<div>    
+                                        <p>Estimados</p>           
+                                        <p>A continuacion se muestran los datos de una intención de compra a través del asistente virtual Dora:</p>
+                                        <br>           
                                         <p>Referencia: ${contexto.numeroReferencia}</p>
                                         <p>Fecha de finalización: ${formattedDate}</p>
                                         <p>Nombres: ${contexto.primerNombre}</p>
                                         <p>Apellidos: ${contexto.primerApellido}</p>
                                         <p>${contexto.tipoIdentificacion}: ${contexto.numIdentificacion}</p>
-                                    </div>`
+                                        <p>Metodo de pago: ${contexto.metodoPago}</p>
+                                        </div>`
 
                     var cabeceraTabla = `<tr>
                                             <th>N</th>
@@ -813,7 +816,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                                     <td colspan="3">TOTAL A PAGAR</td>
                                                     <td colspan="3">${(totalFactura*1.12).toFixed(2)}</td>
                                                 </tr>`
-                    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
+                                                              
+                                        var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
                     var contenido = `${cabecera}${tabla}`
                         mailController.enviarEmail(titulo, contenido)
                     .then(respuesta => {
