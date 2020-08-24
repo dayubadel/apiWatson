@@ -608,6 +608,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 'isMarketplace' : producto.isMarketplace
             }
 
+        }        
+        else if (strAccion=="limpiarDatosContexto")
+        {
+            delete contexto.mostrarCarrito
+            delete contexto.marcaProductos
+            delete contexto.categoriaUltimoNivel
+            delete contexto.marcaProductos
+            delete contexto.productoSelected
+            delete contexto.infoProductoSelected
         }
         else if(strAccion=='agregarProductoAlCarrito')
         {
@@ -619,7 +628,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* exitosamente`})
                 respuesta.push({response_type:'text', text: `*Detalles adicionales:*\n*Cantidad:* ${resultQuery[0].cantidad}\n*Producto:* ${resultQuery[0].nombreProducto}\n*Precio unitario:* $${(resultQuery[0].precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${((resultQuery[0].precioProducto*1.12)*resultQuery[0].cantidad).toFixed(2)}`})
                 respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *Agregar productos* al carrito\n- *Quitar productos* del carrito\n- *Consultar carrito* de compras\n- *Finalizar compra*\n'})
-                delete contexto.metodoPago
                 delete contexto.mostrarCarrito
                 delete contexto.marcaProductos
                 delete contexto.categoriaUltimoNivel
@@ -681,14 +689,13 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contexto['carritoActual'] = carritoActual
                     respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)}`})
                     respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *Agregar productos* al carrito\n- *Quitar productos* del carrito\n- *Finalizar compra*'})
-                    delete contexto.metodoPago
-                    delete contexto.mostrarCarrito
-                    delete contexto.marcaProductos
-                    delete contexto.categoriaUltimoNivel
-                    delete contexto.marcaProductos
-                    delete contexto.productoSelected
-                    delete contexto.infoProductoSelected
                 }
+                delete contexto.mostrarCarrito
+                delete contexto.marcaProductos
+                delete contexto.categoriaUltimoNivel
+                delete contexto.marcaProductos
+                delete contexto.productoSelected
+                delete contexto.infoProductoSelected
             })
         }
         else if(strAccion=='enviarLinkPago'){
