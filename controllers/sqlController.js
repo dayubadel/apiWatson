@@ -692,4 +692,37 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
     })
     return resultSQL
 }
+
+sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, idProductoBot, nombreProducto) =>
+{
+    let query
+    let resultSQL =[]
+    let datos = {} 
+
+    query = `[dbo].[sp_InsertarProductoSeleccionado] 
+            @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+            @idProductoBot = ${idProductoBot},
+            @nombreProducto = N'${nombreProducto}'`
+
+    request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+               data.recordset.forEach(element => 
+               {
+                   datos = 
+                   {
+                        idProductoSeleccionado : element.idProductoSeleccionado
+                   }
+                   resultSQL.push(datos)
+               }
+               )
+       }
+   })
+   .catch(err => {
+           console.log("Error al insertar producto seleccionado")
+           console.log(err)
+           throw new Error('Error al registrar en BD')
+   })
+   return resultSQL
+}
 module.exports = sqlController

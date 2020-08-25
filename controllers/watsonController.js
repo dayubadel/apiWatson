@@ -608,6 +608,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 'isMarketplace' : producto.isMarketplace
             }
 
+            await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,producto.idProductoBot,producto.nombre)
         }        
         else if (strAccion=="limpiarDatosContexto")
         {
