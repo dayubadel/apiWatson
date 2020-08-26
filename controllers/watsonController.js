@@ -238,7 +238,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             }
                             tiendasOrganizadas = {
                                 response_type: 'text',
-                                text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                                text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):* '+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
                                 elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                             }
 
@@ -298,7 +298,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         }
                         tiendasOrganizadas = {
                             response_type: 'text',
-                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):* '+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
                             elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                         }
 
@@ -778,10 +778,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 {            
                     let current_datetime = resultSql[0].fechaFinalizacion
                     let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
-                    let titulo = `Compra Finalizada - Factura: #${contexto.numeroReferencia} `
+                    let titulo = `PRUEBAS DORA - Compra Finalizada - Factura: #${contexto.numeroReferencia} `
                     let cabecera = `<div>    
                                         <p>Estimados</p>           
-                                        <p>A continuación se muestran los datos de una intención de compra a través del asistente virtual Dora:</p>
+                                        <p>A continuación se muestran los datos de una intención de compra a través del asistente virtual Dora en etapa de pruebas:</p>
                                         <br>           
                                         <p>Referencia: ${contexto.numeroReferencia}</p>
                                         <p>Fecha de finalización: ${formattedDate}</p>
@@ -799,6 +799,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                             <th>Precio Total</th>
                                         </tr>`
                     filaCuerpo = ''
+                    numero = 0
                     var totalFactura = 0
                     contexto.carritoActual.forEach(element =>
                         {
@@ -811,23 +812,34 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                                             <td>${total.toFixed(2)}</td>
                                                         </tr>`
                             totalFactura = totalFactura + total
+                            numero = element.p
                         })
+                        filaCuerpo = filaCuerpo + `<tr>
+                        <td>${numero+1}</td>
+                        <td>1</td>
+                        <td>VALOR DE ENVÍO</td>
+                        <td>3.51</td>
+                        <td>3.51</td>
+                    </tr>`
                     filaCuerpo = filaCuerpo +  `<tr>
                                                     <td colspan="3">SUBTOTAL</td>
-                                                    <td colspan="3">${totalFactura.toFixed(2)}</td>
+                                                    <td colspan="3">${(totalFactura+3.51).toFixed(2)}</td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="3">IVA</td>
-                                                    <td colspan="3">${(totalFactura*0.12).toFixed(2)}</td>
+                                                    <td colspan="3">${((totalFactura+3.51)*0.12).toFixed(2)}</td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="3">TOTAL A PAGAR</td>
-                                                    <td colspan="3">${(totalFactura*1.12).toFixed(2)}</td>
+                                                    <td colspan="3">$${((totalFactura+3.51)*1.12).toFixed(2)}</td>
                                                 </tr>`
                                                               
                                         var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
                     var contenido = `${cabecera}${tabla}`
-                        mailController.enviarEmail(titulo, contenido)
+                    respuesta.push({response_type: 'text', text: `Su compra está siendo procesada con el número de referencia ${contexto.numeroReferencia}`})
+
+
+                    mailController.enviarEmail(titulo, contenido)
                     .then(respuesta => {
                         console.log(respuesta)
                     })
