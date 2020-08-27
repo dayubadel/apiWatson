@@ -372,7 +372,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     menuMostradoProductos.menuMostrado.push({
                         "pocision": ''+num,
                         "nombre" : cat.nombreCategoria,
-                        "tipoCategoria":"categoria"
+                        "tipoCategoria":cat.tipoCategoria
                     });
                     num++;
                 });
