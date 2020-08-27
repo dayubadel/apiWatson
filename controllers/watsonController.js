@@ -622,7 +622,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             }
 
             await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,null,null,producto.nombre)
-        }        
+        }    
         else if (strAccion=="limpiarDatosContexto")
         {
             delete contexto.mostrarCarrito
@@ -631,6 +631,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.marcaProductos
             delete contexto.productoSelected
             delete contexto.infoProductoSelected
+            if(contexto.hasOwnProperty('carritoActual'))
+            {
+                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *Agregar productos* al carrito\n- *Quitar productos* del carrito\n- *Consultar carrito* de compras\n- *Finalizar compra*\n'})
+            }
+            else
+            {
+                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- Ver *menú principal*\n- Seguir viendo el *catálogo* '})
+            }
         }
         else if(strAccion=='agregarProductoAlCarrito')
         {
@@ -858,7 +866,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     })
             }
         })
-        }
+        }        
+        else if (strAccion == "limpiarDatosCliente")
+        {
+            delete contexto.primerNombre
+            delete contexto.primerApellido
+            delete contexto.telefono 
+            delete contexto.numIdentificacion
+            delete contexto.tipoIdentificacion
+        }    
         /*comentado v 2.0
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
         {
