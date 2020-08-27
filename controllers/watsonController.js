@@ -347,7 +347,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 if(contexto.hasOwnProperty('menuMostradoProductos')){
                     delete contexto.menuMostradoProductos
                 }
-                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,`Categoria:${nombreCategoria}`)
+                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,nombreCategoria,null,null)
                 contexto['menuMostradoProductos'] = menuMostradoProductos;
 
             });
@@ -484,7 +484,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     }
                     contexto['menuMostradoProductos'] = menuMostradoProductos;
                 }
-                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,`Categoria:${categoriaUltimoNivel}`)
+                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,categoriaUltimoNivel,null,null)
 
             })
         }
@@ -581,7 +581,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     }
                     contexto['menuMostradoProductos'] = menuMostradoProductos;
                 }
-                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,`Categoria:${categoriaUltimoNivel};Marca:${marcaProductos}`)
+                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,categoriaUltimoNivel,marcaProductos,null)
 
             })
         }
@@ -621,7 +621,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 'isMarketplace' : producto.isMarketplace
             }
 
-            await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,producto.nombre)
+            await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,null,null,producto.nombre)
         }        
         else if (strAccion=="limpiarDatosContexto")
         {

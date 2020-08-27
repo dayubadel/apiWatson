@@ -693,7 +693,7 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
     return resultSQL
 }
 
-sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, nombreProducto) =>
+sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, nombreCategoria, nombreMarca, nombreProducto) =>
 {
     let query
     let resultSQL =[]
@@ -701,6 +701,8 @@ sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, nombreP
 
     query = `[dbo].[sp_InsertarProductoSeleccionado] 
             @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+            @nombreCategoria = N'${nombreCategoria}',
+            @nombreMarca = N'${nombreMarca}',
             @nombreProducto = N'${nombreProducto}'`
 
     request.query(query)
@@ -708,13 +710,9 @@ sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, nombreP
         if (data.recordset != undefined && data.recordset.length > 0) {
                data.recordset.forEach(element => 
                {
-                   datos = 
-                   {
-                        idProductoSeleccionado : element.idProductoSeleccionado
-                   }
+                   datos =  { idProductoSeleccionado : element.idProductoSeleccionado }
                    resultSQL.push(datos)
-               }
-               )
+               })
        }
    })
    .catch(err => {
