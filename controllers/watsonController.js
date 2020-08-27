@@ -238,7 +238,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                             }
                             tiendasOrganizadas = {
                                 response_type: 'text',
-                                text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                                text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):* '+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
                                 elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                             }
 
