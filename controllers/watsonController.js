@@ -605,7 +605,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             });
             respuesta.push({
                 response_type: "text",
-                text: `¿Deseas conocer el precio de este producto?\nEsta disponible para pagos con:\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Credito o Debito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Credito o Debito*\n *- Efectivo*' }`
+                text: `¿Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Credito o Debito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngrese el *método de pago* con el que desea conocer el precio`
             });
 
             contexto['infoProductoSelected'] = {
