@@ -110,14 +110,13 @@ watsonController.ControlMensajes = async (req, res) => {
         for(i=0;i<=contar;i++){
             if(watsonResponse.result.output.generic[i].text=="" || watsonResponse.result.output.generic[i].text==" "){
                 watsonResponse.result.output.generic.splice(i,1)
-                console.log('texto '+i+'-delete')
             }
         }
 
         var contexto = watsonResponse.result.context
-        //console.log("********************este llega de watson*****************")
-        //console.log(JSON.stringify(watsonResponse.result,null,4))
-        //console.log("********************este llega de watson*****************")
+        console.log("********************este llega de watson*****************")
+        console.log(JSON.stringify(watsonResponse.result,null,4))
+        console.log("********************este llega de watson*****************")
 
         if(contexto.hasOwnProperty('_actionNode'))
         {
@@ -142,12 +141,10 @@ watsonController.ControlMensajes = async (req, res) => {
                     delete contexto.marcaProductos
                     delete contexto.categoriaUltimoNivel
                     delete contexto.categoria
-                    console.log("entro if 1")
                 }
 
                 if(contexto.hasOwnProperty('categoria') && contexto._actionNode=="consultarCategoriasPorCategoria" && (!(contexto.hasOwnProperty('opcionNoValida')) || contexto.opcionNoValida == null ))
                 {
-                    console.log("entro if 2")
                     delete contexto.categoria
                 }
             }
@@ -181,8 +178,6 @@ watsonController.ControlMensajes = async (req, res) => {
 
         var contextoConversacion = watsonResponse.result
         await watsonController.RegistrarMensajes(idClienteCanalMensajeria,inputTextUsuario,outputWatsonRespuesta,intencionesWatson,entidadesWatson,contextoConversacion)
-        
-        
         res.send(watsonResponse.result.output.generic)
 
     } catch (error) {
@@ -298,7 +293,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         }
                         tiendasOrganizadas = {
                             response_type: 'text',
-                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):*'+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):* '+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
                             elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
                         }
 
@@ -331,7 +326,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 };
 
             await sqlController.consultarCategoriasPorCategoria(nombreCategoria)
-            .then(data => {
+            .then(async data => {
                 respuesta.push({
                     response_type: "text",
                     text: `En *${nombreCategoria}* contamos con las siguientes *Sub Categorías:*`
@@ -352,6 +347,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 if(contexto.hasOwnProperty('menuMostradoProductos')){
                     delete contexto.menuMostradoProductos
                 }
+                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,`Categoria:${nombreCategoria}`)
                 contexto['menuMostradoProductos'] = menuMostradoProductos;
 
             });
@@ -397,7 +393,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         {
             var categoriaUltimoNivel = contexto.categoriaUltimoNivel
             await sqlController.consultarMarcasPorCategoriaUltimoNivel(categoriaUltimoNivel)
-            .then(result => {
+            .then(async result => {
                 var tipoResultado = result[0].tipoResultado,
                     num = 1
                     menuMostradoProductos = {
@@ -488,39 +484,54 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     }
                     contexto['menuMostradoProductos'] = menuMostradoProductos;
                 }
+                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,`Categoria:${categoriaUltimoNivel}`)
+
             })
         }
         else if(strAccion == "consultarProductosPorMarcaPorCategoriaUltimoNivel")
         {
+            var menuMostradoProductos = {
+                "tipoMenu" : "",
+                'menuMostrado' : [],
+                "actionNodeAnterior" : strAccion
+            };
             let categoriaUltimoNivel = contexto.categoriaUltimoNivel
             let marcaProductos = contexto.marcaProductos
             await sqlController.consultarProductosPorMarcaPorCategoriaUltimoNivel(categoriaUltimoNivel, marcaProductos)
-            .then(result => {
+            .then(async result => {
                 let tipoResultado = result[0].tipoResultado
                 if(tipoResultado=="marcas")
                 {
+                    menuMostradoProductos.tipoMenu = 'marcaProductos';
+                    var txtMarcas = '';
+                    var num =1;
+
                     respuesta.push({
                         response_type: "text",
-                        text:"No hemos encontrado "+categoriaUltimoNivel+" en la marca "+marcaProductos+"\nDisponemos de las siguientes marcas: "
+                        text:"No hemos encontrado *"+categoriaUltimoNivel+"* en la marca *"+marcaProductos+"*\nDisponemos de las siguientes *marcas:* "
                     });
-                    respuesta.push({
-                        response_type: "text",
-                        text:"Este probar cuando entra"
-                    });
-                    result.forEach(elementMarca => {
-                        respuesta.push({
-                            response_type: "text",
-                            text:elementMarca.nombreMarca+" ("+ elementMarca.totalProductos +") "
+                    result.forEach(marca => {
+                        txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
+                        menuMostradoProductos.menuMostrado.push({
+                            "pocision": num,
+                            "nombre" : marca.nombreMarca,
+                            "tipoCategoria": "marcaProductos"
                         });
+                        num++;
                     });
+                    respuesta.push({
+                        response_type: "text",
+                        text: txtMarcas
+                    });
+                    if(contexto.hasOwnProperty('menuMostradoProductos')){
+                        delete contexto.menuMostradoProductos
+                    }
+                    contexto['menuMostradoProductos'] = menuMostradoProductos;
+
                 }
                 else
                 {
-                    var menuMostradoProductos = {
-                        "tipoMenu" : "",
-                        'menuMostrado' : [],
-                        "actionNodeAnterior" : strAccion
-                    };
+                    
                     respuesta.push({response_type: "text", text:`Disponemos de los siguientes *${categoriaUltimoNivel} en la marca ${marcaProductos}*:`})
                     let resultMapped = result.reduce((acc, item) => {
                         (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
@@ -570,6 +581,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     }
                     contexto['menuMostradoProductos'] = menuMostradoProductos;
                 }
+                await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,`Categoria:${categoriaUltimoNivel};Marca:${marcaProductos}`)
+
             })
         }
         else if(strAccion == 'consultarInfoProducto'){
@@ -608,7 +621,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 'isMarketplace' : producto.isMarketplace
             }
 
-            await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,producto.idProductoBot,producto.nombre)
+            await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,producto.nombre)
         }        
         else if (strAccion=="limpiarDatosContexto")
         {
@@ -778,10 +791,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 {            
                     let current_datetime = resultSql[0].fechaFinalizacion
                     let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
-                    let titulo = `Compra Finalizada - Factura: #${contexto.numeroReferencia} `
+                    let titulo = `PRUEBAS DORA - Compra Finalizada - Factura: #${contexto.numeroReferencia} `
                     let cabecera = `<div>    
                                         <p>Estimados</p>           
-                                        <p>A continuación se muestran los datos de una intención de compra a través del asistente virtual Dora:</p>
+                                        <p>A continuación se muestran los datos de una intención de compra a través del asistente virtual Dora en etapa de pruebas:</p>
                                         <br>           
                                         <p>Referencia: ${contexto.numeroReferencia}</p>
                                         <p>Fecha de finalización: ${formattedDate}</p>
@@ -799,6 +812,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                             <th>Precio Total</th>
                                         </tr>`
                     filaCuerpo = ''
+                    numero = 0
                     var totalFactura = 0
                     contexto.carritoActual.forEach(element =>
                         {
@@ -811,23 +825,34 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                                             <td>${total.toFixed(2)}</td>
                                                         </tr>`
                             totalFactura = totalFactura + total
+                            numero = element.p
                         })
+                        filaCuerpo = filaCuerpo + `<tr>
+                        <td>${numero+1}</td>
+                        <td>1</td>
+                        <td>VALOR DE ENVÍO</td>
+                        <td>3.51</td>
+                        <td>3.51</td>
+                    </tr>`
                     filaCuerpo = filaCuerpo +  `<tr>
                                                     <td colspan="3">SUBTOTAL</td>
-                                                    <td colspan="3">${totalFactura.toFixed(2)}</td>
+                                                    <td colspan="3">${(totalFactura+3.51).toFixed(2)}</td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="3">IVA</td>
-                                                    <td colspan="3">${(totalFactura*0.12).toFixed(2)}</td>
+                                                    <td colspan="3">${((totalFactura+3.51)*0.12).toFixed(2)}</td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="3">TOTAL A PAGAR</td>
-                                                    <td colspan="3">${(totalFactura*1.12).toFixed(2)}</td>
+                                                    <td colspan="3">$${((totalFactura+3.51)*1.12).toFixed(2)}</td>
                                                 </tr>`
                                                               
                                         var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
                     var contenido = `${cabecera}${tabla}`
-                        mailController.enviarEmail(titulo, contenido)
+                    respuesta.push({response_type: 'text', text: `Su compra está siendo procesada con el número de referencia ${contexto.numeroReferencia}`})
+
+
+                    mailController.enviarEmail(titulo, contenido)
                     .then(respuesta => {
                         console.log(respuesta)
                     })
@@ -1019,13 +1044,19 @@ watsonController.RegistrarMensajes = async (idClienteCanalMensajeria, msgUser, o
             
         }  
         
-            if(entidades == ' '){
-                concatenaEntidades = 'Sin Entidades'
-            }else{
-                entidades.forEach(element => {
-                    concatenaEntidades = concatenaEntidades+'#'+element.entity + ':'+element.value
-                }) 
-            }
+        if(entidades == ' '){
+            concatenaEntidades = 'Sin Entidades'
+        }else{
+            entidades.forEach(element => {
+                if(element.entity == "categoriaUltimoNivel" || element.entity == "marcaProductos"
+                || element.entity == "categoriaNivel0" || element.entity == "categoriaNivel1"
+                || element.entity == "categoriaNivel2" || element.entity == "categoriaNivel3"
+                || element.entity == "categoriaNivel4"){
+                    concatenaEntidades = `${(concatenaEntidades== '') ? '' : concatenaEntidades + ';'}${(element.entity != "marcaProductos") ? "Categoria" : "Marca"}:${element.value}`
+
+                }
+            }) 
+        }
         
     })();
     

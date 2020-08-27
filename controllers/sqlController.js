@@ -693,7 +693,7 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
     return resultSQL
 }
 
-sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, idProductoBot, nombreProducto) =>
+sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, nombreProducto) =>
 {
     let query
     let resultSQL =[]
@@ -701,7 +701,6 @@ sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, idProdu
 
     query = `[dbo].[sp_InsertarProductoSeleccionado] 
             @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
-            @idProductoBot = ${idProductoBot},
             @nombreProducto = N'${nombreProducto}'`
 
     request.query(query)
