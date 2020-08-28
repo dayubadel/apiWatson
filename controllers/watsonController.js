@@ -251,6 +251,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 data.forEach(element => {
                      sectores = sectores + element.sector + ' - '
                 })
+                
                 let sectorRespuesta =  {
                     response_type: 'text',
                     text: `En *${ciudad}* tenemos almacenes en los sectores: ${sectores}.\nPor favor, indicame en qué *sector* deseas consultar.`
@@ -258,7 +259,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push(sectorRespuesta)
             })
         }
-        else if(strAccion == "consultarTiendasPorCiudadPorSector"){
+        else   if(strAccion == "consultarTiendasPorCiudadPorSector"){
             var ciudad = contexto.Ciudad
             var sector = contexto.Sector
             var tiendasOrganizadas = {}
@@ -551,7 +552,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
                     respuesta.push({
                         response_type: "text",
-                        text:"No hemos encontrado *"+categoriaUltimoNivel+"* en la marca *"+marcaProductos+"*\nDisponemos de las siguientes *marcas:* "
+                        text:"No disponemos *"+categoriaUltimoNivel+"* en la marca *"+marcaProductos+"*\nDisponemos de las siguientes *marcas:* "
                     });
                     result.forEach(marca => {
                         txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
@@ -1064,7 +1065,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 }
             })
         }*/
-        console.log(respuesta)
         return respuesta
 }
 

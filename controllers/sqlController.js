@@ -530,12 +530,11 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                 precioCC : data.recordset[0].precioCC,
                 precioOtroPago : data.recordset[0].precioOtroPago,
                 cuotasPrecioCC : data.recordset[0].cuotasPrecioCC,
-                plazoGarantia : data.recordset[0].plazoGarantia,
+                plazoGarantia : data.recordset[0].mesesGarantia,
                 arrayImagenes : JSON.parse(data.recordset[0].arrayImagenes),
                 arrayCarac : '',
                 isMarketplace : data.recordset[0].isMarketplace
             }
-
             data.recordset.forEach(element => 
              {
                 resultSQL.arrayCarac =  `${resultSQL.arrayCarac}  \n *-${element.nombreCara}:* ${element.caracteristicaValue.replace(/\\/g,' \\')}`
