@@ -228,6 +228,47 @@ sqlController.consultarTiendasPorCiudadPorSector = async(ciudad, sector) => {
    return resultSQL
 }
 
+sqlController.consultarTiendasPorNombreTienda = async(nombreTienda) => {
+
+    let query
+    var resultSQL = []
+    var datos = {}
+    
+    query = `EXEC [dbo].[sp_ConsultarTiendaPorNombreTienda]
+                @nombreTienda = N'${nombreTienda}'`
+                
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+           data.recordset.forEach(element => 
+            {
+               datos = {
+                   idTienda: element.idTienda,
+                   nombreTienda: element.nombreTienda,
+                   direccionEspecifica: element.direccionEspecifica,
+                   telefonos: element.telefonos,
+                   horaApertura: element.horaApertura,
+                   horaCierre: element.horaCierre,
+                   atiendeSabado: element.atiendeSabado,
+                   atiendeDomingo: element.atiendeDomingo,
+                   horaAperturaSabado: element.horaAperturaSabado,
+                   horaCierreSabado: element.horaCierreSabado,
+                   horaAperturaDomingo: element.horaAperturaDomingo,
+                   horaCierreDomingo: element.horaCierreDomingo
+               }
+               resultSQL.push(datos)
+            })
+          
+        }
+    })
+    .catch(err => {
+        console.log("Ha ocurrido un error al consultar las tiendas por nombre tienda")
+        console.log(err)
+        throw new Error('Error al registrar en BD')
+    })
+    return resultSQL
+ }
+
 
 sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefono,
                                             direccion, correo, clienteVerificado) => {

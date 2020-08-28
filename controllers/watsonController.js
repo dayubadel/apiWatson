@@ -206,10 +206,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             await sqlController.consultarTiendasPorCiudad(ciudad)
                 .then(data =>{
                     let contadorTiendas = data.length
-                    var textoGeneral =  'Contamos con una tienda en '+ciudad+':'
+                    var textoGeneral =  `Contamos con una tienda en *${ciudad}*:`
                     if(contadorTiendas>1)
                     {
-                        textoGeneral =  'A continuación, le presento las '+contadorTiendas+' tiendas disponibles en '+ciudad+':'
+                        textoGeneral =  `A continuación, le presento las *${contadorTiendas}* tiendas disponibles en *${ciudad}*:`
                     }
                     tiendasOrganizadas = {
                         response_type: 'text',
@@ -253,12 +253,12 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 })
                 let sectorRespuesta =  {
                     response_type: 'text',
-                    text: 'En '+ciudad+' tenemos almacenes en los sectores: '+sectores+'. Por favor, indicame en qué sector deseas consultar.'
+                    text: `En *${ciudad}* tenemos almacenes en los sectores: ${sectores}.\nPor favor, indicame en qué *sector* deseas consultar.`
                 }
                 respuesta.push(sectorRespuesta)
             })
         }
-        else   if(strAccion == "consultarTiendasPorCiudadPorSector"){
+        else if(strAccion == "consultarTiendasPorCiudadPorSector"){
             var ciudad = contexto.Ciudad
             var sector = contexto.Sector
             var tiendasOrganizadas = {}
@@ -266,10 +266,53 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            await sqlController.consultarTiendasPorCiudadPorSector(ciudad, sector)
             .then(data =>{
                 let contadorTiendas = data.length
-                var textoGeneral =  'Contamos con una tienda en el sector '+sector+ ' de '+ciudad+':'
+                var textoGeneral =  `Contamos con una tienda en el sector *${sector}* de *${ciudad}*:`
                 if(contadorTiendas>1)
                 {
-                    textoGeneral =  'A continuación, le presento las '+contadorTiendas+' tiendas disponibles en el sector '+sector+' de '+ciudad+':'
+                    textoGeneral =  `A continuación, le presento las *${contadorTiendas}* tiendas disponibles en el sector *${sector}* de *${ciudad}*:`
+                }
+                tiendasOrganizadas = {
+                    response_type: 'text',
+                    text: textoGeneral
+                }
+                respuesta.push(tiendasOrganizadas)
+                var contador = 1
+                data.forEach(elementTienda =>
+                    {
+                        var atencionSabado='No atiende días sábados. '
+                        if(elementTienda.atiendeSabado==true)
+                        {
+                            atencionSabado='*Horario sábado:* '+elementTienda.horaAperturaSabado+
+                            ' - '+elementTienda.horaCierreSabado+' . '
+                        }
+                        var atencionDomingo='No atiende días domingos. '
+                        if(elementTienda.atiendeDomingo==true)
+                        {
+                            atencionDomingo='*Horario domingo:* '+elementTienda.horaAperturaDomingo+
+                            ' - '+elementTienda.horaCierreDomingo+' . '
+                        }
+                        tiendasOrganizadas = {
+                            response_type: 'text',
+                            text: '*ALMACEN # '+contador+'*\n*Dirección:* '+elementTienda.direccionEspecifica+'.\n*Teléfono(s):* '+elementTienda.telefonos+'.\n*Horario de lunes a viernes:* '+
+                            elementTienda.horaApertura+' - '+elementTienda.horaCierre+'.\n'+atencionSabado+'\n'+atencionDomingo
+                        }
+
+                        respuesta.push(tiendasOrganizadas)
+                        contador++
+                }
+               )})
+        }
+        else if(strAccion == "consultarTiendasPorNombreTienda"){
+            var nombreTienda = contexto.nombreTienda
+            var tiendasOrganizadas = {}
+
+           await sqlController.consultarTiendasPorNombreTienda(nombreTienda)
+            .then(data =>{
+                let contadorTiendas = data.length
+                var textoGeneral =  `Contamos con una tienda en *${nombreTienda}*:`
+                if(contadorTiendas>1)
+                {
+                    textoGeneral =  `A continuación, le presento las ${contadorTiendas} tiendas disponibles en *${nombreTienda}*`
                 }
                 tiendasOrganizadas = {
                     response_type: 'text',
