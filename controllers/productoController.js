@@ -65,22 +65,21 @@ productoController.RegistrarProductos = async (req, res) => {
                     delete caracteristicas.modelo
                 }
                 for (const key in caracteristicas) {
-                    caracteristicas[key] = caracteristicas[key].replace(/[,:]+/g,'')
+                    caracteristicas[key] = caracteristicas[key].replace(/[,:]+/g,'').replace(/[']+/g,"")
                 }
             }
             
             if(producto.ProductCategories != ''){
                 var i = 0,
                     objCate = [];
-                    arrayCateStr = producto.ProductCategories.replace(/[{}]/g,'').split(',');
-                console.log(arrayCateStr)
+                    arrayCateStr = producto.ProductCategories.replace(/[{}]/g,'').replace(/[']+/g,"").split(',');
 
                 for (let index = arrayCateStr.length; index > 0; index--) {
 
-                    varKey = arrayCateStr[index - 1].split(':')[0];
-                    varValue = arrayCateStr[index - 1].split(':')[1];
+                    var varKey = arrayCateStr[index - 1].split(':')[0];
+                    var varValue = arrayCateStr[index - 1].split(':')[1];
                     if(varValue == 'Motos' && index != 0){
-                        varValue = 'Moto'
+                        varValue = 'Motocicletas'
                     }
                     objCate.push(JSON.parse(`{${varKey} : ${varValue}}`))
                 }
@@ -91,25 +90,10 @@ productoController.RegistrarProductos = async (req, res) => {
                     arrayCategorias.push(new Categoria(Object.keys(iterator)[0], Object.values(iterator)[0],nivel))
                     nivel++
                 }
-            //    console.log(arrayCategorias)
-               
-                // console.log(producto.ProductCategories)
-                // for (const key in objCate) {
-
-                //     let nivel = (producto.hasOwnProperty(`Nivel${i}`) && producto[`Nivel${i}`] == objCate[key]) ? i : null;
-
-                //     if(objCate[key] == 'Motos' && i > 0){
-                //         objCate[key] = 'Moto'
-                //     }
-
-                //     arrayCategorias.push(new Categoria(key, objCate[key],i))
-
-                //     i += 1
-                // }
             }
 
             objProducto.idVitex = producto.Id
-            objProducto.modelo = modelo
+            objProducto.modelo = modelo.replace(/[']+/g,"")
             objProducto.nombre = producto.ProductName
             objProducto.idRefSAP = producto.RefId
             objProducto.stockOtroPago = producto.stock
@@ -142,7 +126,10 @@ productoController.RegistrarProductos = async (req, res) => {
         res.send({success:1})
     } catch (error) {
         console.log(error)
-        res.status(500).send({success:0})
+        res.status(500).send({
+            success:0,
+            msg: error.message
+        })
             
     }
 
@@ -151,8 +138,9 @@ productoController.RegistrarProductos = async (req, res) => {
 
 productoController.ActualizarEntidades = async (req, res) =>{ 
     try {
-                    
-        entidadesArray = [
+        
+        
+       entidadesArray = [
             'nombreProductos',
             'marcaProductos',
             'caracteristicaKProducto',
@@ -199,7 +187,10 @@ productoController.ActualizarEntidades = async (req, res) =>{
     } catch (error) {
         console.log(error)
         if(req != undefined){
-            res.status(500).send({success:0})
+            res.status(500).send({
+                success:0,
+                msg: error.message
+            })
         }
     }
 }
