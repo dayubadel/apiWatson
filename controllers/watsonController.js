@@ -649,7 +649,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             });
             respuesta.push({
                 response_type: "text",
-                text: `¿Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Credito o Debito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngrese el *método de pago* con el que desea conocer el precio`
+                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Credito o Debito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngrese el *método de pago* con el que desea conocer el precio`
             });
 
             contexto['infoProductoSelected'] = {
@@ -784,7 +784,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     'menuMostrado' : [],
                     "actionNodeAnterior" : strAccion
                 };
-                respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos que te podrían interesar con ese *metodo de pago*:`})
+                respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos que te podrían interesar con ese *método de pago*:`})
                 let resultMapped = result.reduce((acc, item) => {
                     (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
                         return acc;
@@ -853,7 +853,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                         <p>Nombres: ${contexto.primerNombre}</p>
                                         <p>Apellidos: ${contexto.primerApellido}</p>
                                         <p>${contexto.tipoIdentificacion}: ${contexto.numIdentificacion}</p>
-                                        <p>Metodo de pago: ${contexto.carritoActual[0].metodoPago}</p>
+                                        <p>Método de pago: ${contexto.carritoActual[0].metodoPago}</p>
                                         </div>`
 
                     var cabeceraTabla = `<tr>

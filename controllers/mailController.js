@@ -1,12 +1,15 @@
 var nodemailer = require('nodemailer');
 
+
 var mailController = {}
 
 var transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'mail.comandato.com',
+  port: '587',
+  secure: false,
   auth: {
-    user: 'helenbailon95@gmail.com',
-    pass: 'Bailon1995.'
+    user: 'chatbot1',
+    pass: 'cmdchatbot#20'
   }
 });
 
@@ -15,8 +18,9 @@ mailController.enviarEmail = async (subject, content) =>
 {
     console.log(subject, content)
     var mailOptions = {
-        from: 'helenbailon95@gmail.com',
-        to: 'helenbailon95@gmail.com',
+        from: 'chatbot1@comandato.com',
+        //to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
+        to: 'dayana.bailon@gaiaconsultores.biz',
         subject: subject,
         html: content
       };
