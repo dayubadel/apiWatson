@@ -715,6 +715,20 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
             respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *Agregar productos* al carrito\n- *Quitar productos* del carrito\n- *Finalizar compra*'})
         }
+        else if(strAccion=='presentarCarritoDeComprasAntesFinalizar')
+        {           
+            respuesta.push({response_type:'text',text:`Antes de finalizar la compra, verifica que tu carrito tienes todo lo que necesitas:`})
+            respuesta.push({response_type:'text',text:`Con el método de pago seleccionado *${contexto.carritoActual[0].metodoPago}*`})
+            respuesta.push({response_type:'text',text:'Su *carrito de compras* contiene los siguientes *productos*:'})
+            let totalFactura= 0
+            contexto.carritoActual.forEach(element => {
+                let total = element.cantidad*(element.precioProducto*1.12)
+                totalFactura=totalFactura+total
+                respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
+            })
+            respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
+            respuesta.push({response_type:'text', text: '¿Está seguro de *finalizar su compra*?'})
+        }
         else if(strAccion=="consultarProductosCarritoParaQuitar")
         {            
             respuesta.push({response_type: 'text', text: 'Su *carrito de compras* contiene los siguientes *registros*:'})
