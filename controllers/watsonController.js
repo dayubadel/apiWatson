@@ -80,6 +80,13 @@ watsonController.ControlMensajes = async (req, res) => {
                 numeroRegistro++
             })
             contextoAnterior['carritoActual'] = carritoActual
+            menuCarrito = []
+            menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito`})
+            menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito`})
+            menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras`})
+            menuCarrito.push({opcion: 4, accion: `*Finalizar compra*`})
+            menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras`})
+            contextoAnterior['menuCarrito'] = menuCarrito
         } 
 
         var cabeceraVenta = await sqlController.gestionCabeceraVenta(contextoAnterior.numeroReferencia,null,null,null,null,null,2)
@@ -353,7 +360,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
                 let valoracionRespuesta =  {
                     response_type: 'text',
-                    text: 'Muchas gracias por su valoración.'
+                    text: 'Muchas gracias por tu valoración.'
                 }
                 respuesta.push(valoracionRespuesta)
             })
@@ -649,7 +656,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             });
             respuesta.push({
                 response_type: "text",
-                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Credito o Debito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngrese el *método de pago* con el que desea conocer el precio`
+                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Crédito o Débito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngrese el *método de pago* con el que deseas conocer el precio`
             });
 
             contexto['infoProductoSelected'] = {
@@ -677,7 +684,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.infoProductoSelected
             if(contexto.hasOwnProperty('carritoActual'))
             {
-                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *Agregar productos* al carrito\n- *Quitar productos* del carrito\n- *Consultar carrito* de compras\n- *Finalizar compra*\n'})
+                txtMenu = 'Indícame qué más deseas hacer:'
+                contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
+                respuesta.push({response_type:'text', text: txtMenu})
             }
             else
             {
@@ -693,7 +702,21 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({response_type:'text', text: `Tiene un *carrito de compras activo* con el *método de pago* ${resultQuery[0].metodoPago}`})
                 respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* exitosamente`})
                 respuesta.push({response_type:'text', text: `*Detalles adicionales:*\n*Cantidad:* ${resultQuery[0].cantidad}\n*Producto:* ${resultQuery[0].nombreProducto}\n*Precio unitario:* $${(resultQuery[0].precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${((resultQuery[0].precioProducto*1.12)*resultQuery[0].cantidad).toFixed(2)}`})
-                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *Agregar productos* al carrito\n- *Quitar productos* del carrito\n- *Consultar carrito* de compras\n- *Finalizar compra*\n'})
+                
+                if(!contexto.hasOwnProperty('menuCarrito'))
+                {                
+                    menuCarrito = []
+                    menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito`})
+                    menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito`})
+                    menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras`})
+                    menuCarrito.push({opcion: 4, accion: `*Finalizar compra*`})
+                    menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras`})
+                    contexto['menuCarrito'] = menuCarrito
+                }
+                txtMenu = 'Indícame qué más deseas hacer:'
+                contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
+                respuesta.push({response_type:'text', text: txtMenu})
+                
                 delete contexto.mostrarCarrito
                 delete contexto.marcaProductos
                 delete contexto.categoriaUltimoNivel
@@ -705,7 +728,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         else if(strAccion=='presentarCarritoDeCompras')
         {           
             respuesta.push({response_type:'text',text:`Con el método de pago seleccionado *${contexto.carritoActual[0].metodoPago}*`})
-            respuesta.push({response_type:'text',text:'Su *carrito de compras* contiene los siguientes *productos*:'})
+            respuesta.push({response_type:'text',text:'Tu *carrito de compras* contiene los siguientes *productos*:'})
             let totalFactura= 0
             contexto.carritoActual.forEach(element => {
                 let total = element.cantidad*(element.precioProducto*1.12)
@@ -713,13 +736,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
             })
             respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
-            respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *Agregar productos* al carrito\n- *Quitar productos* del carrito\n- *Finalizar compra*'})
+            txtMenu = 'Indícame qué más deseas hacer:'
+            contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
+            respuesta.push({response_type:'text', text: txtMenu})
         }
         else if(strAccion=='presentarCarritoDeComprasAntesFinalizar')
         {           
             respuesta.push({response_type:'text',text:`Antes de finalizar la compra, verifica que tu carrito tienes todo lo que necesitas:`})
             respuesta.push({response_type:'text',text:`Con el método de pago seleccionado *${contexto.carritoActual[0].metodoPago}*`})
-            respuesta.push({response_type:'text',text:'Su *carrito de compras* contiene los siguientes *productos*:'})
+            respuesta.push({response_type:'text',text:'Tu *carrito de compras* contiene los siguientes *productos*:'})
             let totalFactura= 0
             contexto.carritoActual.forEach(element => {
                 let total = element.cantidad*(element.precioProducto*1.12)
@@ -727,11 +752,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
             })
             respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
-            respuesta.push({response_type:'text', text: '¿Está seguro de *finalizar su compra*?'})
+            respuesta.push({response_type:'text', text: '¿Estás seguro de *finalizar tu compra*?'})
         }
         else if(strAccion=="consultarProductosCarritoParaQuitar")
         {            
-            respuesta.push({response_type: 'text', text: 'Su *carrito de compras* contiene los siguientes *registros*:'})
+            respuesta.push({response_type: 'text', text: 'Tu *carrito de compras* contiene los siguientes *registros*:'})
             let totalFactura = 0
             contexto.carritoActual.forEach(element => {
                 let total = element.cantidad*(element.precioProducto*1.12)
@@ -739,7 +764,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})
             })
             respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
-            respuesta.push({response_type: 'text', text: 'Por favor, seleccione el *número del registro* que desea quitar de su carrito'})
+            respuesta.push({response_type: 'text', text: 'Por favor, seleccione el *número del registro* que quieras quitar de tu carrito'})
         }
         else if(strAccion=="eliminarProductoCarritoCompras")
         {
@@ -751,11 +776,12 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     respuesta.push({response_type:'text',text:'Actualmente no tiene un carrito de compras activo'})
                     respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- Ver el *catálogo de productos*\n- Volver al *menú principal*'})
                     delete contexto.carritoActual
+                    delete contexto.menuCarrito
                 }
                 else
                 {
                     respuesta.push({response_type:'text',text:`*Con el método de pago seleccionado:* ${resultQuery[0].metodoPago}`})
-                    respuesta.push({response_type:'text',text:'Su *carrito de compras* contiene los siguientes *productos*:'})
+                    respuesta.push({response_type:'text',text:'Tu *carrito de compras* contiene los siguientes *productos*:'})
                     let totalFactura= 0
                     carritoActual = []
                     let numeroRegistro = 1
@@ -768,7 +794,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     })
                     contexto['carritoActual'] = carritoActual
                     respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)}`})
-                    respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- *Agregar productos* al carrito\n- *Quitar productos* del carrito\n- *Finalizar compra*'})
+                    txtMenu = 'Indícame qué más deseas hacer:'
+                    contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
+                    respuesta.push({response_type:'text', text: txtMenu})
                 }
                 delete contexto.mostrarCarrito
                 delete contexto.marcaProductos
@@ -777,6 +805,19 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 delete contexto.productoSelected
                 delete contexto.infoProductoSelected
             })
+        }
+        else if(strAccion == "abandonarCarrito")
+        {
+            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,3)
+            .then( 
+                resultSQL => {
+                    respuesta.push({response_type: 'text', text: 'El carrito ha sido abandonado.'})
+                    respuesta.push({response_type: 'text', text: 'Actualmente no tiene un carrito activo'})
+                    respuesta.push({response_type:'text', text: `Indícame qué más deseas hacer: \n- Ver el *catálogo de productos*\n- Volver al *menú principal*`})
+                    delete contexto.carritoActual
+                    delete contexto.menuCarrito
+                }
+            )
         }
         else if(strAccion=='enviarLinkPago'){
 
@@ -915,7 +956,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                                               
                                         var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
                     var contenido = `${cabecera}${tabla}`
-                    respuesta.push({response_type: 'text', text: `Su compra está siendo procesada con el número de referencia ${contexto.numeroReferencia}`})
+                    respuesta.push({response_type: 'text', text: `Tu compra está siendo procesada con el número de referencia ${contexto.numeroReferencia}`})
 
 
                     mailController.enviarEmail(titulo, contenido)

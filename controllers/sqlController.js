@@ -698,7 +698,7 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
             @numeroTelefono = N'${numeroTelefono}',
             @opcion = ${opcion}`
     }
-    else if(opcion==2)
+    else if(opcion==2 || opcion==3 )
     {
         query = `[dbo].[sp_GestionCabeceraVenta]
         @numeroReferencia = N'${numeroReferencia}',
