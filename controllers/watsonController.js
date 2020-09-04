@@ -1005,7 +1005,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 contexto['identificacionValidada'] =1
             }
         }
-        /*comentado v 2.0
+        /*comentado v 2.0 rama desarrollo
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
         {
             let categoriaUltimoNivel = contexto.categoriaUltimoNivel
