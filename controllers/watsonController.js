@@ -650,10 +650,13 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     source: imgItem.ImageUrl
                 })
             });
-            respuesta.push({
-                response_type: "text",
-                text: `El producto *${producto.nombre}* cuenta con las siguientes *caracteristicas:* ${producto.arrayCarac}`
-            });
+            if(producto.arrayCarac!='')
+            {
+                respuesta.push({
+                    response_type: "text",
+                    text: `El producto *${producto.nombre}* cuenta con las siguientes *caracteristicas:* ${producto.arrayCarac}`
+                });
+            }
             respuesta.push({
                 response_type: "text",
                 text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Crédito o Débito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngresa el *método de pago* con el que deseas conocer el precio`
@@ -752,7 +755,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
             })
             respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
-            respuesta.push({response_type:'text', text: '¿Estás seguro de *finalizar tu compra*?'})
+            respuesta.push({response_type:'text', text: '¿Procedemos con la compra?'})
         }
         else if(strAccion=="consultarProductosCarritoParaQuitar")
         {            

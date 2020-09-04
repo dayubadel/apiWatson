@@ -537,12 +537,18 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
             }
             data.recordset.forEach(element => 
              {
-                resultSQL.arrayCarac =  `${resultSQL.arrayCarac}  \n *-${element.nombreCara}:* ${element.caracteristicaValue.replace(/\\/g,' \\')}`
-                // let caracteristicas = {
-                // caracKey : element.nombreCara,
-                // caracVal : element.caracteristicaValue,
-                // }
-                // resultSQL.arrayCarac.push(caracteristicas)
+                if(element.nombreCara != null)
+                {
+                    if(element.nombreCara!='')
+                    {
+                        resultSQL.arrayCarac =  `${resultSQL.arrayCarac}  \n *-${element.nombreCara}:* ${element.caracteristicaValue.replace(/\\/g,' \\')}`
+                        // let caracteristicas = {
+                        // caracKey : element.nombreCara,
+                        // caracVal : element.caracteristicaValue,
+                        // }
+                        // resultSQL.arrayCarac.push(caracteristicas)
+                    }
+                }
              }) 
          }
      })
