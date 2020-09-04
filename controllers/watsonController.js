@@ -656,7 +656,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             });
             respuesta.push({
                 response_type: "text",
-                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Crédito o Débito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngrese el *método de pago* con el que deseas conocer el precio`
+                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Crédito o Débito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngresa el *método de pago* con el que deseas conocer el precio`
             });
 
             contexto['infoProductoSelected'] = {
@@ -974,6 +974,34 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.numIdentificacion
             delete contexto.tipoIdentificacion
         }    
+        else if(strAccion == "validarCedula")
+        {
+            if(contexto.tipoIdentificacion=='Cédula')
+            {
+                const ced = contexto.numIdentificacion;
+                let [suma, mul, index] = [0, 1, ced.length];
+                while (index--) {
+                let num = ced[index] * mul;
+                suma += num - (num > 9) * 9;
+                mul = 1 << index % 2;
+                }
+
+                if ((suma % 10 === 0) && (suma > 0)) {
+                    respuesta.push({response_type:'text', text: `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`})
+                    respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
+                    contexto['identificacionValidada'] =1
+                } else {
+                    respuesta.push({response_type:'text', text:`La cédula ingresada es incorrecta.`})                
+                    respuesta.push({response_type:'text', text:`Por favor, ingresa nuevamente el *número de cédula*.`})                
+                }
+            }
+            else 
+            {
+                respuesta.push({response_type:'text', text: `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`})
+                respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
+                contexto['identificacionValidada'] =1
+            }
+        }
         /*comentado v 2.0
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
         {
