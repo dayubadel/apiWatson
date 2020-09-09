@@ -702,7 +702,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 contexto.metodoPago,contexto.cantidadProductos,1)
             .then(resultQuery =>
             {
-                respuesta.push({response_type:'text', text: `Tiene un *carrito de compras activo* con el *método de pago* ${resultQuery[0].metodoPago}`})
+                respuesta.push({response_type:'text', text: `Tienes un *carrito de compras activo* con el método de pago *${resultQuery[0].metodoPago}*`})
                 respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* exitosamente`})
                 respuesta.push({response_type:'text', text: `*Detalles adicionales:*\n*Cantidad:* ${resultQuery[0].cantidad}\n*Producto:* ${resultQuery[0].nombreProducto}\n*Precio unitario:* $${(resultQuery[0].precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${((resultQuery[0].precioProducto*1.12)*resultQuery[0].cantidad).toFixed(2)}`})
                 
@@ -828,7 +828,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
             respuesta.push({
                 response_type:'text',
-                text: `http://1ffa79554e3b.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
+                text: `http://e5f8874fc574.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){

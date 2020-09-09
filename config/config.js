@@ -28,7 +28,7 @@ module.exports = {
              password: 'dayu2020',
              server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
              port: 1433,
-             database: 'DchatbotComandato',
+             database: 'chatbotComandato',
              options:{
                'encrypt' : true,
                'enableArithAbort': true
