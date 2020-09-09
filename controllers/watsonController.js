@@ -828,7 +828,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
             respuesta.push({
                 response_type:'text',
-                text: `http://1ffa79554e3b.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
+                text: `http://19cc9dac71aa.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){

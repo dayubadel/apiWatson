@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <title>Pago en Linea | Comandato</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <script src="https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js"></script>
+    </head>
+  <body>
+    <p>Estimados</p>
+    <p>En la presente se adjunta el reporte diario de chatbot con la informacion de intenciones de clientes, productos solicitados y carritos de compras creados.</p>
+    <p></p>
+    <p>Saludos</p>
+    <button class="js-payment-checkout">Pay with Card</button>
+    <div id="response"></div>
+
+  <script>
+
+    var user_id;
+    var user_email;
+    var user_phone;
+    var order_description;
+    var order_amount;
+    var order_vat;
+    var order_reference;
+    var order_taxable_amount;
+    var order_tax_percentage;
+
+    window.onload = function() {
+
+      const queryString = window.location.search;
+      // console.log(queryString);
+
+      const urlParams = new URLSearchParams(queryString);
+
+      user_id = urlParams.get('user_id')
+      user_email = urlParams.get('user_email')
+      user_phone = urlParams.get('user_phone')
+      order_description = urlParams.get('order_description')
+      order_amount = parseFloat(urlParams.get('order_amount'))
+      order_vat = parseFloat(urlParams.get('order_vat'))
+      order_reference = urlParams.get('order_reference')
+      order_taxable_amount = parseFloat(urlParams.get('order_taxable_amount'))
+      order_tax_percentage = parseFloat(urlParams.get('order_tax_percentage'))
+
+      
+    };
+
+
+    let paymentCheckout = new PaymentCheckout.modal({
+
+      client_app_code: 'TPP2-EC-CLIENT', // Client Credentials
+      client_app_key: 'sDAwQAdBqetYhVZFFLpOg6FU2cmjF0', // Client Credentials
+      locale: 'es', // User's preferred language (es, en, pt). English will be used by default.
+      env_mode: 'stg', // `prod`, `stg`, `local` to change environment. Default is `stg`
+
+      onOpen: function () {
+        console.log('modal open');
+      },
+      onClose: function () {
+        console.log('modal closed');
+      },
+      onResponse: function (response) { // The callback to invoke when the Checkout process is completed
+
+        /*
+          In Case of an error, this will be the response.
+          response = {
+            "error": {
+              "type": "Server Error",
+              "help": "Try Again Later",
+              "description": "Sorry, there was a problem loading Checkout."
+            }
+          }
+
+          When the User completes all the Flow in the Checkout, this will be the response.
+          response = {
+            "transaction":{
+                "status": "success", // success or failure
+                "id": "CB-81011", // transaction_id
+                "status_detail": 3 // for the status detail please refer to: https://paymentez.github.io/api-doc/#status-details
+            }
+          }
+        */
+        // console.log('modal response');
+        // document.getElementById('response').innerHTML = JSON.stringify(response);
+
+        console.log(response)
+
+        var ajax_url = "http://localhost:8000/pago/respuestapago";
+
+        var myjson = JSON.stringify(response.transaction)
+        var ajax_request = new XMLHttpRequest();
+        ajax_request.open( "POST", ajax_url, true );
+        // Establecer la cabecera Content-Type apropiada
+        ajax_request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+        // Enviar la solicitud
+        ajax_request.send( myjson );
+
+        ajax_request.onreadystatechange = function() {
+          // console.log(ajax_request.readyState,ajax_request.responseText)
+          // readyState es 4
+          if (ajax_request.readyState == 4 ) {
+
+              // // Analizaos el responseText que contendrá el JSON enviado desde el servidor
+              // var jsonObj = JSON.parse( ajax_request.responseText );
+              // // La variable jsonObj ahora contiene un objeto con los datos recibidos
+
+          }
+        }
+      }
+    });
+
+    console.log(document)
+
+
+    let btnOpenCheckout = document.querySelector('.js-payment-checkout');
+
+    btnOpenCheckout.addEventListener('click', function () {
+      paymentCheckout.open({
+        user_id: '56465',
+        user_email: 'bryanfgg@gmail.com',
+        user_phone: '0980546307',
+        order_description: "order_description",
+        order_amount: 60,//valor total en dolares a cancelar incluyendo iva
+        order_vat: 12, //valor en dolales en iva
+        order_reference: "order_reference",
+        order_taxable_amount: 50, //valor neto en dolares - sin iva
+        order_tax_percentage: 12 //porcentaje del iva
+
+
+
+
+        // user_id: user_id,
+        // user_email: 'bryanfgg@gmail.com',
+        // user_phone: '0980546307',
+        // order_description: order_description,
+        // order_amount: order_amount,//valor total en dolares a cancelar incluyendo iva
+        // order_vat: order_vat, //valor en dolales en iva
+        // order_reference: order_reference,
+        // order_taxable_amount: order_taxable_amount, //valor neto en dolares - sin iva
+        // order_tax_percentage: order_tax_percentage //porcentaje del iva
+
+        
+        
+        
+        
+        
+        
+      //   user_id: 'uid1234',
+      //   user_email: 'jhon@doe.com', //optional
+      //   user_phone: '7777777777', //optional
+      //   order_description: '1 Green Salad',
+      //   order_amount: 56, valorTotalOrden en BD
+      //   order_vat: 6, valorNetoIva en BD
+      //   order_reference: '#234323411',
+      // // order_installments_type: 0, // optional: The installments type are only available for Equador. The valid values are: https://paymentez.github.io/api-doc/#installments-type  //2 diferido con interes - 3 diferido sin interes, 00 corriente
+      //   order_taxable_amount: 50, valor neto en nuestra db // optional: Only available for Datafast (Equador). The taxable amount, if it is zero, it is calculated on the total. Format: Decimal with two fraction digits.
+      //   order_tax_percentage: 12, pocentaje sobre el que se calcula en el IVA // optional: Only available for Datafast (Equador). The tax percentage to be applied to this order.
+      });
+    });
+
+    window.addEventListener('popstate', function () {
+      paymentCheckout.close();
+    });
+  </script>
+  </body>
+</html>
