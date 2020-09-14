@@ -7,7 +7,12 @@ module.exports = {
     },
     valorGlobales :{
         IVAPercent : 12,
-        valorEnvio : 3.99
+        valorEnvio : 3.99,
+        urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL'
+    },
+    wsFacturacion: {
+        token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
+        urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL'
     },
     // sql: {
     //     config_sql : {
