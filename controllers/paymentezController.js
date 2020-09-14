@@ -1,4 +1,5 @@
 const config = require("../config/config.js");
+const sqlController = require('./sqlController.js')
 const soap = require('soap')
 const paymentezController = {}
 
@@ -16,7 +17,7 @@ paymentezController.GestionFactura = async (req, res) => {
         respuestaSql = await sqlController.gestionCabeceraVenta (datosFactura.numeroReferencia,datosFactura.first_name.toUpperCase(),
                                         datosFactura.last_name.toUpperCase(),datosFactura.user_tipo_identificacion,
                                         datosFactura.user_numero_identificacion,datosFactura.user_email.toLowerCase(),datosFactura.user_phone,
-                                        datosFactura.nombre_receptor, 1, datosFactura.calle_principal, datosFactura.numero_calle,
+                                        datosFactura.nombre_receptor, 160, datosFactura.calle_principal, datosFactura.numero_calle,
                                         datosFactura.barrio_entrega, datosFactura.referencia_entrega,null,null,null,null,null,null,4)    
     }
     if(respuestaSql.length==0)
@@ -40,7 +41,7 @@ paymentezController.GestionFactura = async (req, res) => {
                 order_reference :  factura.numeroReferencia,
                 order_installments_type: tipoPago,
                 order_taxable_amount : factura.valorNeto + factura.valorEnvio,
-                order_tax_percentage : valorGlobales.IVAPercent,
+                order_tax_percentage : config.valorGlobales.IVAPercent,
                 first_name : factura.nombres,
                 last_name : factura.apellidos,
                 phone : factura.numeroTelefono,

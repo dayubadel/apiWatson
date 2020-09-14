@@ -4,7 +4,7 @@ const sqlController = require('./sqlController.js')
 const mailController = require('./mailController.js')
 const config = require("../config/config.js");
 const { json } = require('body-parser');
-const { sql } = require('../config/config.js');
+const { sql, valorGlobales } = require('../config/config.js');
 // const pedidoModel = require('./../models/pedido.js')
 
 const id_workspace = config.Watson.id_workspace
@@ -739,7 +739,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 totalFactura=totalFactura+total
                 respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
             })
-            respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
+            respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio}`})
+            respuesta.push({response_type:'text', text: `*Total a pagar:* $${(totalFactura+valorGlobales.valorEnvio).toFixed(2)} _incluye IVA_`})
             txtMenu = 'Indícame qué más deseas hacer:'
             contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
             respuesta.push({response_type:'text', text: txtMenu})
@@ -755,7 +756,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 totalFactura=totalFactura+total
                 respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
             })
-            respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
+            respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio}`})
+            respuesta.push({response_type:'text', text: `*Total a pagar:* $${(totalFactura+valorGlobales.valorEnvio).toFixed(2)} _incluye IVA_`})
             respuesta.push({response_type:'text', text: '¿Procedemos con la compra?'})
         }
         else if(strAccion=="consultarProductosCarritoParaQuitar")
@@ -767,7 +769,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 totalFactura=totalFactura+total
                 respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})
             })
-            respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)} _incluye IVA_`})
+            respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio}`})
+            respuesta.push({response_type:'text', text: `*Total a pagar:* $${(totalFactura+valorGlobales.valorEnvio).toFixed(2)} _incluye IVA_`})
             respuesta.push({response_type: 'text', text: 'Por favor, seleccione el *número del registro* que quieras quitar de tu carrito'})
         }
         else if(strAccion=="eliminarProductoCarritoCompras")
@@ -797,7 +800,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         numeroRegistro++
                     })
                     contexto['carritoActual'] = carritoActual
-                    respuesta.push({response_type:'text', text: `*Total a pagar:* $${totalFactura.toFixed(2)}`})
+                    respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio}`})
+                    respuesta.push({response_type:'text', text: `*Total a pagar:* $${(totalFactura+valorGlobales.valorEnvio).toFixed(2)} _incluye IVA_`})
                     txtMenu = 'Indícame qué más deseas hacer:'
                     contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
                     respuesta.push({response_type:'text', text: txtMenu})
