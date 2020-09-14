@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <title>Pago en Linea | Comandato</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <script src="https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js"></script>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </head>
+  <body>
+    
+    <div class="container">
+      <div class="row">
+          <div class="col-md-12">
+                  <form class="form-horizontal" method="post">
+                      <fieldset>
+                          <legend class="text-center header">Formulario de pago | Datos del cliente </legend> 
+                            <div id="respuestaPagoTarjeta"></div>
+                          <div class="form-group">
+                              <div class="col-md-12">
+                                  <input id="firstname" value="Dayana Helen" name="name" type="text" placeholder="Ingrese sus dos nombres *" class="form-control">
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <div class="col-md-12">
+                                  <input id="lastname" value="Bailón Delgado" name="lastname" type="text" placeholder="Ingrese sus dos apellidos *" class="form-control">
+                              </div>
+                          </div>
+                          
+                          <div class="form-group">
+                            <div class="col-md-12">
+                                <select id="tipoidentificacion" name="tipoidentificacion" class="form-control">
+                                  <option value="0">Seleccione el tipo de identificación</option>
+                                  <option value="cedulaECU" selected>Cédula</option>
+                                  <option value="rucECU">RUC</option>
+                                </select>
+                            </div>
+                          </div>
+
+                          <div class="form-group">
+                            <div class="col-md-12">
+                              <input id="numeroIdentificacion" value="1313210716" name="numeroIdentificacion" type="number" placeholder="Ingrese su número de identificación *" class="form-control">
+                            </div>
+                          </div>
+  
+                          <div class="form-group">
+                              <div class="col-md-12">
+                                  <input id="email" name="email" value="dayana.bailon@gaiaconsultorez.biz" type="text" placeholder="Ingrese su correo electrónico *" class="form-control">
+                              </div>
+                          </div>
+  
+                          <div class="form-group">
+                              <div class="col-md-12">
+                                  <input id="phone" name="phone" value="0987648370" type="text" placeholder="Ingrese su teléfono *" class="form-control">
+                              </div>
+                          </div> 
+                          <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="receptor" name="receptor" value="Amir Bailón" type="text" placeholder="Ingrese el nombre y apellido de quien recibirá el pedido *" class="form-control">
+                            </div>
+                          </div>    
+                          <div class="form-group">
+                            <div class="col-md-12">
+                              <select name="provincia" id="provincia" class="form-control">
+                                <option value="0">Seleccione la provincia de destino</option>
+                                <option value="1" selected>GUAYAS</option>
+                              </select>
+                            </div>
+                          </div>  
+                          <div class="form-group">
+                            <div class="col-md-12">
+                              <select name="canton" id="canton" class="form-control">
+                                <option value="0">Seleccione el cantón de destino</option>
+                                <option value="9001" selected>GUAYAQUIL</option>
+                              </select>
+                            </div>
+                          </div>  
+                          <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="calleprincipal" name="calleprincipal" value="LOS CEIBOS" type="text" placeholder="Ingrese su calle crincipal *" class="form-control">
+                            </div>
+                          </div>                              
+                          <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="numerocalle" name="numerocalle" value="CALLE 3" type="text" placeholder="Número de calle" class="form-control">
+                            </div>
+                          </div>     
+                          <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="barrioentrega" name="barrioentrega" value="CDLA. LAS PALMAS" type="text" placeholder="Ingrese el barrio de entrega" class="form-control">
+                            </div>
+                          </div> 
+                          <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="referenciaentrega" name="referenciaentrega" value="FRENTE AL ÁRBOL PRINCIPAL" type="text" placeholder="Ingrese alguna referencia de la dirección" class="form-control">
+                            </div>
+                          </div>            
+                      </fieldset>
+                  </form>
+          </div>
+      </div>
+  </div>
+  <style>
+    .header {
+        color: #00529b;
+        font-size: 27px;
+        padding: 10px;
+    }
+
+    .bigicon {
+        font-size: 35px;
+        color: #36A0FF;
+    }
+</style>
+    <button onclick="pasarDatos()" class="js-payment-checkout">Pay with Card</button>
+    <div id="response"></div>
+  <script type="text/javascript">      
+      var user_id;
+      var order_description;
+      var order_amount;
+      var order_vat;
+      var order_reference;
+      var order_installments_type;
+      var order_taxable_amount;
+      var order_tax_percentage;
+
+      var user_email;
+      var user_phone;
+      window.onload = function() {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+
+      order_reference = urlParams.get('numero_referencia')
+
+      consultarFactura(order_reference)
+
+      function consultarFactura(numeroReferencia)
+      {
+        
+          $.ajax({            
+            url: "http://localhost:8000/pago/gestionfactura",
+            type: "post",
+            dataType: "JSON",
+            data: { numeroReferencia: numeroReferencia, opcion : 1 },
+            success:  function(data)
+            {
+              if(data.estado==true)
+              {
+                  console.log(data.resultado)
+                  user_id = data.resultado.user_id
+                  order_description = data.resultado.order_description
+                  order_amount = data.resultado.order_amount 
+                  order_vat = data.resultado.order_vat
+                  order_reference = data.resultado.order_reference
+                  order_installments_type = data.resultado.order_installments_type
+                  order_taxable_amount = data.resultado.order_taxable_amount
+                  order_tax_percentage = data.resultado.order_tax_percentage
+              }
+            }
+          });
+      }      
+    };
+
+    function pasarDatos()
+    {      
+        var first_name = $('#firstname').val()
+        var last_name = $('#lastname').val()
+        var user_tipo_identificacion = $('#tipoidentificacion').val()
+        var user_numero_identificacion = $('#numeroIdentificacion').val().toString()
+        var nombre_receptor = $('#receptor').val()
+        var provincia = $('#provincia').val()
+        var canton = $('#canton').val()
+        var calle_principal = $('#calleprincipal').val()
+        var numero_calle = $('#numerocalle').val()
+        var barrio_entrega = $('#barrioentrega').val()
+        var referencia_entrega = $('#referenciaentrega').val()
+        
+        user_email = $('#email').val()
+        user_phone = $('#phone').val().toString()
+        $.ajax({            
+            url: "http://localhost:8000/pago/gestionfactura",
+            type: "post",
+            dataType: "JSON",
+            data: { opcion : 2, numeroReferencia: order_reference, first_name : first_name, 
+                    last_name :last_name, user_tipo_identificacion: user_tipo_identificacion, 
+                    user_numero_identificacion : user_numero_identificacion, user_email : user_email,
+                    user_phone : user_phone, nombre_receptor : nombre_receptor, provincia : provincia,
+                    canton : canton, calle_principal : calle_principal, numero_calle : numero_calle,
+                    barrio_entrega : barrio_entrega, referencia_entrega : referencia_entrega },
+            success:  function(data)
+            {
+              if(data.estado==true)
+              {
+                  user_id = data.resultado.user_id
+                  order_description = data.resultado.order_description
+                  order_amount = data.resultado.order_amount
+                  order_vat = data.resultado.order_vat
+                  order_reference = data.resultado.order_reference
+                  order_installments_type = data.resultado.order_installments_type
+                  order_taxable_amount = data.resultado.order_taxable_amount
+                  order_tax_percentage = data.resultado.order_tax_percentage
+              }
+            }
+          });
+    }
+
+
+    let paymentCheckout = new PaymentCheckout.modal({
+
+      client_app_code: 'CHATBOTSTG-EC-CLIENT', // Client Credentials
+      client_app_key: 'od9xqwIxCxD4jInSVnORPUtb9yxJLT', // Client Credentials
+      locale: 'es', // User's preferred language (es, en, pt). English will be used by default.
+      env_mode: 'stg', // `prod`, `stg`, `local` to change environment. Default is `stg`
+
+      onOpen: function () {        
+        console.log('modal opened');
+      },
+      onClose: function () {
+        console.log('modal closed');
+      },
+      onResponse: function (response) { // The callback to invoke when the Checkout process is completed
+        
+        $.ajax({
+          url :  "http://localhost:8000/pago/respuestapago",
+          method : "post",
+          dataType : "JSON",
+          data : { myjson: response },
+          success : function (data){
+              $('#respuestaPagoTarjeta').html(data.mensaje)
+          }
+        });
+      }
+    });
+
+    console.log(document)
+
+
+    let btnOpenCheckout = document.querySelector('.js-payment-checkout');
+
+    btnOpenCheckout.addEventListener('click', function () {
+      paymentCheckout.open({
+        user_id: user_id,
+        user_email: user_email,
+        user_phone: user_phone,
+        order_description: order_description,
+        order_amount: order_amount,//valor total en dolares a cancelar incluyendo iva
+        order_vat: order_vat, //valor en dolales en iva
+        order_reference: order_reference,
+        order_taxable_amount: order_taxable_amount, //valor neto en dolares - sin iva
+        order_tax_percentage: order_tax_percentage, //porcentaje del iva
+        order_installments_type: order_installments_type
+      });
+    });
+
+    window.addEventListener('popstate', function () {
+      paymentCheckout.close();
+    });
+  </script>
+  </body>
+</html>

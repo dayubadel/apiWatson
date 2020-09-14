@@ -99,7 +99,8 @@ productoController.RegistrarProductos = async (req, res) => {
             objProducto.stockOtroPago = producto.stock
             objProducto.stockCC = producto.stockcc
 
-            objProducto.precioOtroPago = producto.Price_bot
+            objProducto.precioConIntereses = producto.Price_bot_con_int
+            objProducto.precioSinIntereses = producto.Price_bot_sin_int
             objProducto.precioCC = producto.PriceC_bot
             objProducto.cuotasPrecioCC = producto.Cuotas_PriceC_bot
             objProducto.plazoGarantia = producto.plz_garantiaext

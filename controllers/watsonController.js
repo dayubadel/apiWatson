@@ -69,6 +69,7 @@ watsonController.ControlMensajes = async (req, res) => {
 
         if(carritoCompras.length>0)
         {
+            contextoAnterior['identificadorMetodoPagoCarrito'] = carritoCompras[0].identificadorMetodoPago
             carritoActual = []
             let numeroRegistro = 1
             carritoCompras.forEach(element => {
@@ -89,7 +90,7 @@ watsonController.ControlMensajes = async (req, res) => {
             contextoAnterior['menuCarrito'] = menuCarrito
         } 
 
-        var cabeceraVenta = await sqlController.gestionCabeceraVenta(contextoAnterior.numeroReferencia,null,null,null,null,null,2)
+        var cabeceraVenta = await sqlController.gestionCabeceraVenta(contextoAnterior.numeroReferencia,null,null,null,null,null,null, null,null,null,null,null,null,null,null,null,null,null,null,2)
         if(cabeceraVenta.length>0)
         {
             if(cabeceraVenta[0].nombresCabecera!=null)
@@ -811,7 +812,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }
         else if(strAccion == "abandonarCarrito")
         {
-            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,3)
+            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,3)
             .then( 
                 resultSQL => {
                     respuesta.push({response_type: 'text', text: 'El carrito ha sido abandonado.'})
@@ -823,12 +824,12 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             )
         }
         else if(strAccion=='enviarLinkPago'){
-
-            const datosCP = contexto.datosCliente
-            datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
-            respuesta.push({
+           // datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
+           await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
+           .then(result => { console.log("kdsjflsdf", result)}) 
+           respuesta.push({
                 response_type:'text',
-                text: `http://e5f8874fc574.ngrok.io/pago?user_id=${datosCP.user_id}&order_vat=${datosCP.order_vat}&user_email=${datosCP.user_email}&user_phone=${datosCP.user_phone}&order_amount=${datosCP.order_amount}&order_reference=${datosCP.order_reference}&order_description=${datosCP.order_description}&order_tax_percentage=${datosCP.order_tax_percentage}&order_taxable_amount=${datosCP.order_taxable_amount}`
+                text: ` http://d91e42c2d9a2.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){
@@ -895,7 +896,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }           
         else if(strAccion == 'enviarCorreoCompraFinalizada')
         {
-            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,1)
+            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
+            .then(result => { console.log("kdsjflsdf", result)})
+
+            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,null,null,null,null,null,null,null,null,null,null,null,null,null,1)
             .then(resultSql => {
                 if(resultSql.length>0)
                 {            

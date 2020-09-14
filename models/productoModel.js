@@ -1,17 +1,21 @@
 
 class Producto {
     constructor(idVitex, modelo, nombre, idRefSAP, stockCC, stockOtroPago, 
-        precioCC, precioOtroPago, cuotasPrecioCC, plazoGarantia, 
+        precioCC, precioConIntereses, precioSinIntereses, cuotasPrecioCC, plazoGarantia, 
         imagenes, marca, caracteristicas, categorias, isMarketPlace, url){
             this.idVitex = idVitex || "";
             this.modelo = modelo || "";
             this.nombre = nombre || "";
             this.idRefSAP = idRefSAP || "";
+
             this.stockCC = stockCC || 0;
             this.stockOtroPago = stockOtroPago || 0;
             this.precioCC = precioCC || 0;
-            this.precioOtroPago = precioOtroPago || 0;
+
+            this.precioConIntereses = precioConIntereses || 0;
+            this.precioSinIntereses = precioSinIntereses || 0;
             this.cuotasPrecioCC = cuotasPrecioCC || 0;
+
             this.plazoGarantia = plazoGarantia || 0;
 
             this.imagenes = imagenes || [];
