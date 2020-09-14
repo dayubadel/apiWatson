@@ -4,6 +4,7 @@ var paymentezController = require('./../controllers/paymentezController')
 
 
 router.get('/', paymentezController.GetFormulario)
+router.get('/ws', paymentezController.WSFacturacion)
 router.post('/respuestapago', paymentezController.RespuestaPago)
 
 module.exports = router;
