@@ -107,11 +107,11 @@ paymentezController.RespuestaPago = async (req, res) => {
 }
 
 
-paymentezController.WSFacturacion = async (numeroReferencia) => {
+paymentezController.WSFacturacion = async (req,res) => {
     var facuturaCreada = false
     // const soapUrl = config.wsFacturacion.urlSoapFactuacion
     var jsonCompra = {}
-    var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
+    var data  = await sqlPaymentezController.getDatosToWS('20200914124041710')
     if(data.length > 0){
         data.forEach(tabla => {
             if(tabla[0].tipoTabla == 'Cabecera'){
@@ -139,10 +139,10 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
     })()
 
     if(!facuturaCreada){
-        mailController.MailErrorWSFacturacion();
+        mailController.MailErrorWSFacturacion(jsonCompra);
     }
 
-    // res.json({'Estado':facuturaCreada})
+    res.json({'Estado':facuturaCreada})
     return facuturaCreada
     
     return

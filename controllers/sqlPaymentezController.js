@@ -1,6 +1,5 @@
 const mssql = require('mssql');
 const { sql } = require('../config/config');
-const mailCOntroller = require('./mailController')
 var request = new mssql.Request();
 
 
