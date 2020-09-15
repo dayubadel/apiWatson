@@ -18,18 +18,28 @@
                   <form class="form-horizontal" method="post">
                       <fieldset>
                           <legend class="text-center header">Formulario de pago | Datos del cliente </legend> 
-                            <div id="respuestaPagoTarjeta"></div>
+                            <div id="respuestaPagoTarjeta">
+                            </div>
                           <div class="form-group">
                               <div class="col-md-12">
-                                  <input id="firstname" value="Dayana Helen" name="name" type="text" placeholder="Ingrese sus dos nombres *" class="form-control">
+                                  <input id="firstname" value="Dayana" name="name" type="text" placeholder="Ingrese su primer nombre *" class="form-control">
+                              </div>
+                          </div>
+                          <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="secondname" value="Helen" name="name" type="text" placeholder="Ingrese su segundo nombre *" class="form-control">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                              <div class="col-md-12">
+                                  <input id="lastname" value="Bailón" name="lastname" type="text" placeholder="Ingrese su primer apellido *" class="form-control">
                               </div>
                           </div>
                           <div class="form-group">
                               <div class="col-md-12">
-                                  <input id="lastname" value="Bailón Delgado" name="lastname" type="text" placeholder="Ingrese sus dos apellidos *" class="form-control">
+                                  <input id="secondlastname" value="Delgado" name="lastname" type="text" placeholder="Ingrese su segundo apellido *" class="form-control">
                               </div>
-                          </div>
-                          
+                          </div>                          
                           <div class="form-group">
                             <div class="col-md-12">
                                 <select id="tipoidentificacion" name="tipoidentificacion" class="form-control">
@@ -64,17 +74,14 @@
                           </div>    
                           <div class="form-group">
                             <div class="col-md-12">
-                              <select name="provincia" id="provincia" class="form-control">
-                                <option value="0">Seleccione la provincia de destino</option>
-                                <option value="1" selected>GUAYAS</option>
+                              <select name="provincia" onchange="cargarCiudades()" id="provincia" class="form-control">
                               </select>
                             </div>
                           </div>  
                           <div class="form-group">
                             <div class="col-md-12">
-                              <select name="canton" id="canton" class="form-control">
-                                <option value="0">Seleccione el cantón de destino</option>
-                                <option value="9001" selected>GUAYAQUIL</option>
+                              <select name="ciudad" id="ciudad" class="form-control">
+                                <option value="0">SELECCIONE UNA CIUDAD</option>
                               </select>
                             </div>
                           </div>  
@@ -115,7 +122,8 @@
         color: #36A0FF;
     }
 </style>
-    <button onclick="pasarDatos()" class="js-payment-checkout">Pay with Card</button>
+    <button onclick="pasarDatos()" >Guardar datos</button>
+    <button class="js-payment-checkout" style="display:none">Pay with Card</button>
     <div id="response"></div>
   <script type="text/javascript">      
       var user_id;
@@ -129,14 +137,32 @@
 
       var user_email;
       var user_phone;
+
+
       window.onload = function() {
+
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
 
+      $.ajax({
+          url :  "http://localhost:8000/pago/gestionlugares",
+          method : "post",
+          dataType : "JSON",
+          data : { opcion : 1, provincia : null},
+          beforeSend : function (){
+            $('#provincia').html('<option value="0">CARGANDO...</option>')
+          },
+          success : function (data){
+            var optionP = '<option value="0">SELECCIONE UNA PROVINCIA</option>'
+            data.resultado.forEach(element => {
+              optionP = `${optionP}<option value='${element.provincia}'>${element.provincia}</option> ` 
+            })
+            $('#provincia').html(optionP)
+          }
+        });
+
       order_reference = urlParams.get('numero_referencia')
-
       consultarFactura(order_reference)
-
       function consultarFactura(numeroReferencia)
       {
         
@@ -149,7 +175,6 @@
             {
               if(data.estado==true)
               {
-                  console.log(data.resultado)
                   user_id = data.resultado.user_id
                   order_description = data.resultado.order_description
                   order_amount = data.resultado.order_amount 
@@ -164,23 +189,222 @@
       }      
     };
 
+    function validarInicial(numero, tipo)
+    {
+        var mensaje =''
+        
+        if (!/^([0-9])*$/.test(numero)) {
+            mensaje = 'Valor ingresado debe ser solo números'
+        }
+        else if (tipo=='cedula' && numero.length!=10) {
+            mensaje = 'Valor ingresado debe tener 10 caracteres'
+        }
+        else if (tipo=='ruc' && numero.length!=12) {
+            mensaje = 'Valor ingresado debe tener 10 caracteres'
+        }
+        else 
+        {
+            return true
+        }
+        return false
+    }
+
+    function  validarCodigoProvincia(numero)
+    {
+        var estado = false
+        var mensaje = ''
+        if (numero < 0 || numero > 24) {
+          mensaje = 'Codigo de Provincia (dos primeros dígitos) no deben ser mayor a 24 ni menores a 0'
+        }
+        else {
+          estado=true
+        }
+        return estado
+    }
+
+    function validarTercerDigito(numero, tipo)
+    {
+        var estado = false
+        var mensaje = ''
+
+        if(tipo=='cedula' && (numero<0 || numero> 5))
+        {
+          mensaje = 'Tercer dígito debe ser mayor o igual a 0 y menor a 6 para cédulas y RUC de persona natural'
+        }
+        else if(tipo=='ruc' &&  numero!=6 && numero!=9 && (numero<0 || numero>5))
+        {
+          mensaje = 'Tercer dígito para RUC debe ser mayor o igual a 0 y menor a 6, o ser 6 o ser 9'
+        }
+        else 
+        { 
+          estado=true
+        }
+        return estado
+    }
+
+    function  validarCodigoEstablecimiento(numero)
+    {
+        var estado = false
+        var mensaje = ''
+        if (numero < 1 ) {
+          mensaje = 'Código de establecimiento no puede ser 0'
+        }
+        else {
+          estado=true
+        }
+        return estado
+    }
+
+
+    function validarCedula(cedula)
+    {
+      const ced = cedula;
+      let [suma, mul, index] = [0, 1, ced.length];
+      while (index--) {
+        let num = ced[index] * mul;
+        suma += num - (num > 9) * 9;
+        mul = 1 << index % 2;
+      }
+      if ((suma % 10 === 0) && (suma > 0)) {
+        return true
+      } 
+      return false              
+      
+    }
+
+    function validarEmail(valor) {
+      if (/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(valor)){
+         return true
+      } 
+      return false
+    }
+
+    function cargarCiudades()
+    {
+        let provincia = $('#provincia').val()
+        $.ajax({
+          url :  "http://localhost:8000/pago/gestionlugares",
+          method : "post",
+          dataType : "JSON",
+          data : { opcion : 2, provincia : provincia},
+          beforeSend : function (){
+            $('#ciudad').html('<option value="0">CARGANDO...</option>')
+          },
+          success : function (data){
+            var optionP = '<option value="0">SELECCIONE UNA CIUDAD</option>'
+            data.resultado.forEach(element => {
+              optionP = `${optionP}<option value='${element.idCiudad}'>${element.ciudad}</option> ` 
+            })
+            $('#ciudad').html(optionP)
+          }
+        });
+    }
+
     function pasarDatos()
     {      
         var first_name = $('#firstname').val()
+        var second_name = $('#secondname').val()
         var last_name = $('#lastname').val()
+        var second_last_name = $('#secondlastname').val()
         var user_tipo_identificacion = $('#tipoidentificacion').val()
         var user_numero_identificacion = $('#numeroIdentificacion').val().toString()
+        var user_correo = $('#email').val()
+        var user_telefono = $('#phone').val().toString()
         var nombre_receptor = $('#receptor').val()
         var provincia = $('#provincia').val()
-        var canton = $('#canton').val()
+        var ciudad = $('#ciudad').val()
         var calle_principal = $('#calleprincipal').val()
         var numero_calle = $('#numerocalle').val()
         var barrio_entrega = $('#barrioentrega').val()
         var referencia_entrega = $('#referenciaentrega').val()
+
+        estadoValidacion = false;
+        mensajeValidacion = '';       
         
         user_email = $('#email').val()
         user_phone = $('#phone').val().toString()
-        $.ajax({            
+        if(first_name.trim()=='')
+        {
+            mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE SU PRIMER NOMBRE</div>'
+        }
+        else if(second_name.trim() == '')
+        {
+            mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE SU SEGUNDO NOMBRE</div>'
+        }
+        else if(last_name.trim() == '')
+        {
+            mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE SU PRIMER APELLIDO</div>'
+        }
+        else if(second_last_name.trim() == '')
+        {
+            mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE SU SEGUNDO APELLIDO</div>'
+        }
+        else if(user_tipo_identificacion != 'cedulaECU' && user_tipo_identificacion != 'rucECU'  ) 
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">SELECCIONE UN TIPO DE IDENTIFICACIÓN</div>'
+        }
+        else if(user_tipo_identificacion=='cedulaECU' && ( validarInicial(user_numero_identificacion,'cedula')==false || validarCodigoProvincia(user_numero_identificacion.substr(0,2)) ==false || validarTercerDigito(user_numero_identificacion.substr[2],'cedula')==false ||  validarCedula(user_numero_identificacion)==false))
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">CÉDULA INCORRECTA. INGRESE NUEVAMENTE</div>'
+        }
+        else if(user_tipo_identificacion== 'rucECU' && ( validarInicial(user_numero_identificacion,'ruc')==false || validarCodigoProvincia(user_numero_identificacion.substr(0,2)) ==false || validarTercerDigito(user_numero_identificacion.substr[2],'ruc')==false ))
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">RUC INCORRECTO. INGRESE NUEVAMENTE</div>'
+        }
+        else if(user_correo.trim().length==0)
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE SU CORREO ELECTRÓNICO</div>'
+        }
+        else if(validarEmail(user_correo)==false)
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">CORREO ELECTRÓNICO INVÁLIDO. INGRESE NUEVAMENTE</div>'
+        }
+        else if(user_telefono.trim().length==0 )
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE SU NÚMERO DE TELÉFONO</div>'
+        }
+        else if(nombre_receptor.trim().length==0)
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE EL NOMBRE Y APELLIDO DE LA PERSONA QUE RECIBIRÁ EL PEDIDO</div>'
+        }
+        else if(provincia=='' || provincia=='0')
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">SELECCIONE UNA PROVINCIA PARA LA ENTREGA DEL PEDIDO</div>'
+        }
+        else if(ciudad=='' || ciudad=='0')
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">SELECCIONE UNA CIUDAD PARA LA ENTREGA DEL PEDIDO</div>'
+        }
+        else if(calle_principal.trim().length==0)
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE LA CALLE PRINCIPAL</div>'
+        }
+        else if(numero_calle.trim().length==0)
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE EL NÚMERO DE LA CALLE</div>'
+        }        
+        else if(barrio_entrega.trim().length==0)
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE EL BARRIO DE ENTREGA</div>'
+        }     
+        else if(referencia_entrega.trim().length==0)
+        {
+          mensajeValidacion = '<div id="respuestaValidacion" class="alert alert-danger text-center" role="alert">INGRESE LA REFERENCIA DE LA DIRECCIÓN DE ENTREGA</div>'
+        }      
+        else 
+        {
+          estadoValidacion=true
+        }  
+
+
+        if(estadoValidacion==false)
+        {
+            $('#respuestaPagoTarjeta').html(mensajeValidacion)
+        }
+        else
+        {
+          $(".js-payment-checkout").trigger("click");
+          $.ajax({            
             url: "http://localhost:8000/pago/gestionfactura",
             type: "post",
             dataType: "JSON",
@@ -188,7 +412,7 @@
                     last_name :last_name, user_tipo_identificacion: user_tipo_identificacion, 
                     user_numero_identificacion : user_numero_identificacion, user_email : user_email,
                     user_phone : user_phone, nombre_receptor : nombre_receptor, provincia : provincia,
-                    canton : canton, calle_principal : calle_principal, numero_calle : numero_calle,
+                    ciudad : ciudad, calle_principal : calle_principal, numero_calle : numero_calle,
                     barrio_entrega : barrio_entrega, referencia_entrega : referencia_entrega },
             success:  function(data)
             {
@@ -205,6 +429,7 @@
               }
             }
           });
+        }
     }
 
 
