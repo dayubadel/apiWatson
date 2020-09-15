@@ -35,4 +35,24 @@ mailController.enviarEmail = async (subject, content) =>
 }
 
 
+mailController.MailErrorWSFacturacion = () => {
+    var mailOptions = {
+      from: 'chatbot1@comandato.com',
+  //   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
+      to: 'bryan.garcia@gaiaconsultores.biz',
+      subject: 'Error de comunicación con WS de Facturacion Automatica',
+      html: 'content'
+    };
+
+  transporter.sendMail(mailOptions, function(error, info){
+    
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+}
+
+
 module.exports = mailController;

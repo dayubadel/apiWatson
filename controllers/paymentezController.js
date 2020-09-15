@@ -1,6 +1,9 @@
 const config = require("../config/config.js");
 const sqlController = require('./sqlController.js')
+const sqlPaymentezController = require('./sqlPaymentezController.js')
 const soap = require('soap')
+const util = require('util')
+const mailController = require('./mailController')
 const paymentezController = {}
 
 paymentezController.GestionFactura = async (req, res) => {
@@ -18,7 +21,7 @@ paymentezController.GestionFactura = async (req, res) => {
                                         datosFactura.last_name.toUpperCase(),datosFactura.user_tipo_identificacion,
                                         datosFactura.user_numero_identificacion,datosFactura.user_email.toLowerCase(),datosFactura.user_phone,
                                         datosFactura.nombre_receptor, 160, datosFactura.calle_principal, datosFactura.numero_calle,
-                                        datosFactura.barrio_entrega, datosFactura.referencia_entrega,null,null,null,null,null,null,4)    
+                                        datosFactura.barrio_entrega, datosFactura.referencia_entrega,null,null,null,null,null,null,4)
     }
     if(respuestaSql.length==0)
     {
@@ -32,8 +35,8 @@ paymentezController.GestionFactura = async (req, res) => {
             tipoPago = 2
         else if (factura.identificadorMetodoPago == 5)
             tipoPago = 3
-        var facuturaPaymentez = 
-            { 
+        var facuturaPaymentez =
+            {
                 user_id : factura.idClienteCanalMensajeria.toString(),
                 order_description : 'Chatbot_Dora',
                 order_amount : factura.valorTotalOrden,
@@ -61,7 +64,7 @@ paymentezController.RespuestaPago = async (req, res) => {
     const transaction = req.body.myjson.transaction;
     if(transaction.hasOwnProperty("type")){
         res.send(
-        { 
+        {
             estado: false,
             type: "Error de servidor",
             mensaje: '<div class="alert alert-danger text-center" role="alert">HA OCURRIOD UN ERROR CON EL PAGO, POR FAVOR INTENTE NUEVAMENTE.</div>'
@@ -70,7 +73,7 @@ paymentezController.RespuestaPago = async (req, res) => {
     else if(transaction.hasOwnProperty("status")){
         if(transaction.status == "failure"){
             res.send(
-                { 
+                {
                     estado: false,
                     type: "Error con la tarjeta",
                     mensaje: '<div class="alert alert-danger text-center" role="alert">SU TARJETA HA SIDO RECHAZADA</div>'
@@ -83,7 +86,7 @@ paymentezController.RespuestaPago = async (req, res) => {
            if(respuestaSql.length==0)
            {
                 res.send(
-                { 
+                {
                     estado: false,
                     type: "Error al actualizar datos en la base",
                     mensaje: '<div class="alert alert-warning text-center" role="alert">SU PAGO FUE PROCESADO DE FORMA CORRECTA. SIN EMBARGO SE PRESENTARON ERRORES AL ACTUALIZAR SUS DATOS.</div>'
@@ -92,7 +95,7 @@ paymentezController.RespuestaPago = async (req, res) => {
            else
            {
                 res.send(
-                { 
+                {
                     estado: true,
                     type: "Exito",
                     mensaje:'<div class="alert alert-success text-center" role="alert">SU PAGO HA SIDO PROCESADO EXITOSAMENTE. GRACIAS POR SU COMPRA</div>'
@@ -100,82 +103,130 @@ paymentezController.RespuestaPago = async (req, res) => {
             }
         }
     }
-    
+
 }
 
 
-paymentezController.WSFacturacion = (req, res) => {
-    const soapUrl = config.wsFacturacion.urlSoapFactuacion
+paymentezController.WSFacturacion = async (numeroReferencia) => {
+    var facuturaCreada = false
+    // const soapUrl = config.wsFacturacion.urlSoapFactuacion
+    var jsonCompra = {}
+    var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
+    if(data.length > 0){
+        data.forEach(tabla => {
+            if(tabla[0].tipoTabla == 'Cabecera'){
+                    let orden = tabla[0];
+                    delete orden.tipoTabla
+                    jsonCompra.orden = orden
+            }
+            if(tabla[0].tipoTabla == 'Detalle'){
+                let detalle = tabla
+                delete detalle.tipoTabla
+                jsonCompra.orden.items = tabla
+            }
+        });
 
-    const jsonCompra = {
-        "orden": {
-            "id":"717763",
-            "orderid":"717763",
-            "value_order":"105898",
-            "value_items":"94196",
-            "value_discounts":"0",
-            "value_tax":"11346",
-            "value_envio":"356",
-            "value_intereses":"0",
-            "items":[
-                {
-                    "id":"2012775",
-                    "quantity":1,
-                    "name":"Refrigeradora LG Side by Side  GS65MPP1 | 626 Litros 100054508",
-                    "refId":"100054508",
-                    "price":94196,
-                    "listPrice":196696,
-                    "tax":11303,
-                    "bodega":397,
-                    "marketPlace":"0"
-                }
-            ],
-            "email":"oscar_chavez_1992@hotmail.com",
-            "firstname":"Oscar Omar",
-            "lastname":"Chavez Molina",
-            "document_type":"cedulaECU",
-            "document":"930177720",
-            "phone":"5930997335903",
-            "receiver_name":"Oscar Omar Chavez Molina",
-            "address_id":"",
-            "code_postal":"",
-            "city":"9001",
-            "state":"GUAYAS",
-            "country":"ECU",
-            "street":"Guasmo Sur Coop Union de Bananeros Bloque 1 Manzana 2823 Solar 4",
-            "number":"",
-            "neighborhood":"",
-            "complement":"",
-            "reference":"",
-            "isactive_transaction":"",
-            "transactionId":"",
-            "merchantName":"COMANDATO",
-            "paymenId":"",
-            "paymentSystem":"4",
-            "paymentSystemName":"Mastercard",
-            "valuePayment":"105898",
-            "installments":"1",
-            "firstDigits":"545195",
-            "lastDigits":"2016",
-            "group":"",
-            "tid":"DF-3536229",
-            "estado":"1"
-        }
-        
     }
+
+    await (async () => {
+        
+        for (let i = 0; i < 3; i++) {
+            facuturaCreada = await paymentezController.CallWS(jsonCompra)
+            if(facuturaCreada == true){
+                break;
+            }      
+        }
+    })()
+
+    if(!facuturaCreada){
+        mailController.MailErrorWSFacturacion();
+    }
+
+    // res.json({'Estado':facuturaCreada})
+    return facuturaCreada
+    
+    return
+    // console.log(jsonCompra)
+    /*
+    const paramsWS = {
+        "I_TOKEN": config.wsFacturacion.token,
+        'I_FECHAHORA_BOT': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),
+        'I_DATOS_ORDEN': JSON.stringify(jsonCompra.orden)
+    }
+
+    soap.createClientAsync(soapUrl)
+    .then(async soapClient => {
+        // res.send(soapClient.describe())
+        const soapCreateOrder = util.promisify(soapClient.CreateOrder)
+        return soapCreateOrder(paramsWS)
+        // .then()
+        // var respSoap
+        // soapClient.CreateOrder(paramsWS, (err, clientRes)=> {
+        //     respSoap = clientRes 
+        //     console.log(1,respSoap)
+        // // if(clientRes.CreateOrderResult.O_TIPOM == 'S'){
+        //     //     // res.json({'Estado':'OK',clientRes})
+
+        //     // }else{
+        //     //     // res.json({'Estado':'no',clientRes})
+        //     // }
+        // })
+        console.log(2,respSoap)
+        return respSoap
+    })
+    .then(clientRes => {
+        console.log(3,clientRes)
+        res.json({'Estado':'OK',clientRes})
+    })
+    .catch(err => {
+        console.log("errro",err)
+        res.send(err)
+    })
+
+    // soap.createClient(soapUrl, function(err, client) {
+    //     // res.send(client.describe())
+    //     client.CreateOrder(paramsWS,(err, result) => {
+    //         if(result.CreateOrderResult.O_TIPOM == 'S'){
+    //             res.json({'Estado':'OK',result})
+
+    //         }else{
+    //             res.json({'Estado':'no',result})
+    //         }
+    //     })
+    // })*/
+}
+
+paymentezController.CallWS = async (jsonCompra) => {
+    var facturaCreada = false
+    const soapUrl = config.wsFacturacion.urlSoapFactuacion
 
     const paramsWS = {
         "I_TOKEN": config.wsFacturacion.token,
         'I_FECHAHORA_BOT': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),
         'I_DATOS_ORDEN': JSON.stringify(jsonCompra)
     }
-    
-    soap.createClient(soapUrl, function(err, client) {
-        // res.send(client.describe())
-        client.CreateOrder(paramsWS,(err, result) => {
-            res.json(result)
-        })
+
+
+    await soap.createClientAsync(soapUrl)
+    .then(async soapClient => {
+        const soapCreateOrder = util.promisify(soapClient.CreateOrder)
+        return soapCreateOrder(paramsWS)
     })
+    .then(clientRes => {
+        console.log(clientRes)
+        if(clientRes.CreateOrderResult.O_TIPOM == 'S'){
+            facturaCreada = true
+        }else{
+            facturaCreada = false
+        }
+    })
+    .catch(err => {
+        console.log("error de comunicacion",err)
+        facturaCreada = false
+            // res.send(err)
+    })
+
+    return facturaCreada
 }
 
 module.exports = paymentezController;
