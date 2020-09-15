@@ -17,7 +17,7 @@ paymentezController.GestionFactura = async (req, res) => {
         respuestaSql = await sqlController.gestionCabeceraVenta (datosFactura.numeroReferencia,datosFactura.first_name.toUpperCase(),
                                         datosFactura.last_name.toUpperCase(),datosFactura.user_tipo_identificacion,
                                         datosFactura.user_numero_identificacion,datosFactura.user_email.toLowerCase(),datosFactura.user_phone,
-                                        datosFactura.nombre_receptor, 160, datosFactura.calle_principal, datosFactura.numero_calle,
+                                        datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal, datosFactura.numero_calle,
                                         datosFactura.barrio_entrega, datosFactura.referencia_entrega,null,null,null,null,null,null,4)    
     }
     if(respuestaSql.length==0)
@@ -53,12 +53,19 @@ paymentezController.GestionFactura = async (req, res) => {
     }
 }
 
+paymentezController.GestionLugares= async (req, res) => {
+    var resultadoSql =  await sqlController.GestionLugares(req.body.provincia,req.body.opcion)
+
+    res.send({estado: true, resultado: resultadoSql})
+}
+
 paymentezController.GetFormulario = (req, res) => {
     res.sendFile('indexPago.html', { root: `${__dirname}\\..\\dist\\` })
 }
 
 paymentezController.RespuestaPago = async (req, res) => {
     const transaction = req.body.myjson.transaction;
+    console.log(req.body.myjson)
     if(transaction.hasOwnProperty("type")){
         res.send(
         { 
