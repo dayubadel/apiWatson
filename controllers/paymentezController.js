@@ -74,7 +74,7 @@ paymentezController.RespuestaPago = async (req, res) => {
         {
             estado: false,
             type: "Error de servidor",
-            mensaje: '<div class="alert alert-danger text-center" role="alert">HA OCURRIOD UN ERROR CON EL PAGO, POR FAVOR INTENTE NUEVAMENTE.</div>'
+            mensaje: 'HA OCURRIOD UN ERROR CON EL PAGO, POR FAVOR INTENTE NUEVAMENTE'
         })
     }
     else if(transaction.hasOwnProperty("status")){
@@ -83,7 +83,7 @@ paymentezController.RespuestaPago = async (req, res) => {
                 {
                     estado: false,
                     type: "Error con la tarjeta",
-                    mensaje: '<div class="alert alert-danger text-center" role="alert">SU TARJETA HA SIDO RECHAZADA</div>'
+                    mensaje: 'SU TARJETA HA SIDO RECHAZADA'
                 })
         }
         else{
@@ -96,7 +96,7 @@ paymentezController.RespuestaPago = async (req, res) => {
                 {
                     estado: false,
                     type: "Error al actualizar datos en la base",
-                    mensaje: '<div class="alert alert-warning text-center" role="alert">SU PAGO FUE PROCESADO DE FORMA CORRECTA. SIN EMBARGO SE PRESENTARON ERRORES AL ACTUALIZAR SUS DATOS.</div>'
+                    mensaje: 'PAGO FUE PROCESADO DE FORMA CORRECTA. SIN EMBARGO SE PRESENTARON ERRORES AL ACTUALIZAR SUS DATOS.'
                 })
            }
            else
@@ -104,8 +104,8 @@ paymentezController.RespuestaPago = async (req, res) => {
                 res.send(
                 {
                     estado: true,
-                    type: "Exito",
-                    mensaje:'<div class="alert alert-success text-center" role="alert">SU PAGO HA SIDO PROCESADO EXITOSAMENTE. GRACIAS POR SU COMPRA</div>'
+                    type: "Éxito",
+                    mensaje:'SU PAGO HA SIDO PROCESADO EXITOSAMENTE. GRACIAS POR SU COMPRA'
                 })
             }
         }

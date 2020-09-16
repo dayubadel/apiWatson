@@ -833,7 +833,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            .then(result => { console.log("kdsjflsdf", result)}) 
            respuesta.push({
                 response_type:'text',
-                text: `http://b9c9ca7350e8.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
+                text: `http://727dee53e327.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){
