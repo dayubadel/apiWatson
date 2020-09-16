@@ -101,12 +101,26 @@ paymentezController.RespuestaPago = async (req, res) => {
            }
            else
            {
-                res.send(
-                {
-                    estado: true,
-                    type: "Éxito",
-                    mensaje:'SU PAGO HA SIDO PROCESADO EXITOSAMENTE. GRACIAS POR SU COMPRA'
-                })
+                let respuestaWS = await paymentezController.WSFacturacion(transaction.dev_reference)
+                if(respuestaWS==true)
+                {                    
+                    res.send(
+                    {
+                        estado: true,
+                        type: "Éxito",
+                        mensaje:`SU PAGO HA SIDO PROCESADO EXITOSAMENTE CON EL SIGUIENTE NÚMERO DE ORDEN DE COMPRA: ${transaction.dev_reference}`
+                    })
+                }
+                else 
+                {      
+                    //preguntar si es necesario emitir email al dpto. de ventas            
+                    res.send(
+                    {
+                        estado: true,
+                        type: "Éxito",
+                        mensaje:'SU PAGO HA SIDO PROCESADO EXITOSAMENTE. OCURRIÓ UN ERROR EN LA FACTURACIÓN.'
+                    })
+                }
             }
         }
     }
@@ -114,11 +128,11 @@ paymentezController.RespuestaPago = async (req, res) => {
 }
 
 
-paymentezController.WSFacturacion = async (req,res) => {
+paymentezController.WSFacturacion = async (numeroReferencia) => {
     var facuturaCreada = false
     // const soapUrl = config.wsFacturacion.urlSoapFactuacion
     var jsonCompra = {}
-    var data  = await sqlPaymentezController.getDatosToWS('20200914124041710')
+    var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
     if(data.length > 0){
         data.forEach(tabla => {
             if(tabla[0].tipoTabla == 'Cabecera'){
@@ -132,11 +146,9 @@ paymentezController.WSFacturacion = async (req,res) => {
                 jsonCompra.orden.items = tabla
             }
         });
-
     }
 
-    await (async () => {
-        
+    await (async () => {        
         for (let i = 0; i < 3; i++) {
             facuturaCreada = await paymentezController.CallWS(jsonCompra)
             if(facuturaCreada == true){
@@ -149,58 +161,7 @@ paymentezController.WSFacturacion = async (req,res) => {
         mailController.MailErrorWSFacturacion(jsonCompra);
     }
 
-    res.json({'Estado':facuturaCreada})
     return facuturaCreada
-    
-    return
-    // console.log(jsonCompra)
-    /*
-    const paramsWS = {
-        "I_TOKEN": config.wsFacturacion.token,
-        'I_FECHAHORA_BOT': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),
-        'I_DATOS_ORDEN': JSON.stringify(jsonCompra.orden)
-    }
-
-    soap.createClientAsync(soapUrl)
-    .then(async soapClient => {
-        // res.send(soapClient.describe())
-        const soapCreateOrder = util.promisify(soapClient.CreateOrder)
-        return soapCreateOrder(paramsWS)
-        // .then()
-        // var respSoap
-        // soapClient.CreateOrder(paramsWS, (err, clientRes)=> {
-        //     respSoap = clientRes 
-        //     console.log(1,respSoap)
-        // // if(clientRes.CreateOrderResult.O_TIPOM == 'S'){
-        //     //     // res.json({'Estado':'OK',clientRes})
-
-        //     // }else{
-        //     //     // res.json({'Estado':'no',clientRes})
-        //     // }
-        // })
-        console.log(2,respSoap)
-        return respSoap
-    })
-    .then(clientRes => {
-        console.log(3,clientRes)
-        res.json({'Estado':'OK',clientRes})
-    })
-    .catch(err => {
-        console.log("errro",err)
-        res.send(err)
-    })
-
-    // soap.createClient(soapUrl, function(err, client) {
-    //     // res.send(client.describe())
-    //     client.CreateOrder(paramsWS,(err, result) => {
-    //         if(result.CreateOrderResult.O_TIPOM == 'S'){
-    //             res.json({'Estado':'OK',result})
-
-    //         }else{
-    //             res.json({'Estado':'no',result})
-    //         }
-    //     })
-    // })*/
 }
 
 paymentezController.CallWS = async (jsonCompra) => {
@@ -210,10 +171,8 @@ paymentezController.CallWS = async (jsonCompra) => {
     const paramsWS = {
         "I_TOKEN": config.wsFacturacion.token,
         'I_FECHAHORA_BOT': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),
-        'I_DATOS_ORDEN': JSON.stringify(jsonCompra)
+        'I_DATOS_ORDEN': JSON.stringify(jsonCompra.orden)
     }
-
-
     await soap.createClientAsync(soapUrl)
     .then(async soapClient => {
         const soapCreateOrder = util.promisify(soapClient.CreateOrder)

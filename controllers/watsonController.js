@@ -830,7 +830,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         else if(strAccion=='enviarLinkPago'){
            // datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
-           .then(result => { console.log("kdsjflsdf", result)}) 
            respuesta.push({
                 response_type:'text',
                 text: `http://727dee53e327.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
