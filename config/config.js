@@ -8,38 +8,39 @@ module.exports = {
     valorGlobales :{
         IVAPercent : 12,
         valorEnvio : 3.99,
-        urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL'
+        urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL',
+        uriWhatsapp : 'http://localhost:8011/sendmessage'
     },
     wsFacturacion: {
         token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
         urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL'
     },
-    // sql: {
-    //     config_sql : {
-    //         user : 'sa',
-    //         password: '1234',
-    //         server: 'DESKTOP-TU6JTR4\\SQLEXPRESS',
-    //         port: 1433,
-    //         database: 'chatbotComandato',
-    //         options:{
-    //           'encrypt' : true,
-    //           'enableArithAbort': true
-    //         }
-    //     }
-    //   } 
-     sql: {
-         config_sql : {
-             user : 'sa',
-             password: 'dayu2020',
-             server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
-             port: 1433,
-             database: 'chatbotComandato',
-             options:{
-               'encrypt' : true,
-               'enableArithAbort': true
-             }
-         }
+    sql: {
+        config_sql : {
+            user : 'sa',
+            password: '1234',
+            server: 'DESKTOP-TU6JTR4\\SQLEXPRESS',
+            port: 1433,
+            database: 'chatbotComandato',
+            options:{
+              'encrypt' : true,
+              'enableArithAbort': true
+            }
         }
+      }
+    //  sql: {
+    //      config_sql : {
+    //          user : 'sa',
+    //          password: 'dayu2020',
+    //          server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
+    //          port: 1433,
+    //          database: 'chatbotComandato',
+    //          options:{
+    //            'encrypt' : true,
+    //            'enableArithAbort': true
+    //          }
+    //      }
+    //     }
     // sql: {
     //     config_sql : {
     //         user : 'userGaia',

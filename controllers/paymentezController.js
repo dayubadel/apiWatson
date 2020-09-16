@@ -4,7 +4,11 @@ const sqlPaymentezController = require('./sqlPaymentezController.js')
 const soap = require('soap')
 const util = require('util')
 const mailController = require('./mailController')
+const whatsappController = require('./whatsappController')
+
+
 const paymentezController = {}
+
 
 paymentezController.GestionFactura = async (req, res) => {
     let opcion = req.body.opcion
@@ -193,6 +197,20 @@ paymentezController.CallWS = async (jsonCompra) => {
     })
 
     return facturaCreada
+}
+
+paymentezController.sendWhatsapp = (objRespuesta, idWhatsapp) => {
+    // var respuesta = [
+    //     {
+    //         response_type: 'text',
+    //         text: 'este mensaje es una prueba'
+    //     },
+    //     {
+    //         response_type: 'text',
+    //         text: 'este mensaje es una pruea'
+    //     }
+    // ]
+    whatsappController.enviarMensaje(objRespuesta,idWhatsapp)
 }
 
 module.exports = paymentezController;
