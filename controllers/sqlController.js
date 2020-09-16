@@ -765,7 +765,8 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
                              valorEnvio : element.valorEnvio,
                              idClienteCanalMensajeria : element.idClienteCanalMensajeria,
                              email : element.email,
-                             identificadorMetodoPago : element.identificadorMetodoPago
+                             identificadorMetodoPago : element.identificadorMetodoPago,
+                             idConversacionCanal : element.idConversacionCanal
                     }
                     resultSQL.push(datos)
                 }
@@ -778,47 +779,6 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
             throw new Error('Error al registrar en BD')
     })
     return resultSQL
-}
-
-sqlController.GestionLugares = async (provincia, opcion) =>
-{
-
-    let query
-    var resultSQL = []
-    var datos = {}
-    if(opcion==1)
-    {
-        query = `[dbo].[sp_GestionLugares] 
-                @opcion = ${opcion}`
-    }
-    else if(opcion==2)
-    {
-        query = `[dbo].[sp_GestionLugares] 
-                @provincia = N'${provincia}',
-                @opcion = ${opcion}`
-    }
-    await request.query(query)
-    .then(async data => {
-        if (data.recordset != undefined && data.recordset.length > 0) {
-               data.recordset.forEach(element => 
-               {
-                   datos =  
-                    { 
-                        idCiudad : element.idCiudad,
-                        identificador : element.identificador,
-                        ciudad : element.nombre,
-                        provincia : element.provincia
-                    }                    
-                   resultSQL.push(datos)
-               })
-       }
-   })
-   .catch(err => {
-           console.log("Error al gestionar lugares")
-           console.log(err)
-           throw new Error('Error al registrar en BD')
-   })
-   return resultSQL
 }
 
 sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, nombreCategoria, nombreMarca, nombreProducto) =>

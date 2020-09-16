@@ -2853,6 +2853,7 @@ body.is-menu-visible #menu {
       <div id="response"></div>
   <script type="text/javascript">      
       var user_id;
+      var canal_id;
       var order_description;
       var order_amount;
       var order_vat;
@@ -3166,6 +3167,7 @@ body.is-menu-visible #menu {
                   order_installments_type = data.resultado.order_installments_type
                   order_taxable_amount = data.resultado.order_taxable_amount
                   order_tax_percentage = data.resultado.order_tax_percentage
+                  canal_id = data.resultado.idConversacionCanal
               }
             }
           });
@@ -3192,7 +3194,7 @@ body.is-menu-visible #menu {
           url :  "http://localhost:8000/pago/respuestapago",
           method : "post",
           dataType : "JSON",
-          data : { myjson: response },
+          data : { myjson: response},
           success : function (data){
             if(data.estado==false)
             {

@@ -1,5 +1,4 @@
 const config = require("../config/config.js");
-const sqlController = require('./sqlController.js')
 const sqlPaymentezController = require('./sqlPaymentezController.js')
 const soap = require('soap')
 const util = require('util')
@@ -16,12 +15,12 @@ paymentezController.GestionFactura = async (req, res) => {
     if(opcion == 1)
     {
         var numeroReferencia = req.body.numeroReferencia
-        respuestaSql = await sqlController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+        respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
     }
     else if(opcion == 2)
     {
         var datosFactura = req.body
-        respuestaSql = await sqlController.gestionCabeceraVenta (datosFactura.numeroReferencia,datosFactura.first_name.toUpperCase(),
+        respuestaSql = await sqlPaymentezController.gestionCabeceraVenta (datosFactura.numeroReferencia,datosFactura.first_name.toUpperCase(),
                                         datosFactura.last_name.toUpperCase(),datosFactura.user_tipo_identificacion,
                                         datosFactura.user_numero_identificacion,datosFactura.user_email.toLowerCase(),datosFactura.user_phone,
                                         datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal, datosFactura.numero_calle,
@@ -54,14 +53,15 @@ paymentezController.GestionFactura = async (req, res) => {
                 phone : factura.numeroTelefono,
                 tipo_identificacion : factura.tipoIdentificacion,
                 numero_identificacion : factura.numIdentificacion,
-                email : factura.email
+                email : factura.email,
+                idConversacionCanal : factura.idConversacionCanal
             }
         res.send({estado: true, resultado: facuturaPaymentez})
     }
 }
 
 paymentezController.GestionLugares= async (req, res) => {
-    var resultadoSql =  await sqlController.GestionLugares(req.body.provincia,req.body.opcion)
+    var resultadoSql =  await sqlPaymentezController.GestionLugares(req.body.provincia,req.body.opcion)
 
     res.send({estado: true, resultado: resultadoSql})
 }
@@ -71,8 +71,8 @@ paymentezController.GetFormulario = (req, res) => {
 }
 
 paymentezController.RespuestaPago = async (req, res) => {
+    var respuesta = []
     const transaction = req.body.myjson.transaction;
-    console.log(req.body.myjson)
     if(transaction.hasOwnProperty("type")){
         res.send(
         {
@@ -93,7 +93,7 @@ paymentezController.RespuestaPago = async (req, res) => {
         else{
            let card = req.body.myjson.card
            console.log(req.body)
-           let respuestaSql = await sqlController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,6)
+           let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,6)
            if(respuestaSql.length==0)
            {
                 res.send(
@@ -106,31 +106,40 @@ paymentezController.RespuestaPago = async (req, res) => {
            else
            {
                 let respuestaWS = await paymentezController.WSFacturacion(transaction.dev_reference)
+                var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`
+                //preguntar si es necesario emitir email al dpto. de ventas  cuando ws falla
                 if(respuestaWS==true)
-                {                    
+                {     
                     res.send(
                     {
                         estado: true,
                         type: "¡Transacción exitosa!",
-                        mensaje:`Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`
+                        mensaje: mensajeF
+                    })                    
+                    respuesta.push({
+                        response_type:'text',
+                        text: mensajeF
                     })
                 }
                 else 
-                {      
-                    //preguntar si es necesario emitir email al dpto. de ventas            
+                {           
                     res.send(
                     {
                         estado: true,
                         type: "¡Transacción exitosa!",
-                        mensaje:`Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}. Ocurrió un error en la facturación.`
+                        mensaje: `${mensaje} Con errores en la facturación.` 
+                    })
+                    respuesta.push({
+                        response_type:'text',
+                        text: `${mensaje} Con errores en la facturación.` 
                     })
                 }
+                console.log(respuesta, respuestaSql[0].idConversacionCanal)
+                paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
             }
         }
     }
-
 }
-
 
 paymentezController.WSFacturacion = async (numeroReferencia) => {
     var facuturaCreada = false
