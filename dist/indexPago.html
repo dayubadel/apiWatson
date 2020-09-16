@@ -3005,6 +3005,13 @@ body.is-menu-visible #menu {
       return false
     }
 
+    function validarTelefono(valor) {
+      if (/^(\+593|593)?[ -]*(09|9)[ -]*([0-9][ -]*){8}$/i.test(valor)){
+         return true
+      } 
+      return false
+    }
+
     function cargarCiudades()
     {
         let provincia = $('#provincia').val()
@@ -3087,7 +3094,11 @@ body.is-menu-visible #menu {
         }
         else if(user_telefono.trim().length==0 )
         {
-          mensajeValidacion = 'INGRESE SU NÚMERO DE TELÉFONO</div>'
+          mensajeValidacion = 'INGRESE SU NÚMERO DE TELÉFONO'
+        }
+        else if(validarTelefono(user_telefono)==false)
+        {
+          mensajeValidacion = 'CELULAR INVÁLIDO. INGRESE NUEVAMENTE'
         }
         else if(nombre_receptor.trim().length==0)
         {
@@ -3116,11 +3127,11 @@ body.is-menu-visible #menu {
         else if(referencia_entrega.trim().length==0)
         {
           mensajeValidacion = 'INGRESE LA REFERENCIA DE LA DIRECCIÓN DE ENTREGA'
-        }      
-        else 
+        }    
+        else
         {
           estadoValidacion=true
-        }  
+        }
 
         if(estadoValidacion==false)
         {
@@ -3195,9 +3206,24 @@ body.is-menu-visible #menu {
             {
               Swal.fire({
                 icon: 'success',
-                title: '¡Transacción exitosa!',
-                text: 'Se ha enviado un correo de confirmación de su compra.'
+                title: data.type,
+                text:  data.mensaje
               })
+              $('#firstname').val('')
+              $('#secondname').val('')
+              $('#lastname').val('')
+              $('#secondlastname').val('')
+              $('#tipoidentificacion').val('0')
+              $('#numeroIdentificacion').val('')
+              $('#email').val('')
+              $('#phone').val('')
+              $('#receptor').val('')
+              $('#provincia').val('0')
+              $('#ciudad').html('<option value="0">SELECCIONE UNA CIUDAD</option>')
+              $('#calleprincipal').val('')
+              $('#numerocalle').val('')
+              $('#barrioentrega').val('')
+              $('#referenciaentrega').val('')
             }
           }
         });

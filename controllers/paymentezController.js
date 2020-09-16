@@ -111,8 +111,8 @@ paymentezController.RespuestaPago = async (req, res) => {
                     res.send(
                     {
                         estado: true,
-                        type: "Éxito",
-                        mensaje:`SU PAGO HA SIDO PROCESADO EXITOSAMENTE CON EL SIGUIENTE NÚMERO DE ORDEN DE COMPRA: ${transaction.dev_reference}`
+                        type: "¡Transacción exitosa!",
+                        mensaje:`Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`
                     })
                 }
                 else 
@@ -121,8 +121,8 @@ paymentezController.RespuestaPago = async (req, res) => {
                     res.send(
                     {
                         estado: true,
-                        type: "Éxito",
-                        mensaje:'SU PAGO HA SIDO PROCESADO EXITOSAMENTE. OCURRIÓ UN ERROR EN LA FACTURACIÓN.'
+                        type: "¡Transacción exitosa!",
+                        mensaje:`Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}. Ocurrió un error en la facturación.`
                     })
                 }
             }
