@@ -40,13 +40,13 @@ mailController.MailErrorWSFacturacion = (jsonEnviado) => {
     var mailOptions = {
       from: 'chatbot1@comandato.com',
   //   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
-      to: 'bryan.garcia@gaiaconsultores.biz',
+      to: 'bryan.garcia@gaiaconsultores.biz;dayana.bailon@gaiaconsultores.biz',
       subject: 'Error de comunicación con WS de Facturacion Automatica',
       html: `<!DOCTYPE html>
       <html>
       <body>
           <p>Estimados</p>
-          <p>La presente es para indicarles que el web services de facturacion automatica ha fallado despues de 3 intentos</p>
+          <p>La presente es para indicarles que el web services de facturación automática ha fallado después de 3 intentos</p>
           <p>A continuación se muestran los parametros enviados:</p>
           <code>
               ${JSON.stringify(jsonEnviado)}
