@@ -105,37 +105,21 @@ paymentezController.RespuestaPago = async (req, res) => {
            }
            else
            {
-                let respuestaWS = await paymentezController.WSFacturacion(transaction.dev_reference)
                 var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`
-                //preguntar si es necesario emitir email al dpto. de ventas  cuando ws falla
-                if(respuestaWS==true)
-                {     
-                    res.send(
+                res.send(
                     {
                         estado: true,
                         type: "¡Transacción exitosa!",
                         mensaje: mensajeF
-                    })                    
-                    respuesta.push({
+                    })   
+                 
+                respuesta.push({
                         response_type:'text',
-                        text: mensajeF
+                        text: `${mensaje}` 
                     })
-                }
-                else 
-                {           
-                    res.send(
-                    {
-                        estado: true,
-                        type: "¡Transacción exitosa!",
-                        mensaje: `${mensaje} Con errores en la facturación.` 
-                    })
-                    respuesta.push({
-                        response_type:'text',
-                        text: `${mensaje} Con errores en la facturación.` 
-                    })
-                }
-                console.log(respuesta, respuestaSql[0].idConversacionCanal)
+                
                 paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+                paymentezController.WSFacturacion(transaction.dev_reference)
             }
         }
     }
