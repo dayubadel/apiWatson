@@ -1012,6 +1012,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 contexto['identificacionValidada'] =1
             }
         }
+        else if(strAccion=='enviarTicket')
+        {
+            let nombres = `${contexto.primerNombre} ${contexto.primerApellido}`
+            sqlController.gestionNotificacion(idClienteCanalMensajeria,contexto.motivoTicket,nombres,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,contexto.detalleTicket,null,1)
+        }
         /*comentado v 2.0 rama desarrollo
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
         {
