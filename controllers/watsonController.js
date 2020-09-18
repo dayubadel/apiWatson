@@ -5,6 +5,7 @@ const mailController = require('./mailController.js')
 const config = require("../config/config.js");
 const { json } = require('body-parser');
 const { sql, valorGlobales } = require('../config/config.js');
+const ticketController = require('./ticketController.js');
 // const pedidoModel = require('./../models/pedido.js')
 
 const id_workspace = config.Watson.id_workspace
@@ -983,11 +984,25 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.telefono 
             delete contexto.numIdentificacion
             delete contexto.tipoIdentificacion
+            if(contexto.hasOwnProperty("motivoTicket"))
+            {
+              delete contexto.motivoTicket
+              delete contexto.detalleTicket
+            }
         }    
         else if(strAccion == "validarCedula")
         {
             if(contexto.tipoIdentificacion=='Cédula')
-            {
+            { 
+                var mensajePresentacionInfo = null
+                if(contexto.hasOwnProperty("motivoTicket"))
+                {
+                    mensajePresentacionInfo = `Tu información registrada es:\n   *Motivo de solicitud:* ${contexto.motivoTicket}\n   *Detalle de solicitud:* ${contexto.detalleTicket}\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
+                }
+                else 
+                {
+                    mensajePresentacionInfo = `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
+                }
                 const ced = contexto.numIdentificacion;
                 let [suma, mul, index] = [0, 1, ced.length];
                 while (index--) {
@@ -997,7 +1012,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 }
 
                 if ((suma % 10 === 0) && (suma > 0)) {
-                    respuesta.push({response_type:'text', text: `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`})
+                    respuesta.push({response_type:'text', text: mensajePresentacionInfo})
                     respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
                     contexto['identificacionValidada'] =1
                 } else {
@@ -1007,7 +1022,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             }
             else 
             {
-                respuesta.push({response_type:'text', text: `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`})
+                respuesta.push({response_type:'text', text: mensajePresentacionInfo})
                 respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
                 contexto['identificacionValidada'] =1
             }
@@ -1015,7 +1030,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         else if(strAccion=='enviarTicket')
         {
             let nombres = `${contexto.primerNombre} ${contexto.primerApellido}`
-            sqlController.gestionNotificacion(idClienteCanalMensajeria,contexto.motivoTicket,nombres,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,contexto.detalleTicket,null,1)
+            let respuestaWS = await ticketController.EnviarTicket(contexto.motivoTicket,contexto.detalleTicket,nombres,contexto.numIdentificacion,contexto.telefono)
+            if(respuestaWS!=null)
+            {
+                sqlController.gestionNotificacion(idClienteCanalMensajeria,contexto.motivoTicket,nombres,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,contexto.detalleTicket,respuestaWS,1) 
+                respuesta.push({response_type: 'text', text: `Número de ticket generado por su solicitud: ${respuestaWS}`})
+            }
+            else
+                sqlController.gestionNotificacion(idClienteCanalMensajeria,contexto.motivoTicket,nombres,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,contexto.detalleTicket,null,1)
         }
         /*comentado v 2.0 rama desarrollo
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
