@@ -18,7 +18,7 @@ ticketController.EnviarTicket = async (motivoTicket,detalleTicket,nombres,numIde
         "I_TELEFONO" : telefono,
         "I_TOKEN": token,
         'I_SECUENCIA': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),
-        'I_MENSAJE': detalleTicket
+        'I_MENSAJE': `<tdline>${detalleTicket}</tdline>` 
     }
     console.log(paramsWS)
 
@@ -29,11 +29,13 @@ ticketController.EnviarTicket = async (motivoTicket,detalleTicket,nombres,numIde
         await soap.createClientAsync(urlSoap)
         .then(async soapClient => {
             const soapCreateOrder = util.promisify(soapClient.CreateTicket)
+            console.log("1",soapCreateOrder)
             return soapCreateOrder(paramsWS)
         })
         .then(clientRes => {
+            console.log("r",clientRes)
             if(clientRes.CreateTicketResult.O_TIPOM == 'S'){
-                numeroSecuencia = clientRes.CreateTicketResult.O_MENSAJE 
+               numeroSecuencia = clientRes.CreateTicketResult.O_MENSAJE 
             }
         })
         .catch(err => {

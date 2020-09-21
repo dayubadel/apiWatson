@@ -33,7 +33,6 @@ sqlPaymentezController.getDatosToWS = async (numeroReferencia) => {
 
 sqlPaymentezController.GestionLugares = async (provincia, opcion) =>
 {
-    console.log("skfña")
     let query
     var resultSQL = []
     var datos = {}

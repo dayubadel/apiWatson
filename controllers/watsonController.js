@@ -833,7 +833,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
            respuesta.push({
                 response_type:'text',
-                text: `http://ec0d40cea69f.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
+                text: `http://b254b69cdac4.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){
@@ -992,17 +992,18 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }    
         else if(strAccion == "validarCedula")
         {
+            var mensajePresentacionInfo = null
+            if(contexto.hasOwnProperty("motivoTicket"))
+            {
+                mensajePresentacionInfo = `Tu información registrada es:\n   *Motivo de solicitud:* ${contexto.motivoTicket}\n   *Detalle de solicitud:* ${contexto.detalleTicket}\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
+            }
+            else 
+            {
+                mensajePresentacionInfo = `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
+            }
+
             if(contexto.tipoIdentificacion=='Cédula')
-            { 
-                var mensajePresentacionInfo = null
-                if(contexto.hasOwnProperty("motivoTicket"))
-                {
-                    mensajePresentacionInfo = `Tu información registrada es:\n   *Motivo de solicitud:* ${contexto.motivoTicket}\n   *Detalle de solicitud:* ${contexto.detalleTicket}\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
-                }
-                else 
-                {
-                    mensajePresentacionInfo = `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
-                }
+            {                
                 const ced = contexto.numIdentificacion;
                 let [suma, mul, index] = [0, 1, ced.length];
                 while (index--) {
