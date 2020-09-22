@@ -74,15 +74,25 @@ paymentezController.RespuestaPago = async (req, res) => {
     var respuesta = []
     const transaction = req.body.myjson.transaction;
     if(transaction.hasOwnProperty("type")){
+        respuesta.push({
+            response_type:'text',
+            text: 'HA OCURRIOD UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE' 
+        })
+        paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
         res.send(
         {
             estado: false,
             type: "Error de servidor",
-            mensaje: 'HA OCURRIOD UN ERROR CON EL PAGO, POR FAVOR INTENTE NUEVAMENTE'
+            mensaje: 'HA OCURRIOD UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE'
         })
     }
     else if(transaction.hasOwnProperty("status")){
-        if(transaction.status == "failure"){
+        if(transaction.status == "failure"){     
+            respuesta.push({
+                response_type:'text',
+                text: 'SU TARJETA HA SIDO RECHAZADA' 
+            })       
+            paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
             res.send(
                 {
                     estado: false,
@@ -92,7 +102,6 @@ paymentezController.RespuestaPago = async (req, res) => {
         }
         else{
            let card = req.body.myjson.card
-           console.log(req.body)
            let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,6)
            if(respuestaSql.length==0)
            {
@@ -105,37 +114,20 @@ paymentezController.RespuestaPago = async (req, res) => {
            }
            else
            {
-                let respuestaWS = await paymentezController.WSFacturacion(transaction.dev_reference)
-                var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`
-                //preguntar si es necesario emitir email al dpto. de ventas  cuando ws falla
-                if(respuestaWS==true)
-                {     
-                    res.send(
+                var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
+                respuesta.push({
+                        response_type:'text',
+                        text: `${mensajeF}` 
+                    })
+                
+                paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+                paymentezController.WSFacturacion(transaction.dev_reference)
+                res.send(
                     {
                         estado: true,
                         type: "¡Transacción exitosa!",
                         mensaje: mensajeF
-                    })                    
-                    respuesta.push({
-                        response_type:'text',
-                        text: mensajeF
-                    })
-                }
-                else 
-                {           
-                    res.send(
-                    {
-                        estado: true,
-                        type: "¡Transacción exitosa!",
-                        mensaje: `${mensaje} Con errores en la facturación.` 
-                    })
-                    respuesta.push({
-                        response_type:'text',
-                        text: `${mensaje} Con errores en la facturación.` 
-                    })
-                }
-                console.log(respuesta, respuestaSql[0].idConversacionCanal)
-                paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+                    })   
             }
         }
     }
@@ -154,8 +146,10 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
                     jsonCompra.orden = orden
             }
             if(tabla[0].tipoTabla == 'Detalle'){
+                tabla.forEach(tblDetalle => {
+                    delete tblDetalle.tipoTabla
+                });
                 let detalle = tabla
-                delete detalle.tipoTabla
                 jsonCompra.orden.items = tabla
             }
         });
@@ -209,16 +203,6 @@ paymentezController.CallWS = async (jsonCompra) => {
 }
 
 paymentezController.sendWhatsapp = (objRespuesta, idWhatsapp) => {
-    // var respuesta = [
-    //     {
-    //         response_type: 'text',
-    //         text: 'este mensaje es una prueba'
-    //     },
-    //     {
-    //         response_type: 'text',
-    //         text: 'este mensaje es una pruea'
-    //     }
-    // ]
     whatsappController.enviarMensaje(objRespuesta,idWhatsapp)
 }
 

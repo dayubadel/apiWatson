@@ -15,6 +15,10 @@ module.exports = {
         token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
         urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL'
     },
+    wsTickets: {
+        token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
+        urlSoapTickets : 'https://appchatbot.comandato.com/wsChatBot.asmx?WSDL'
+    },
     // sql: {
     //     config_sql : {
     //         user : 'sa',

@@ -811,4 +811,46 @@ sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, nombreC
    })
    return resultSQL
 }
+
+sqlController.gestionNotificacion = async (idClienteCanalMensajeria, motivoNotificacion, nombres,
+    tipoIdentificacion, numIdentificacion, telefono, mensaje, numeroSecuencialSAP, opcion) =>
+{
+    let query
+    var resultSQL =[]
+    var datos = {}
+    if(opcion==1)
+    {
+        query = `[dbo].[sp_GestionNotificaciones]
+        @idClienteCanalMensajeria = ${idClienteCanalMensajeria},
+        @motivoNotificacion = N'${motivoNotificacion}',
+        @nombres = N'${nombres}',
+        @tipoIdentificacion =N'${tipoIdentificacion}',
+        @numIdentificacion = N'${numIdentificacion}',
+        @telefono = N'${telefono}',
+        @mensaje = N'${mensaje}',
+        @numeroSecuencialSAP = N'${numeroSecuencialSAP}',
+        @opcion = ${opcion}`
+    }
+
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+               data.recordset.forEach(element => 
+               {
+                   datos = 
+                   {
+                       idNotificacion : element.idNotificacion
+                   }
+                   resultSQL.push(datos)
+                }
+            )
+        }
+    }) 
+    .catch(err => {
+            console.log("Error al gestionar cabecera venta")
+            console.log(err)
+            throw new Error('Error al registrar en BD')
+    }) 
+    return resultSQL
+}
 module.exports = sqlController
