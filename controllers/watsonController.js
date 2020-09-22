@@ -671,7 +671,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 'stockCC' : producto.stockCC,
                 'stockOtroPago' : producto.stockOtroPago,
                 'precioCC' : producto.precioCC,
-                'precioOtroPago' : producto.precioOtroPago,
+                'precioConIntereses' : producto.precioConIntereses,
+                'precioSinIntereses' : producto.precioSinIntereses,
                 'cuotasPrecioCC' : producto.cuotasPrecioCC,
                 'plazoGarantia' : producto.plazoGarantia,
                 'isMarketplace' : producto.isMarketplace

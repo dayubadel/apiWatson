@@ -111,6 +111,7 @@ productoController.RegistrarProductos = async (req, res) => {
             objProducto.categorias = arrayCategorias
             objProducto.isMarketPlace = producto.Marketplace
             objProducto.url = producto.url
+            objProducto.isActive = producto.IsActive
             arrayProductos.push(objProducto)
             // console.log(objProducto)
 
