@@ -839,7 +839,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
            respuesta.push({
                 response_type:'text',
-                text: `http://b254b69cdac4.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
+                text: `http://4304155dc886.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){

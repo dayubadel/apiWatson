@@ -10,7 +10,6 @@ ticketController.EnviarTicket = async (motivoTicket,detalleTicket,nombres,numIde
 {
     const urlSoap = config.wsTickets.urlSoapTickets
     const token = config.wsTickets.token
-
    
     const paramsWS = {
         "I_TEXTO": motivoTicket,

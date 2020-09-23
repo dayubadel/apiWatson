@@ -178,7 +178,7 @@ paymentezController.CallWS = async (jsonCompra) => {
     const paramsWS = {
         "I_TOKEN": config.wsFacturacion.token,
         'I_FECHAHORA_BOT': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),
-        'I_DATOS_ORDEN': JSON.stringify(jsonCompra.orden)
+        'I_DATOS_ORDEN': JSON.stringify(jsonCompra)
     }
     await soap.createClientAsync(soapUrl)
     .then(async soapClient => {

@@ -2871,7 +2871,7 @@ body.is-menu-visible #menu {
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       $.ajax({
-          url :  "http://b254b69cdac4.ngrok.io/pago/gestionlugares",
+          url :  "http://4304155dc886.ngrok.io/pago/gestionlugares",
           method : "post",
           dataType : "JSON",
           data : { opcion : 1, provincia : null},
@@ -2892,7 +2892,7 @@ body.is-menu-visible #menu {
       function consultarFactura(numeroReferencia)
       {
           $.ajax({            
-            url: "http://b254b69cdac4.ngrok.io/pago/gestionfactura",
+            url: "http://4304155dc886.ngrok.io/pago/gestionfactura",
             type: "post",
             dataType: "JSON",
             data: { numeroReferencia: numeroReferencia, opcion : 1 },
@@ -3015,7 +3015,7 @@ body.is-menu-visible #menu {
     {
         let provincia = $('#provincia').val()
         $.ajax({
-          url :  "http://b254b69cdac4.ngrok.io/pago/gestionlugares",
+          url :  "http://4304155dc886.ngrok.io/pago/gestionlugares",
           method : "post",
           dataType : "JSON",
           data : { opcion : 2, provincia : provincia},
@@ -3144,7 +3144,7 @@ body.is-menu-visible #menu {
         {
           $(".js-payment-checkout").trigger("click");
           $.ajax({            
-            url: "http://b254b69cdac4.ngrok.io/pago/gestionfactura",
+            url: "http://4304155dc886.ngrok.io/pago/gestionfactura",
             type: "post",
             dataType: "JSON",
             data: { opcion : 2, numeroReferencia: order_reference, first_name : first_name, 
@@ -3189,7 +3189,7 @@ body.is-menu-visible #menu {
       onResponse: function (response) { // The callback to invoke when the Checkout process is completed
         
         $.ajax({
-          url :  "http://b254b69cdac4.ngrok.io/pago/respuestapago",
+          url :  "http://4304155dc886.ngrok.io/pago/respuestapago",
           method : "post",
           dataType : "JSON",
           data : { myjson: response},
