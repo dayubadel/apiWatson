@@ -92,7 +92,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
 //nueva version reportes
 sqlController.gestionMensajes = async(idClienteCanalMensajeria, textoUsuario, textoWatson,intenciones,coincidecia,entidades,contextoConversacion,comentarioUsuario) => {
     let query
-    
+
     query = `[dbo].[sp_GestionMensajes]
 		@idClienteCanalMensajeria = ${idClienteCanalMensajeria},
 		@textoMensaje = N'${textoUsuario}',

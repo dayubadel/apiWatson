@@ -71,6 +71,7 @@ watsonController.ControlMensajes = async (req, res) => {
         if(carritoCompras.length>0)
         {
             contextoAnterior['identificadorMetodoPagoCarrito'] = carritoCompras[0].identificadorMetodoPago
+            contextoAnterior['metodoPagoCarrito'] = carritoCompras[0].metodoPago
             carritoActual = []
             let numeroRegistro = 1
             carritoCompras.forEach(element => {
@@ -786,6 +787,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- Ver el *catálogo de productos*\n- Volver al *menú principal*'})
                     delete contexto.carritoActual
                     delete contexto.menuCarrito
+                    delete contexto.identificadorMetodoPagoCarrito
+                    delete contexto.metodoPagoCarrito
                 }
                 else
                 {
@@ -825,7 +828,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     respuesta.push({response_type: 'text', text: 'Actualmente no tiene un carrito activo'})
                     respuesta.push({response_type:'text', text: `Indícame qué más deseas hacer: \n- Ver el *catálogo de productos*\n- Volver al *menú principal*`})
                     delete contexto.carritoActual
-                    delete contexto.menuCarrito
+                    delete contexto.menuCarrito                    
+                    delete contexto.identificadorMetodoPagoCarrito
+                    delete contexto.metodoPagoCarrito
                 }
             )
         }
@@ -834,7 +839,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
            respuesta.push({
                 response_type:'text',
-                text: `http://b254b69cdac4.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
+                text: `http://4304155dc886.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){
