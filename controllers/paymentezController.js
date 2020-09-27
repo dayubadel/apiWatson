@@ -81,14 +81,14 @@ paymentezController.RespuestaPago = async (req, res) => {
     if(transaction.hasOwnProperty("type")){
         respuesta.push({
             response_type:'text',
-            text: 'HA OCURRIOD UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE' 
+            text: 'HA OCURRIDO UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE' 
         })
         paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
         res.send(
         {
             estado: false,
             type: "Error de servidor",
-            mensaje: 'HA OCURRIOD UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE'
+            mensaje: 'HA OCURRIDO UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE'
         })
     }
     else if(transaction.hasOwnProperty("status")){
