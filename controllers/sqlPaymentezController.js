@@ -72,7 +72,7 @@ sqlPaymentezController.GestionLugares = async (provincia, opcion) =>
 }
 
 sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, email, numeroTelefono,
-    nombreReceptor, idCiudadEntrega, callePrincipalEntrega, calleSecundariaEntrega, barrioEntrega, referenciaEntrega, 
+    nombreReceptor, idCiudadEntrega, callePrincipalEntrega, calleSecundariaEntrega, numeroEntrega, referenciaEntrega, 
     tipoTarjeta, valorTotalPaymentez, mesesPlazo, primerosDigitosTarjetaPaymentez, ultimosDigitosTarjetaPaymentez, tidPaymentez
     ,opcion) =>
 {
@@ -112,7 +112,7 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
             @idCiudadEntrega = ${idCiudadEntrega},
             @callePrincipalEntrega = N'${callePrincipalEntrega}',
             @calleSecundariaEntrega = N'${calleSecundariaEntrega}',
-            @barrioEntrega = N'${barrioEntrega}',
+            @numeroEntrega = N'${numeroEntrega}',
             @referenciaEntrega = N'${referenciaEntrega}',
             @opcion = ${opcion}`
     }
@@ -151,7 +151,8 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
                              idClienteCanalMensajeria : element.idClienteCanalMensajeria,
                              email : element.email,
                              identificadorMetodoPago : element.identificadorMetodoPago,
-                             idConversacionCanal : element.idConversacionCanal
+                             idConversacionCanal : element.idConversacionCanal,
+                             finalizado : element.finalizado
                     }
                     resultSQL.push(datos)
                 }

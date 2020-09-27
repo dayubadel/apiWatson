@@ -3,7 +3,8 @@ const sqlPaymentezController = require('./sqlPaymentezController.js')
 const soap = require('soap')
 const util = require('util')
 const mailController = require('./mailController')
-const whatsappController = require('./whatsappController')
+const whatsappController = require('./whatsappController');
+const { json } = require("body-parser");
 
 
 const paymentezController = {}
@@ -20,11 +21,11 @@ paymentezController.GestionFactura = async (req, res) => {
     else if(opcion == 2)
     {
         var datosFactura = req.body
-        respuestaSql = await sqlPaymentezController.gestionCabeceraVenta (datosFactura.numeroReferencia,datosFactura.first_name.toUpperCase(),
-                                        datosFactura.last_name.toUpperCase(),datosFactura.user_tipo_identificacion,
+        respuestaSql = await sqlPaymentezController.gestionCabeceraVenta (datosFactura.numeroReferencia,datosFactura.first_name,
+                                        datosFactura.last_name,datosFactura.user_tipo_identificacion,
                                         datosFactura.user_numero_identificacion,datosFactura.user_email.toLowerCase(),datosFactura.user_phone,
-                                        datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal, datosFactura.numero_calle,
-                                        datosFactura.barrio_entrega, datosFactura.referencia_entrega,null,null,null,null,null,null,4)    
+                                        datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal,datosFactura.calle_secundaria,
+                                        datosFactura.numero_calle,datosFactura.referencia_entrega,null,null,null,null,null,null,4)    
     }
     if(respuestaSql.length==0)
     {
@@ -54,7 +55,8 @@ paymentezController.GestionFactura = async (req, res) => {
                 tipo_identificacion : factura.tipoIdentificacion,
                 numero_identificacion : factura.numIdentificacion,
                 email : factura.email,
-                idConversacionCanal : factura.idConversacionCanal
+                idConversacionCanal : factura.idConversacionCanal,
+                finalizado : factura.finalizado
             }
         res.send({estado: true, resultado: facuturaPaymentez})
     }
@@ -157,6 +159,7 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 
     await (async () => {        
         for (let i = 0; i < 3; i++) {
+            console.log(jsonCompra)
             facuturaCreada = await paymentezController.CallWS(jsonCompra)
             if(facuturaCreada == true){
                 break;

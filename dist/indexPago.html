@@ -1,7 +1,7 @@
 <!DOCTYPE html>
   <html>
     <head>
-      <title>Pago en Linea | Comandato</title>
+      <title>Pago en Línea | Comandato</title>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <script src="https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js"></script>     
@@ -2754,78 +2754,76 @@ body.is-menu-visible #menu {
 					<div class="content">
 						<div class="row">
 							<div class="col-12 col-12-medium">
-									<h3>DATOS DEL CLIENTE</h3>
-										<div class="row gtr-uniform">
+                  <h3>DATOS DEL CLIENTE</h3>
+										<div class="row gtr-uniform">                                         
                     <div class="form-group col-6 col-12-xsmall">
-                      <label for="firstname">PRIMER NOMBRE:</label>
-                      <input id="firstname" name="name" type="text" placeholder="Ingrese su primer nombre *" class="form-control">
-                    </div>
-                    <div class="form-group col-6 col-12-xsmall">
-                      <label for="secondname">SEGUNDO NOMBRE:</label>
-                      <input id="secondname" name="name" type="text" placeholder="Ingrese su segundo nombre *" class="form-control">
-                    </div>
-                    <div class="form-group col-6 col-12-xsmall">                      
-                      <label for="lastname">PRIMER APELLIDO:</label>
-                      <input id="lastname" name="lastname" type="text" placeholder="Ingrese su primer apellido *" class="form-control">
-                    </div>
-                    <div class="form-group col-6 col-12-xsmall">
-                      <label for="secondlastname">SEGUNDO APELLIDO:</label>
-                      <input id="secondlastname" name="lastname" type="text" placeholder="Ingrese su segundo apellido *" class="form-control">
-                    </div>                          
-                    <div class="form-group col-6 col-12-xsmall">
-                      <label for="tipoidentificacion">TIPO DE IDENTIFICACIÓN:</label>
-                          <select id="tipoidentificacion" name="tipoidentificacion" class="form-control">
+                      <label for="tipoidentificacion">* TIPO DE IDENTIFICACIÓN:</label>
+                          <select onchange="cambiarTipoIdentificacion()" id="tipoidentificacion" name="tipoidentificacion" class="form-control">
                             <option value="0">SELECCIONE EL TIPO DE IDENTIFICACIÓN</option>
                             <option value="cedulaECU">CÉDULA</option>
                             <option value="rucECU">RUC</option>
                           </select>
                     </div>
-
                     <div class="form-group col-6 col-12-xsmall">
-                      <label for="numeroIdentificacion">NÚMERO DE IDENTIFICACIÓN:</label>
+                      <label for="numeroIdentificacion">* NÚMERO DE IDENTIFICACIÓN:</label>
                       <input id="numeroIdentificacion" name="numeroIdentificacion" type="text" placeholder="Ingrese su número de identificación *" class="form-control">
                     </div>
-
+                    <div id='bloquefirstname' class="form-group col-12 col-12-xsmall">
+                      <label for="firstname">* NOMBRES COMPLETOS:</label>
+                      <input id="firstname" name="name" type="text" placeholder="Ingrese su primer nombre *" class="form-control">
+                    </div>
+                    <div  id='bloquelastname' class="form-group col-12 col-12-xsmall">                      
+                      <label for="lastname">* APELLIDOS COMPLETOS:</label>
+                      <input id="lastname" name="lastname" type="text" placeholder="Ingrese su primer apellido *" class="form-control">
+                    </div>   
                     <div class="form-group col-6 col-12-xsmall">
-                      <label for="email">CORREO ELECTRÓNICO:</label>
+                      <label for="tipotelefono">* TIPO DE TELÉFONO:</label>
+                          <select id="tipotelefono" name="tipotelefono" class="form-control">
+                            <option value="0">SELECCIONE EL TIPO DE TELÉFONO</option>
+                            <option selected value="1">CELULAR</option>
+                            <option value="2">CONVENCIONAL</option>
+                          </select>
+                    </div>
+                    <div class="form-group col-6 col-12-xsmall">                      
+                      <label for="phone">* TELÉFONO:</label>
+                      <input id="phone" name="phone" type="text" placeholder="Ingrese su teléfono *" class="form-control">
+                    </div>   
+                    <div class="form-group col-12 col-12-xsmall">
+                      <label for="email">* CORREO ELECTRÓNICO:</label>
                       <input id="email" name="email"  type="text" placeholder="Ingrese su correo electrónico *" class="form-control">
                     </div>
-
-                    <div class="form-group col-6 col-12-xsmall">                      
-                      <label for="phone">TELÉFONO:</label>
-                      <input id="phone" name="phone" type="text" placeholder="Ingrese su teléfono *" class="form-control">
-                    </div> 
                     <div class="form-group col-12 col-12-xsmall">                   
-                      <label for="receptor">RECEPTOR DEL PEDIDO:</label>
+                      <label for="receptor">* NOMBRE Y APELLIDO DE LA PERSONA QUE RECIBIRÁ EL PEDIDO:</label>
                       <input id="receptor" name="receptor" type="text" placeholder="Ingrese el nombre y apellido de quien recibirá el pedido *" class="form-control">
                     </div>    
                     <div class="form-group col-6 col-12-xsmall">                   
-                      <label for="provincia">PROVINCIA DE ENTREGA:</label>
+                      <label for="provincia">* PROVINCIA DE ENTREGA:</label>
                         <select name="provincia" onchange="cargarCiudades()" id="provincia" class="form-control">
                         </select>
                     </div>  
                     <div class="form-group col-6 col-12-xsmall">      
-                      <label for="ciudad">CIUDAD DE ENTREGA:</label>
+                      <label for="ciudad">* CIUDAD DE ENTREGA:</label>
                         <select name="ciudad" id="ciudad" class="form-control">
                           <option value="0">SELECCIONE UNA CIUDAD</option>
                         </select>
                     </div>  
-                    <div class="form-group col-6 col-12-xsmall">
-                      <label for="calleprincipal">DIRECCIÓN DE ENTREGA:</label>                      
+                    <div class="form-group col-12 col-12-xsmall">
+                      <label for="calleprincipal">* DIRECCIÓN DE ENTREGA:</label>                      
                           <input id="calleprincipal" name="calleprincipal"  type="text" placeholder="Ingrese la dirección de entrega *" class="form-control">
                     </div>                              
                     <div class="form-group col-6 col-12-xsmall">
-                      <label for="numerocalle">NÚMERO DE LA CALLE:</label>
+                      <label for="numerocalle">* NÚMERO DE LA CALLE:</label>
                       <input id="numerocalle" name="numerocalle"  type="text" placeholder="Ingrese el número de calle" class="form-control">
                     </div>     
                     <div class="form-group col-6 col-12-xsmall">
-                      <label for="barrioentrega">BARRIO DE ENTREGA:</label>
-                          <input id="barrioentrega" name="barrioentrega" type="text" placeholder="Ingrese el barrio de entrega *" class="form-control">
+                      <label for="calleSecundaria">* CALLE SECUNDARIA:</label>
+                          <input id="calleSecundaria" name="calleSecundaria" type="text" placeholder="Ingrese la calle secundaria *" class="form-control">
                     </div> 
-                    <div class="form-group col-6 col-12-xsmall">
-                      <label for="referenciaentrega">REFERENCIA ADICIONAL DE LA DIRECCIÓN DE ENTREGA:</label>
-                          <input id="referenciaentrega" name="referenciaentrega" type="text" placeholder="Ingrese alguna referencia de la dirección *" class="form-control">
-                    </div>  
+                    <div class="form-group col-12 col-12-xsmall">
+                      <label for="referenciaentrega">* REFERENCIA ADICIONAL DE LA DIRECCIÓN DE ENTREGA:</label>
+                          <textarea rows="1" id="referenciaentrega" name="referenciaentrega" type="text" placeholder="Ingrese alguna referencia de la dirección *" class="form-control"></textarea>
+                    </div>                      
+                    <p>Todos los campos marcados con asterisco (*) son obligatorios.</p>
                     <div class="col-12">
                       <input type="button" onclick="pasarDatos()" value="CONTINUAR CON EL PAGO" class="btnPagar primary"/>
                     </div> 
@@ -2865,13 +2863,15 @@ body.is-menu-visible #menu {
       var user_email;
       var user_phone;
 
+      var urlComandato;   
 
       window.onload = function() {
 
       const queryString = window.location.search;
+      urlComandato = 'http://891bbf229f70.ngrok.io'
       const urlParams = new URLSearchParams(queryString);
       $.ajax({
-          url :  "http://4304155dc886.ngrok.io/pago/gestionlugares",
+          url :  `${urlComandato}/pago/gestionlugares`,
           method : "post",
           dataType : "JSON",
           data : { opcion : 1, provincia : null},
@@ -2892,14 +2892,32 @@ body.is-menu-visible #menu {
       function consultarFactura(numeroReferencia)
       {
           $.ajax({            
-            url: "http://4304155dc886.ngrok.io/pago/gestionfactura",
+            url: `${urlComandato}/pago/gestionfactura`,
             type: "post",
             dataType: "JSON",
             data: { numeroReferencia: numeroReferencia, opcion : 1 },
             success:  function(data)
             {
-              if(data.estado==true)
+              if(data.estado==false)
               {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'El número de referencia no ha sido validado'
+                })
+              }
+              else
+              {
+                if(data.resultado.finalizado == true)
+                {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Esta compra ya ha sido pagada.'
+                  })
+                }
+                else
+                {
                   user_id = data.resultado.user_id
                   order_description = data.resultado.order_description
                   order_amount = data.resultado.order_amount 
@@ -2908,12 +2926,27 @@ body.is-menu-visible #menu {
                   order_installments_type = data.resultado.order_installments_type
                   order_taxable_amount = data.resultado.order_taxable_amount
                   order_tax_percentage = data.resultado.order_tax_percentage
+                }
               }
             }
           });
       }      
     };
 
+    function cambiarTipoIdentificacion()
+    {
+      var tipoIdentificacion = $('#tipoidentificacion').val()
+      if(tipoIdentificacion=="rucECU")
+      {
+        $('#bloquefirstname').html('<label for="firstname">RAZÓN SOCIAL:</label><input id="firstname" name="name" type="text" placeholder="Ingrese su razón social *" class="form-control">')
+        $('#bloquelastname').html('')
+      }
+      else 
+      {
+        $('#bloquefirstname').html('<label for="firstname">NOMBRES COMPLETOS:</label><input id="firstname" name="name" type="text" placeholder="Ingrese su primer nombre *" class="form-control">')
+        $('#bloquelastname').html('<label for="lastname">APELLIDOS COMPLETOS:</label><input id="lastname" name="lastname" type="text" placeholder="Ingrese su primer apellido *" class="form-control"></div>')
+      }
+    }
     function validarInicial(numero, tipo)
     {
         var mensaje =''
@@ -2924,8 +2957,8 @@ body.is-menu-visible #menu {
         else if (tipo=='cedula' && numero.length!=10) {
             mensaje = 'Valor ingresado debe tener 10 caracteres'
         }
-        else if (tipo=='ruc' && numero.length!=12) {
-            mensaje = 'Valor ingresado debe tener 10 caracteres'
+        else if (tipo=='ruc' && numero.length!=13) {
+            mensaje = 'Valor ingresado debe tener 13 caracteres'
         }
         else 
         {
@@ -3011,11 +3044,19 @@ body.is-menu-visible #menu {
       return false
     }
 
+    function validarConvencional(valor)
+    {
+      if (!/^([0-9])*$/.test(valor)) {
+            return false
+        }
+      return true
+    }
+
     function cargarCiudades()
     {
         let provincia = $('#provincia').val()
         $.ajax({
-          url :  "http://4304155dc886.ngrok.io/pago/gestionlugares",
+          url : `${urlComandato}/pago/gestionlugares`,
           method : "post",
           dataType : "JSON",
           data : { opcion : 2, provincia : provincia},
@@ -3032,143 +3073,191 @@ body.is-menu-visible #menu {
         });
     }
 
-    function pasarDatos()
-    {      
-        var first_name = $('#firstname').val()
-        var second_name = $('#secondname').val()
-        var last_name = $('#lastname').val()
-        var second_last_name = $('#secondlastname').val()
-        var user_tipo_identificacion = $('#tipoidentificacion').val()
-        var user_numero_identificacion = $('#numeroIdentificacion').val().toString()
-        var user_correo = $('#email').val()
-        var user_telefono = $('#phone').val().toString()
-        var nombre_receptor = $('#receptor').val()
-        var provincia = $('#provincia').val()
-        var ciudad = $('#ciudad').val()
-        var calle_principal = $('#calleprincipal').val()
-        var numero_calle = $('#numerocalle').val()
-        var barrio_entrega = $('#barrioentrega').val()
-        var referencia_entrega = $('#referenciaentrega').val()
-
-        estadoValidacion = false;
-        mensajeValidacion = '';       
-        
-        user_email = $('#email').val()
-        user_phone = $('#phone').val().toString()
-        if(first_name.trim()=='')
-        {
-            mensajeValidacion = 'INGRESE SU PRIMER NOMBRE'
-        }
-        else if(second_name.trim() == '')
-        {
-            mensajeValidacion = 'INGRESE SU SEGUNDO NOMBRE'
-        }
-        else if(last_name.trim() == '')
-        {
-            mensajeValidacion = 'INGRESE SU PRIMER APELLIDO'
-        }
-        else if(second_last_name.trim() == '')
-        {
-            mensajeValidacion = 'INGRESE SU SEGUNDO APELLIDO'
-        }
-        else if(user_tipo_identificacion != 'cedulaECU' && user_tipo_identificacion != 'rucECU'  ) 
-        {
-          mensajeValidacion = 'SELECCIONE UN TIPO DE IDENTIFICACIÓN'
-        }
-        else if(user_tipo_identificacion=='cedulaECU' && ( validarInicial(user_numero_identificacion,'cedula')==false || validarCodigoProvincia(user_numero_identificacion.substr(0,2)) ==false || validarTercerDigito(user_numero_identificacion.substr[2],'cedula')==false ||  validarCedula(user_numero_identificacion)==false))
-        {
-          mensajeValidacion = 'CÉDULA INCORRECTA. INGRESE NUEVAMENTE'
-        }
-        else if(user_tipo_identificacion== 'rucECU' && ( validarInicial(user_numero_identificacion,'ruc')==false || validarCodigoProvincia(user_numero_identificacion.substr(0,2)) ==false || validarTercerDigito(user_numero_identificacion.substr[2],'ruc')==false ))
-        {
-          mensajeValidacion = 'RUC INCORRECTO. INGRESE NUEVAMENTE'
-        }
-        else if(user_correo.trim().length==0)
-        {
-          mensajeValidacion = 'INGRESE SU CORREO ELECTRÓNICO'
-        }
-        else if(validarEmail(user_correo)==false)
-        {
-          mensajeValidacion = 'CORREO ELECTRÓNICO INVÁLIDO. INGRESE NUEVAMENTE'
-        }
-        else if(user_telefono.trim().length==0 )
-        {
-          mensajeValidacion = 'INGRESE SU NÚMERO DE TELÉFONO'
-        }
-        else if(validarTelefono(user_telefono)==false)
-        {
-          mensajeValidacion = 'CELULAR INVÁLIDO. INGRESE NUEVAMENTE'
-        }
-        else if(nombre_receptor.trim().length==0)
-        {
-          mensajeValidacion = 'INGRESE EL NOMBRE Y APELLIDO DE LA PERSONA QUE RECIBIRÁ EL PEDIDO'
-        }
-        else if(provincia=='' || provincia=='0')
-        {
-          mensajeValidacion = 'SELECCIONE UNA PROVINCIA PARA LA ENTREGA DEL PEDIDO'
-        }
-        else if(ciudad=='' || ciudad=='0')
-        {
-          mensajeValidacion = 'SELECCIONE UNA CIUDAD PARA LA ENTREGA DEL PEDIDO'
-        }
-        else if(calle_principal.trim().length==0)
-        {
-          mensajeValidacion = 'INGRESE LA DIRECCIÓN DE ENTREGA'
-        }
-        else if(numero_calle.trim().length==0)
-        {
-          mensajeValidacion = 'INGRESE EL NÚMERO DE LA CALLE'
-        }        
-        else if(barrio_entrega.trim().length==0)
-        {
-          mensajeValidacion = 'INGRESE EL BARRIO DE ENTREGA'
-        }     
-        else if(referencia_entrega.trim().length==0)
-        {
-          mensajeValidacion = 'INGRESE LA REFERENCIA DE LA DIRECCIÓN DE ENTREGA'
-        }    
-        else
-        {
-          estadoValidacion=true
-        }
-
-        if(estadoValidacion==false)
-        {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: mensajeValidacion
-          })
-        }
-        else
-        {
-          $(".js-payment-checkout").trigger("click");
-          $.ajax({            
-            url: "http://4304155dc886.ngrok.io/pago/gestionfactura",
+    async function validarCompraPagada(numeroReferencia)
+    {
+      var compraPagada = false
+      await  $.ajax({            
+            url: `${urlComandato}/pago/gestionfactura`,
             type: "post",
             dataType: "JSON",
-            data: { opcion : 2, numeroReferencia: order_reference, first_name : first_name, 
-                    last_name :last_name, user_tipo_identificacion: user_tipo_identificacion, 
-                    user_numero_identificacion : user_numero_identificacion, user_email : user_email,
-                    user_phone : user_phone, nombre_receptor : nombre_receptor, provincia : provincia,
-                    ciudad : ciudad, calle_principal : calle_principal, numero_calle : numero_calle,
-                    barrio_entrega : barrio_entrega, referencia_entrega : referencia_entrega },
+            data: { numeroReferencia: numeroReferencia, opcion : 1 },
             success:  function(data)
             {
               if(data.estado==true)
               {
-                  user_id = data.resultado.user_id
-                  order_description = data.resultado.order_description
-                  order_amount = data.resultado.order_amount
-                  order_vat = data.resultado.order_vat
-                  order_reference = data.resultado.order_reference
-                  order_installments_type = data.resultado.order_installments_type
-                  order_taxable_amount = data.resultado.order_taxable_amount
-                  order_tax_percentage = data.resultado.order_tax_percentage
-                  canal_id = data.resultado.idConversacionCanal
+                compraPagada = data.resultado.finalizado
               }
             }
           });
+      return compraPagada
+    }
+
+    async function pasarDatos()
+    {            
+       let facturaPagada = await validarCompraPagada(order_reference)
+        if(facturaPagada==true)
+        {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Esta compra ya ha sido pagada'
+          })
+        }
+        else 
+        {
+          var first_name = $('#firstname').val()
+          var last_name = $('#lastname').val()
+          var user_tipo_identificacion = $('#tipoidentificacion').val()
+          var user_numero_identificacion = $('#numeroIdentificacion').val().toString()
+          var user_correo = $('#email').val()
+          var user_telefono = $('#phone').val().toString()
+          var tipo_telefono = $('#tipotelefono').val()
+          var nombre_receptor = $('#receptor').val()
+          var provincia = $('#provincia').val()
+          var ciudad = $('#ciudad').val()
+          var calle_principal = $('#calleprincipal').val()
+          var numero_calle = $('#numerocalle').val()
+          var calle_secundaria = $('#calleSecundaria').val()
+          var referencia_entrega = $('#referenciaentrega').val()
+
+          estadoValidacion = false;
+          mensajeValidacion = '';       
+          
+          user_email = $('#email').val()
+          user_phone = $('#phone').val().toString()
+          
+          if(user_tipo_identificacion != 'cedulaECU' && user_tipo_identificacion != 'rucECU'  ) 
+          {
+            mensajeValidacion = 'SELECCIONE UN TIPO DE IDENTIFICACIÓN'
+          }
+          else if(user_tipo_identificacion=='cedulaECU' && ( validarInicial(user_numero_identificacion,'cedula')==false || validarCodigoProvincia(user_numero_identificacion.substr(0,2)) ==false || validarTercerDigito(user_numero_identificacion.substr[2],'cedula')==false ||  validarCedula(user_numero_identificacion)==false))
+          {
+            mensajeValidacion = 'CÉDULA INCORRECTA. INGRESE NUEVAMENTE'
+          }
+          else if(user_tipo_identificacion== 'rucECU' && ( validarInicial(user_numero_identificacion,'ruc')==false || validarCodigoProvincia(user_numero_identificacion.substr(0,2)) ==false || validarTercerDigito(user_numero_identificacion.substr[2],'ruc')==false ))
+          {
+            mensajeValidacion = 'RUC INCORRECTO. INGRESE NUEVAMENTE'
+          }
+          else if(first_name.trim()=='' && user_tipo_identificacion=='cedulaECU')
+          {
+              mensajeValidacion = 'INGRESE SUS NOMBRES COMPLETOS'
+          }
+          else if( user_tipo_identificacion=='cedulaECU' && last_name.trim() == '')
+          {
+              mensajeValidacion = 'INGRESE SUS APELLIDOS COMPLETOS'
+          }          
+          else if(first_name.trim()=='' && user_tipo_identificacion=='rucECU')
+          {
+              mensajeValidacion = 'INGRESE SU RAZÓN SOCIAL'
+          }
+          else if(tipo_telefono=="0")
+          {
+            mensajeValidacion = 'SELECCIONE UN TIPO DE TELÉFONO'
+          }          
+          else if(user_telefono.trim().length==0 )
+          {
+            mensajeValidacion = 'INGRESE SU NÚMERO DE TELÉFONO'
+          }
+          else if(tipo_telefono=="1" && validarTelefono(user_telefono)==false)
+          {
+            mensajeValidacion = 'CELULAR INVÁLIDO. INGRESE NUEVAMENTE'
+          }
+          else if(tipo_telefono=="2" && validarConvencional(user_telefono)==false)
+          {
+            mensajeValidacion = 'EL TELÉFONO CONVENCIONAL SOLO PUEDE TENER NÚMEROS. INGRESE NUEVAMENTE'
+          }
+          else if(user_correo.trim().length==0)
+          {
+            mensajeValidacion = 'INGRESE SU CORREO ELECTRÓNICO'
+          }
+          else if(validarEmail(user_correo)==false)
+          {
+            mensajeValidacion = 'CORREO ELECTRÓNICO INVÁLIDO. INGRESE NUEVAMENTE'
+          }
+          else if(nombre_receptor.trim().length==0)
+          {
+            mensajeValidacion = 'INGRESE EL NOMBRE Y APELLIDO DE LA PERSONA QUE RECIBIRÁ EL PEDIDO'
+          }
+          else if(provincia=='' || provincia=='0')
+          {
+            mensajeValidacion = 'SELECCIONE UNA PROVINCIA PARA LA ENTREGA DEL PEDIDO'
+          }
+          else if(ciudad=='' || ciudad=='0')
+          {
+            mensajeValidacion = 'SELECCIONE UNA CIUDAD PARA LA ENTREGA DEL PEDIDO'
+          }
+          else if(calle_principal.trim().length==0)
+          {
+            mensajeValidacion = 'INGRESE LA DIRECCIÓN DE ENTREGA'
+          }
+          else if(numero_calle.trim().length==0)
+          {
+            mensajeValidacion = 'INGRESE EL NÚMERO DE LA CALLE'
+          }        
+          else if(calle_secundaria.trim().length==0)
+          {
+            mensajeValidacion = 'INGRESE LA CALLE SECUNDARIA'
+          }     
+          else if(referencia_entrega.trim().length==0)
+          {
+            mensajeValidacion = 'INGRESE LA REFERENCIA DE LA DIRECCIÓN DE ENTREGA'
+          }    
+          else if(referencia_entrega.length>60)
+          {
+            mensajeValidacion = 'LA REFERENCIA NO PUEDE EXCEDERSE DE LOS 60 CARACTERES. INGRESE NUEVAMENTE'
+          }
+          else
+          {
+            estadoValidacion=true
+          }
+
+          if(estadoValidacion==false)
+          {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: mensajeValidacion
+            })
+          }
+          else
+          {
+            first_name = first_name.toUpperCase()
+            if(user_tipo_identificacion=="cedulaECU")
+            {
+              last_name = last_name.toUpperCase()
+            }
+            else
+            {
+              last_name = ' '
+            }
+            $(".js-payment-checkout").trigger("click");
+            $.ajax({            
+              url: `${urlComandato}/pago/gestionfactura`,
+              type: "post",
+              dataType: "JSON",
+              data: { opcion : 2, numeroReferencia: order_reference, first_name : first_name, 
+                      last_name :last_name, user_tipo_identificacion: user_tipo_identificacion, 
+                      user_numero_identificacion : user_numero_identificacion, user_email : user_email,
+                      user_phone : user_phone, nombre_receptor : nombre_receptor, provincia : provincia,
+                      ciudad : ciudad, calle_principal : calle_principal, numero_calle : numero_calle,
+                      calle_secundaria : calle_secundaria, referencia_entrega : referencia_entrega },
+              success:  function(data)
+              {
+                if(data.estado==true)
+                {
+                    user_id = data.resultado.user_id
+                    order_description = data.resultado.order_description
+                    order_amount = data.resultado.order_amount
+                    order_vat = data.resultado.order_vat
+                    order_reference = data.resultado.order_reference
+                    order_installments_type = data.resultado.order_installments_type
+                    order_taxable_amount = data.resultado.order_taxable_amount
+                    order_tax_percentage = data.resultado.order_tax_percentage
+                    canal_id = data.resultado.idConversacionCanal
+                }
+              }
+            });
+          }
         }
     }
 
@@ -3189,7 +3278,7 @@ body.is-menu-visible #menu {
       onResponse: function (response) { // The callback to invoke when the Checkout process is completed
         
         $.ajax({
-          url :  "http://4304155dc886.ngrok.io/pago/respuestapago",
+          url : `${urlComandato}/pago/respuestapago`,
           method : "post",
           dataType : "JSON",
           data : { myjson: response},
@@ -3210,9 +3299,7 @@ body.is-menu-visible #menu {
                 text:  data.mensaje
               })
               $('#firstname').val('')
-              $('#secondname').val('')
               $('#lastname').val('')
-              $('#secondlastname').val('')
               $('#tipoidentificacion').val('0')
               $('#numeroIdentificacion').val('')
               $('#email').val('')
@@ -3222,7 +3309,7 @@ body.is-menu-visible #menu {
               $('#ciudad').html('<option value="0">SELECCIONE UNA CIUDAD</option>')
               $('#calleprincipal').val('')
               $('#numerocalle').val('')
-              $('#barrioentrega').val('')
+              $('#calleSecundaria').val('')
               $('#referenciaentrega').val('')
             }
           }

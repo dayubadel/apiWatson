@@ -4,7 +4,7 @@ const sqlController = require('./sqlController.js')
 const mailController = require('./mailController.js')
 const config = require("../config/config.js");
 const { json } = require('body-parser');
-const { sql, valorGlobales } = require('../config/config.js');
+const { sql, valorGlobales, subdominioComandato } = require('../config/config.js');
 const ticketController = require('./ticketController.js');
 // const pedidoModel = require('./../models/pedido.js')
 
@@ -839,7 +839,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
            respuesta.push({
                 response_type:'text',
-                text: `http://4304155dc886.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
+                text: `${subdominioComandato.url}/pago?numero_referencia=${contexto.numeroReferencia}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){

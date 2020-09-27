@@ -688,7 +688,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
 //  }
 
 sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, email, numeroTelefono,
-    nombreReceptor, idCiudadEntrega, callePrincipalEntrega, calleSecundariaEntrega, barrioEntrega, referenciaEntrega, 
+    nombreReceptor, idCiudadEntrega, callePrincipalEntrega, calleSecundariaEntrega, numeroEntrega, referenciaEntrega, 
     tipoTarjeta, valorTotalPaymentez, mesesPlazo, primerosDigitosTarjetaPaymentez, ultimosDigitosTarjetaPaymentez, tidPaymentez
     ,opcion) =>
 {
@@ -728,7 +728,7 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
             @idCiudadEntrega = ${idCiudadEntrega},
             @callePrincipalEntrega = N'${callePrincipalEntrega}',
             @calleSecundariaEntrega = N'${calleSecundariaEntrega}',
-            @barrioEntrega = N'${barrioEntrega}',
+            @numeroEntrega = N'${numeroEntrega}',
             @referenciaEntrega = N'${referenciaEntrega}',
             @opcion = ${opcion}`
     }
