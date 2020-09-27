@@ -853,4 +853,5 @@ sqlController.gestionNotificacion = async (idClienteCanalMensajeria, motivoNotif
     }) 
     return resultSQL
 }
+
 module.exports = sqlController

@@ -702,8 +702,21 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }
         else if(strAccion=='agregarProductoAlCarrito')
         {
+            var metodoPagoCar = contexto.metodoPago
+            if(contexto.metodoPago=='Tarjeta de Crédito')
+            {
+                if(contexto.intereses != 'Corriente')
+                    metodoPagoCar = `${contexto.metodoPago} ${contexto.intereses}`
+                else 
+                    metodoPagoCar =  contexto.intereses
+            }
+            else if(contexto.metodoPago=='Tarjeta de Débito')
+            {
+                metodoPagoCar =  'Corriente'
+                contexto['intereses'] = 'Corriente'
+            }
             await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,contexto.infoProductoSelected.idproductoBot,
-                contexto.metodoPago,contexto.cantidadProductos,1)
+                metodoPagoCar,contexto.cantidadProductos,1)
             .then(resultQuery =>
             {
                 respuesta.push({response_type:'text', text: `Tienes un *carrito de compras activo* con el método de pago *${resultQuery[0].metodoPago}*`})
@@ -907,7 +920,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         else if(strAccion == 'enviarCorreoCompraFinalizada')
         {
             await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
-            .then(result => { console.log("kdsjflsdf", result)})
 
             await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,null,null,null,null,null,null,null,null,null,null,null,null,null,1)
             .then(resultSql => {
@@ -975,11 +987,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     var contenido = `${cabecera}${tabla}`
                     respuesta.push({response_type: 'text', text: `Tu compra está siendo procesada con el número de referencia ${contexto.numeroReferencia}`})
 
-
+                    delete contexto.carritoActual
+                    delete contexto.menuCarrito                    
+                    delete contexto.identificadorMetodoPagoCarrito
+                    delete contexto.metodoPagoCarrito
                     mailController.enviarEmail(titulo, contenido)
-                    .then(respuesta => {
-                        console.log(respuesta)
-                    })
             }
         })
         }        
@@ -998,6 +1010,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }    
         else if(strAccion == "validarCedula")
         {
+            delete contexto.pedirConfirmacionDatos
             var mensajePresentacionInfo = null
             if(contexto.hasOwnProperty("motivoTicket"))
             {

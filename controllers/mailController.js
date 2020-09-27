@@ -40,8 +40,8 @@ mailController.MailErrorWSFacturacion = (jsonEnviado) => {
     var mailOptions = {
       from: 'chatbot1@comandato.com',
   //   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
-      to: 'bryan.garcia@gaiaconsultores.biz;dayana.bailon@gaiaconsultores.biz',
-      subject: 'Error de comunicación con WS de Facturacion Automatica',
+      to: 'dayana.bailon@gaiaconsultores.biz',
+      subject: 'Error de comunicación con WS de Facturacion Automática',
       html: `<!DOCTYPE html>
       <html>
       <body>

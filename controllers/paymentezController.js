@@ -75,6 +75,9 @@ paymentezController.GetFormulario = (req, res) => {
 paymentezController.RespuestaPago = async (req, res) => {
     var respuesta = []
     const transaction = req.body.myjson.transaction;
+    console.log(transaction.dev_reference)
+    let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+    console.log(respuestaSql)
     if(transaction.hasOwnProperty("type")){
         respuesta.push({
             response_type:'text',
@@ -92,45 +95,34 @@ paymentezController.RespuestaPago = async (req, res) => {
         if(transaction.status == "failure"){     
             respuesta.push({
                 response_type:'text',
-                text: 'SU TARJETA HA SIDO RECHAZADA' 
+                text: 'LAMENTAMOS INFORMARLE QUE SU TARJETA HA SIDO RECHAZADA' 
             })       
             paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
             res.send(
                 {
                     estado: false,
                     type: "Error con la tarjeta",
-                    mensaje: 'SU TARJETA HA SIDO RECHAZADA'
+                    mensaje: 'LAMENTAMOS INFORMARLE QUE SU TARJETA HA SIDO RECHAZADA'
                 })
         }
-        else{
-           let card = req.body.myjson.card
-           let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,6)
-           if(respuestaSql.length==0)
-           {
-                res.send(
+        else
+        {
+            let card = req.body.myjson.card
+            let respuestaSql2 = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,6)
+          
+            var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
+            respuesta.push({
+                response_type:'text',
+                text: `${mensajeF}` 
+            })
+            paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+            paymentezController.WSFacturacion(transaction.dev_reference)
+            res.send(
                 {
-                    estado: false,
-                    type: "Error al actualizar datos en la base",
-                    mensaje: 'PAGO FUE PROCESADO DE FORMA CORRECTA. SIN EMBARGO SE PRESENTARON ERRORES AL ACTUALIZAR SUS DATOS.'
+                    estado: true,
+                    type: "¡Transacción exitosa!",
+                    mensaje: mensajeF
                 })
-           }
-           else
-           {
-                var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
-                respuesta.push({
-                        response_type:'text',
-                        text: `${mensajeF}` 
-                    })
-                
-                paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
-                paymentezController.WSFacturacion(transaction.dev_reference)
-                res.send(
-                    {
-                        estado: true,
-                        type: "¡Transacción exitosa!",
-                        mensaje: mensajeF
-                    })   
-            }
         }
     }
 }
@@ -177,7 +169,7 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 paymentezController.CallWS = async (jsonCompra) => {
     var facturaCreada = false
     const soapUrl = config.wsFacturacion.urlSoapFactuacion
-
+    console.log(jsonCompra)
     const paramsWS = {
         "I_TOKEN": config.wsFacturacion.token,
         'I_FECHAHORA_BOT': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),
@@ -189,7 +181,7 @@ paymentezController.CallWS = async (jsonCompra) => {
         return soapCreateOrder(paramsWS)
     })
     .then(clientRes => {
-        console.log(clientRes)
+        console.log("res",clientRes)
         if(clientRes.CreateOrderResult.O_TIPOM == 'S'){
             facturaCreada = true
         }else{
