@@ -75,9 +75,7 @@ paymentezController.GetFormulario = (req, res) => {
 paymentezController.RespuestaPago = async (req, res) => {
     var respuesta = []
     const transaction = req.body.myjson.transaction;
-    console.log(transaction.dev_reference)
     let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
-    console.log(respuestaSql)
     if(transaction.hasOwnProperty("type")){
         respuesta.push({
             response_type:'text',
@@ -169,7 +167,6 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 paymentezController.CallWS = async (jsonCompra) => {
     var facturaCreada = false
     const soapUrl = config.wsFacturacion.urlSoapFactuacion
-    console.log(jsonCompra)
     const paramsWS = {
         "I_TOKEN": config.wsFacturacion.token,
         'I_FECHAHORA_BOT': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),

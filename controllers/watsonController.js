@@ -84,11 +84,11 @@ watsonController.ControlMensajes = async (req, res) => {
             })
             contextoAnterior['carritoActual'] = carritoActual
             menuCarrito = []
-            menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito`})
-            menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito`})
-            menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras`})
-            menuCarrito.push({opcion: 4, accion: `*Finalizar compra*`})
-            menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras`})
+            menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito 💻`})
+            menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito ⛔`})
+            menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras 🛒`})
+            menuCarrito.push({opcion: 4, accion: `*Finalizar* compra o *pagar* 💰`})
+            menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras ❌`})
             contextoAnterior['menuCarrito'] = menuCarrito
         } 
 
@@ -657,14 +657,32 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             {
                 respuesta.push({
                     response_type: "text",
-                    text: `El producto *${producto.nombre}* cuenta con las siguientes *caracteristicas:* ${producto.arrayCarac}`
+                    text: `El producto *${producto.nombre}* cuenta con las siguientes *características:* ${producto.arrayCarac}`
                 });
             }
             respuesta.push({
                 response_type: "text",
-                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Crédito o Débito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngresa el *método de pago* con el que deseas conocer el precio`
+                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗\n   *2) Tarjetas de Crédito o Débito* 💳\n   *3) Efectivo* 💸': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗' : '  *1) Tarjetas de Crédito o Débito* 💳\n   *2) Efectivo* 💸' }\nIngresa el *método de pago* con el que deseas conocer el precio`
             });
 
+            menuMetodoPago = []
+
+            if(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no')
+            {
+                menuMetodoPago.push({opcion: 1, metodo: 'Crédito Directo Comandato' })
+                menuMetodoPago.push({opcion: 2, metodo: 'Tarjetas de Crédito o Débito' })
+                menuMetodoPago.push({opcion: 3, metodo: 'Efectivo' })
+            }
+            else if (producto.stockCC > 0 && producto.isMarketplace == 'no')
+            {
+                menuMetodoPago.push({opcion: 1, metodo: 'Crédito Directo Comandato' })
+            }
+            else
+            {                
+                menuMetodoPago.push({opcion: 1, metodo: 'Tarjetas de Crédito o Débito' })
+                menuMetodoPago.push({opcion: 2, metodo: 'Efectivo' })
+            }
+            contexto['menuMetodoPago'] = menuMetodoPago
             contexto['infoProductoSelected'] = {
                 'idproductoBot' : producto.idProductoBot,
                 'nombreProducto' : producto.nombre,
@@ -726,11 +744,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 if(!contexto.hasOwnProperty('menuCarrito'))
                 {                
                     menuCarrito = []
-                    menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito`})
-                    menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito`})
-                    menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras`})
-                    menuCarrito.push({opcion: 4, accion: `*Finalizar compra*`})
-                    menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras`})
+                    menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito 💻`})
+                    menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito ⛔`})
+                    menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras 🛒`})
+                    menuCarrito.push({opcion: 4, accion: `*Finalizar* compra o *pagar* 💰`})
+                    menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras ❌`})
                     contexto['menuCarrito'] = menuCarrito
                 }
                 txtMenu = 'Indícame qué más deseas hacer:'
