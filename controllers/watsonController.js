@@ -117,11 +117,11 @@ watsonController.ControlMensajes = async (req, res) => {
         //bloque para reportes
         var contar = watsonResponse.result.output.generic.length
         contar = contar-1
-        for(i=0;i<=contar;i++){
-            if(watsonResponse.result.output.generic[i].text=="" || watsonResponse.result.output.generic[i].text==" "){
-                watsonResponse.result.output.generic.splice(i,1)
-            }
-        }
+        // for(i=0;i<=contar;i++){
+        //     if(watsonResponse.result.output.generic[i].text=="" || watsonResponse.result.output.generic[i].text==" "){
+        //         watsonResponse.result.output.generic.splice(i,1)
+        //     }
+        // }
 
         var contexto = watsonResponse.result.context
         console.log("********************este llega de watson*****************")
@@ -662,27 +662,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             }
             respuesta.push({
                 response_type: "text",
-                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗\n   *2) Tarjetas de Crédito o Débito* 💳\n   *3) Efectivo* 💸': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗' : '  *1) Tarjetas de Crédito o Débito* 💳\n   *2) Efectivo* 💸' }\nIngresa el *método de pago* con el que deseas conocer el precio`
+                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗\n   *2) Tarjetas de Crédito* 💳\n   *3) Tarjetas de Débito* 💳\n   *4) Efectivo* 💸': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗' : '  *1) Efectivo* 💸\n  *2) Tarjetas de Crédito* 💳\n  *3) Tarjetas de Débito* 💳\n' }\nIngresa el *método de pago* con el que deseas conocer el precio`
             });
-
-            menuMetodoPago = []
-
-            if(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no')
-            {
-                menuMetodoPago.push({opcion: 1, metodo: 'Crédito Directo Comandato' })
-                menuMetodoPago.push({opcion: 2, metodo: 'Tarjetas de Crédito o Débito' })
-                menuMetodoPago.push({opcion: 3, metodo: 'Efectivo' })
-            }
-            else if (producto.stockCC > 0 && producto.isMarketplace == 'no')
-            {
-                menuMetodoPago.push({opcion: 1, metodo: 'Crédito Directo Comandato' })
-            }
-            else
-            {                
-                menuMetodoPago.push({opcion: 1, metodo: 'Tarjetas de Crédito o Débito' })
-                menuMetodoPago.push({opcion: 2, metodo: 'Efectivo' })
-            }
-            contexto['menuMetodoPago'] = menuMetodoPago
+            contexto['menuMetodoPago'] = "si"
             contexto['infoProductoSelected'] = {
                 'idproductoBot' : producto.idProductoBot,
                 'nombreProducto' : producto.nombre,
@@ -1026,6 +1008,35 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
               delete contexto.detalleTicket
             }
         }    
+        else if(strAccion == "validarDocumentoIdentificacion")
+        {            
+            const identificacion = contexto.numIdentificacion;
+            if(contexto.tipoIdentificacion=='Cédula')
+            {                
+                let [suma, mul, index] = [0, 1, identificacion.length];
+                while (index--) {
+                let num = identificacion[index] * mul;
+                suma += num - (num > 9) * 9;
+                mul = 1 << index % 2;
+                }
+
+                if ((suma % 10 === 0) && (suma > 0)) {
+                    contexto['docValido'] ="si"
+                    respuesta.push({response_type:'text', text: 'Por favor, ingresa tus dos nombres. Ubicando con mayúscula únicamente la primera letra de cada nombre.' })
+                    respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })
+                } else {
+                    contexto['docValido'] ="no"                    
+                    respuesta.push({response_type:'text', text: 'Cédula incorrecta. Por favor, ingresa nuevamente tu cédula' })
+                    respuesta.push({response_type:'text', text: 'Por ejemplo: *1313138918* _(Sin guion medio "-" )_' })
+                 }
+            }
+            else 
+            {
+                contexto['docValido'] ="si"
+                respuesta.push({response_type:'text', text: 'Por favor, ingresa tus dos nombres. Ubicando con mayúscula únicamente la primera letra de cada nombre.' })
+                respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })               
+            }
+        }
         else if(strAccion == "validarCedula")
         {
             delete contexto.pedirConfirmacionDatos
