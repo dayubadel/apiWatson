@@ -116,7 +116,7 @@ mailController.MailErrorWSTickets = (datos) => {
         <p>La presente es para indicarles que el web services de tickets o notificaciones ha fallado después de 3 intentos</p>
         <p>A continuación se muestran los parametros enviados:</p>
         <code>
-            ${JSON.stringify(datos)}
+            ${datos}
         </code>
         <p>Saludos</p>
     </body>

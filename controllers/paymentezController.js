@@ -72,8 +72,10 @@ paymentezController.GetFormulario = (req, res) => {
     res.sendFile('indexPago.html', { root: `${__dirname}\\..\\dist\\` })
 }
 
-paymentezController.RespuestaPago = async (req, res) => {
+paymentezController.RespuestaPago = async (req, res) => {    
+    var grupoWhatsapp = '593963206990-1601935738@g.us'
     var respuesta = []
+    var respuestaGrupoWhatsap = []
     const transaction = req.body.myjson.transaction;
     let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
     if(transaction.hasOwnProperty("type")){
@@ -81,7 +83,15 @@ paymentezController.RespuestaPago = async (req, res) => {
             response_type:'text',
             text: 'Ha ocurrido un error con su pago, por favor intente nuevamente.' 
         })
+        var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
+        mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
         paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+        respuestaGrupoWhatsap.push(
+            {
+                response_type:'text',
+                text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero el sistema de Paymentez está presentando problemas.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+            })
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
         res.send(
         {
             estado: false,
@@ -96,6 +106,14 @@ paymentezController.RespuestaPago = async (req, res) => {
                 text: 'Lamentamos informarle que su tarjeta ha sido rechazada.' 
             })       
             paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+            var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
+            mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
+            respuestaGrupoWhatsap.push(
+                {
+                    response_type:'text',
+                    text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero tiene problemas con su tarjeta.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+                })
+            paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
             res.send(
                 {
                     estado: false,
@@ -123,6 +141,29 @@ paymentezController.RespuestaPago = async (req, res) => {
                 })
         }
     }
+}
+
+
+paymentezController.getDatosFactura = async (numeroReferencia) => {
+    var jsonCompra = {}
+    var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
+    if(data.length > 0){
+        data.forEach(tabla => {
+            if(tabla[0].tipoTabla == 'Cabecera'){
+                    let orden = tabla[0];
+                    delete orden.tipoTabla
+                    jsonCompra.orden = orden
+            }
+            if(tabla[0].tipoTabla == 'Detalle'){
+                tabla.forEach(tblDetalle => {
+                    delete tblDetalle.tipoTabla
+                });
+                let detalle = tabla
+                jsonCompra.orden.items = tabla
+            }
+        });
+    }
+    return jsonCompra
 }
 
 paymentezController.WSFacturacion = async (numeroReferencia) => {
@@ -159,6 +200,14 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 
     if(!facuturaCreada){
         mailController.MailErrorWSFacturacion(jsonCompra);
+        var respuestaGrupoWhatsap = []
+        var grupoWhatsapp = '593963206990-1601935738@g.us'
+        respuestaGrupoWhatsap.push(
+            {
+                response_type:'text',
+                text: `Estimados, les saluda Dora.\nUn cliente ha finalizado exitosamente el pago de una compra.\nSin embargo, el servicio web de facturación automática ha fallado en los 3 intentos.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+            })
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
     }
 
     return facuturaCreada

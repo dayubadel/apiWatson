@@ -20,7 +20,7 @@ module.exports = {
         urlSoapTickets : 'https://appchatbot.comandato.com/wsChatBot.asmx?WSDL'
     },
     subdominioComandato : {
-        url : 'http://c63aa1d210f6.ngrok.io'
+        url : 'http://0e97a96a25d6.ngrok.io'
     },
     // sql: {
     //     config_sql : {

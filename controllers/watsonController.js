@@ -843,7 +843,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 resultSQL => {
                     respuesta.push({response_type: 'text', text: 'El carrito ha sido abandonado.'})
                     respuesta.push({response_type: 'text', text: 'Actualmente no tiene un carrito activo'})
-                    respuesta.push({response_type:'text', text: `Indícame qué más deseas hacer: \n- Ver el *catálogo de productos*\n- Volver al *menú principal*`})
                     delete contexto.carritoActual
                     delete contexto.menuCarrito                    
                     delete contexto.identificadorMetodoPagoCarrito
