@@ -79,28 +79,28 @@ paymentezController.RespuestaPago = async (req, res) => {
     if(transaction.hasOwnProperty("type")){
         respuesta.push({
             response_type:'text',
-            text: 'HA OCURRIDO UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE' 
+            text: 'Ha ocurrido un error con su pago, por favor intente nuevamente.' 
         })
         paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
         res.send(
         {
             estado: false,
             type: "Error de servidor",
-            mensaje: 'HA OCURRIDO UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE'
+            mensaje: 'Ha ocurrido un error con su pago, por favor intente nuevamente.'
         })
     }
     else if(transaction.hasOwnProperty("status")){
         if(transaction.status == "failure"){     
             respuesta.push({
                 response_type:'text',
-                text: 'LAMENTAMOS INFORMARLE QUE SU TARJETA HA SIDO RECHAZADA' 
+                text: 'Lamentamos informarle que su tarjeta ha sido rechazada.' 
             })       
             paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
             res.send(
                 {
                     estado: false,
                     type: "Error con la tarjeta",
-                    mensaje: 'LAMENTAMOS INFORMARLE QUE SU TARJETA HA SIDO RECHAZADA'
+                    mensaje: 'Lamentamos informarle que su tarjeta ha sido rechazada.'
                 })
         }
         else
