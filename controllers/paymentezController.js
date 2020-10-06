@@ -3,7 +3,9 @@ const sqlPaymentezController = require('./sqlPaymentezController.js')
 const soap = require('soap')
 const util = require('util')
 const mailController = require('./mailController')
-const whatsappController = require('./whatsappController')
+const whatsappController = require('./whatsappController');
+const { json } = require("body-parser");
+const sqlController = require("./sqlController.js");
 
 
 const paymentezController = {}
@@ -20,11 +22,11 @@ paymentezController.GestionFactura = async (req, res) => {
     else if(opcion == 2)
     {
         var datosFactura = req.body
-        respuestaSql = await sqlPaymentezController.gestionCabeceraVenta (datosFactura.numeroReferencia,datosFactura.first_name.toUpperCase(),
-                                        datosFactura.last_name.toUpperCase(),datosFactura.user_tipo_identificacion,
+        respuestaSql = await sqlPaymentezController.gestionCabeceraVenta (datosFactura.numeroReferencia,datosFactura.first_name,
+                                        datosFactura.last_name,datosFactura.user_tipo_identificacion,
                                         datosFactura.user_numero_identificacion,datosFactura.user_email.toLowerCase(),datosFactura.user_phone,
-                                        datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal, datosFactura.numero_calle,
-                                        datosFactura.barrio_entrega, datosFactura.referencia_entrega,null,null,null,null,null,null,4)    
+                                        datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal,datosFactura.calle_secundaria,
+                                        datosFactura.numero_calle,datosFactura.referencia_entrega,null,null,null,null,null,null,4)    
     }
     if(respuestaSql.length==0)
     {
@@ -54,7 +56,8 @@ paymentezController.GestionFactura = async (req, res) => {
                 tipo_identificacion : factura.tipoIdentificacion,
                 numero_identificacion : factura.numIdentificacion,
                 email : factura.email,
-                idConversacionCanal : factura.idConversacionCanal
+                idConversacionCanal : factura.idConversacionCanal,
+                finalizado : factura.finalizado
             }
         res.send({estado: true, resultado: facuturaPaymentez})
     }
@@ -62,7 +65,6 @@ paymentezController.GestionFactura = async (req, res) => {
 
 paymentezController.GestionLugares= async (req, res) => {
     var resultadoSql =  await sqlPaymentezController.GestionLugares(req.body.provincia,req.body.opcion)
-
     res.send({estado: true, resultado: resultadoSql})
 }
 
@@ -70,67 +72,185 @@ paymentezController.GetFormulario = (req, res) => {
     res.sendFile('indexPago.html', { root: `${__dirname}\\..\\dist\\` })
 }
 
-paymentezController.RespuestaPago = async (req, res) => {
+paymentezController.RespuestaPago = async (req, res) => {    
+    var grupoWhatsapp = '593963206990-1601935738@g.us'
     var respuesta = []
+    var respuestaGrupoWhatsap = []
     const transaction = req.body.myjson.transaction;
+    let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
     if(transaction.hasOwnProperty("type")){
         respuesta.push({
             response_type:'text',
-            text: 'HA OCURRIOD UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE' 
+            text: 'Ha ocurrido un error con su pago, por favor intente nuevamente.' 
         })
+        var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
+        mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
         paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+        respuestaGrupoWhatsap.push(
+            {
+                response_type:'text',
+                text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero el sistema de Paymentez está presentando problemas.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+            })
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
         res.send(
         {
             estado: false,
             type: "Error de servidor",
-            mensaje: 'HA OCURRIOD UN ERROR CON SU PAGO, POR FAVOR INTENTE NUEVAMENTE'
+            mensaje: 'Ha ocurrido un error con su pago, por favor intente nuevamente.'
         })
     }
     else if(transaction.hasOwnProperty("status")){
+        console.log(transaction)
         if(transaction.status == "failure"){     
             respuesta.push({
                 response_type:'text',
-                text: 'SU TARJETA HA SIDO RECHAZADA' 
+                text: 'Lamentamos informarle que su tarjeta ha sido rechazada.' 
             })       
             paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+            var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
+            mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
+            respuestaGrupoWhatsap.push(
+                {
+                    response_type:'text',
+                    text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero tiene problemas con su tarjeta.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+                })
+            paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
             res.send(
                 {
                     estado: false,
                     type: "Error con la tarjeta",
-                    mensaje: 'SU TARJETA HA SIDO RECHAZADA'
+                    mensaje: 'Lamentamos informarle que su tarjeta ha sido rechazada.'
                 })
         }
-        else{
-           let card = req.body.myjson.card
-           let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,6)
-           if(respuestaSql.length==0)
-           {
-                res.send(
+        else
+        {
+            let card = req.body.myjson.card
+            let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,6)
+            paymentezController.sendEmailCliente(datosCabecera[0])
+            var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
+            respuesta.push({
+                response_type:'text',
+                text: `${mensajeF}` 
+            })
+            paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+            paymentezController.WSFacturacion(transaction.dev_reference)
+            res.send(
                 {
-                    estado: false,
-                    type: "Error al actualizar datos en la base",
-                    mensaje: 'PAGO FUE PROCESADO DE FORMA CORRECTA. SIN EMBARGO SE PRESENTARON ERRORES AL ACTUALIZAR SUS DATOS.'
+                    estado: true,
+                    type: "¡Transacción exitosa!",
+                    mensaje: mensajeF
                 })
-           }
-           else
-           {
-                var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
-                respuesta.push({
-                        response_type:'text',
-                        text: `${mensajeF}` 
-                    })
-                
-                paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
-                paymentezController.WSFacturacion(transaction.dev_reference)
-                res.send(
-                    {
-                        estado: true,
-                        type: "¡Transacción exitosa!",
-                        mensaje: mensajeF
-                    })   
-            }
         }
     }
+}
+
+paymentezController.sendEmailCliente = async (objCabecera) => {
+    let current_datetime = objCabecera.fechaFinalizacion
+    let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
+    var tipoIdentificacion = 'Cédula'
+    var nombreCliente = `${objCabecera.nombresCabecera} ${objCabecera.apellidosCabecera}`
+    if(objCabecera.tipoIdentificacion=='rucECU')
+    {
+        tipoIdentificacion='RUC'
+        nombreCliente = objCabecera.nombresCabecera
+    }
+    let tituloCliente = `Comandato / Compra exitosa mediante Asistente Virtual Dora - Factura: #${objCabecera.numeroReferencia} `
+    let cabeceraCliente = `<div>    
+                        <p>Su pago ha sido procesado exitosamente a través del asistente virtual.</p>
+                        <p>A continuación, se muestran los datos de su compra.</p>
+                        <br>           
+                        <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
+                        <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
+                        <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
+                        <label><strong>Fecha de finalización:</strong> ${formattedDate}</label><br>
+                        <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
+                        <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
+                        <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
+                        <label><strong>Correo electrónico:</strong> ${objCabecera.email}</label><br>
+                        <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago.toUpperCase()}</label><br>
+                        </div>`
+    let datosEntrega = `<div>
+                            <p>Los datos para realizar la entrega del producto son:</p>
+                            <br>                            
+                            <label><strong>Persona que recibirá el producto:</strong> ${objCabecera.nombreReceptor.toUpperCase()}</label><br>
+                            <label><strong>Provincia:</strong> ${objCabecera.provincia.toUpperCase()}</label><br>
+                            <label><strong>Ciudad:</strong> ${objCabecera.ciudad.toUpperCase()}</label><br>
+                            <label><strong>Dirección:</strong> ${objCabecera.callePrincipalEntrega.toUpperCase()}</label><br> 
+                            <label><strong>Número de calle:</strong> ${objCabecera.numeroEntrega.toUpperCase()}</label><br> 
+                            <label><strong>Calle secundaria:</strong> ${objCabecera.calleSecundariaEntrega.toUpperCase()}</label><br>
+                            <label><strong>Referencia adicional:</strong> ${objCabecera.referenciaEntrega.toUpperCase()}</label><br>
+                        </div>`
+    var cabeceraTabla = `<tr>
+                        <th>N</th>
+                        <th>Cantidad</th>
+                        <th>Producto</th>
+                        <th>Precio Unitario</th>
+                        <th>Precio Total</th>
+                    </tr>`
+    filaCuerpo = ''
+    numero = 1
+    var totalFactura = 0
+    var elementosFactura = await sqlPaymentezController.gestionCarritoCompras(objCabecera.idClienteCanalMensajeria,objCabecera.numeroReferencia,null,null,null,null,4)
+    console.log(objCabecera.idClienteCanalMensajeria,elementosFactura)
+    elementosFactura.forEach(element =>
+        {
+            let total = element.cantidad*element.precioProducto
+            filaCuerpo = filaCuerpo + `<tr>
+                                            <td>${numero}</td>
+                                            <td>${element.cantidad}</td>
+                                            <td>${element.nombreProducto}</td>
+                                            <td>${element.precioProducto}</td>
+                                            <td>${total.toFixed(2)}</td>
+                                        </tr>`
+            totalFactura = totalFactura + total
+            numero++
+        })
+        filaCuerpo = filaCuerpo + `<tr>
+        <td>${numero}</td>
+        <td>1</td>
+        <td>VALOR DE ENVÍO</td>
+        <td>3.51</td>
+        <td>3.51</td>
+    </tr>`
+    filaCuerpo = filaCuerpo +  `<tr>
+                                    <td colspan="3">SUBTOTAL</td>
+                                    <td colspan="3">${(totalFactura+3.51).toFixed(2)}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">IVA</td>
+                                    <td colspan="3">${((totalFactura+3.51)*0.12).toFixed(2)}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">TOTAL A PAGAR</td>
+                                    <td colspan="3">$${((totalFactura+3.51)*1.12).toFixed(2)}</td>
+                                </tr>`
+                                            
+    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
+    var contenido = `${cabeceraCliente}${tabla}`
+    mailController.enviarEmailCliente(objCabecera.email, tituloCliente, contenido)
+}
+
+
+paymentezController.getDatosFactura = async (numeroReferencia) => {
+    var jsonCompra = {}
+    var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
+    if(data.length > 0){
+        data.forEach(tabla => {
+            if(tabla[0].tipoTabla == 'Cabecera'){
+                    let orden = tabla[0];
+                    delete orden.tipoTabla
+                    jsonCompra.orden = orden
+            }
+            if(tabla[0].tipoTabla == 'Detalle'){
+                tabla.forEach(tblDetalle => {
+                    delete tblDetalle.tipoTabla
+                });
+                let detalle = tabla
+                jsonCompra.orden.items = tabla
+            }
+        });
+    }
+    return jsonCompra
 }
 
 paymentezController.WSFacturacion = async (numeroReferencia) => {
@@ -157,6 +277,7 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
     console.log(JSON.stringify(jsonCompra))
     await (async () => {        
         for (let i = 0; i < 3; i++) {
+            console.log(jsonCompra)
             facuturaCreada = await paymentezController.CallWS(jsonCompra)
             if(facuturaCreada == true){
                 break;
@@ -166,6 +287,14 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 
     if(!facuturaCreada){
         mailController.MailErrorWSFacturacion(jsonCompra);
+        var respuestaGrupoWhatsap = []
+        var grupoWhatsapp = '593963206990-1601935738@g.us'
+        respuestaGrupoWhatsap.push(
+            {
+                response_type:'text',
+                text: `Estimados, les saluda Dora.\nUn cliente ha finalizado exitosamente el pago de una compra.\nSin embargo, el servicio web de facturación automática ha fallado en los 3 intentos.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+            })
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
     }
 
     return facuturaCreada
@@ -174,7 +303,6 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 paymentezController.CallWS = async (jsonCompra) => {
     var facturaCreada = false
     const soapUrl = config.wsFacturacion.urlSoapFactuacion
-
     const paramsWS = {
         "I_TOKEN": config.wsFacturacion.token,
         'I_FECHAHORA_BOT': new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '').replace(/[:]/g,'').replace(/[-]/g,'').replace(/\s/g,''),
@@ -186,7 +314,7 @@ paymentezController.CallWS = async (jsonCompra) => {
         return soapCreateOrder(paramsWS)
     })
     .then(clientRes => {
-        console.log(clientRes)
+        console.log("res",clientRes)
         if(clientRes.CreateOrderResult.O_TIPOM == 'S'){
             facturaCreada = true
         }else{

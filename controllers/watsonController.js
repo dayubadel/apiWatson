@@ -4,7 +4,7 @@ const sqlController = require('./sqlController.js')
 const mailController = require('./mailController.js')
 const config = require("../config/config.js");
 const { json } = require('body-parser');
-const { sql, valorGlobales } = require('../config/config.js');
+const { sql, valorGlobales, subdominioComandato } = require('../config/config.js');
 const ticketController = require('./ticketController.js');
 // const pedidoModel = require('./../models/pedido.js')
 
@@ -63,6 +63,10 @@ watsonController.ControlMensajes = async (req, res) => {
         {
             contextoAnterior['numeroReferencia'] = objMensajeria.numeroReferencia
         }
+        if(objMensajeria.numeroReferenciaCarritoViejo!=null)
+        {             
+            contextoAnterior['numRefCarritoViejo'] =  objMensajeria.numeroReferenciaCarritoViejo
+        }
 
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
 
@@ -84,11 +88,11 @@ watsonController.ControlMensajes = async (req, res) => {
             })
             contextoAnterior['carritoActual'] = carritoActual
             menuCarrito = []
-            menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito`})
-            menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito`})
-            menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras`})
-            menuCarrito.push({opcion: 4, accion: `*Finalizar compra*`})
-            menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras`})
+            menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito 💻`})
+            menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito ⛔`})
+            menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras 🛒`})
+            menuCarrito.push({opcion: 4, accion: `*Finalizar* compra o *pagar* 💰`})
+            menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras ❌`})
             contextoAnterior['menuCarrito'] = menuCarrito
         } 
 
@@ -117,11 +121,11 @@ watsonController.ControlMensajes = async (req, res) => {
         //bloque para reportes
         var contar = watsonResponse.result.output.generic.length
         contar = contar-1
-        for(i=0;i<=contar;i++){
-            if(watsonResponse.result.output.generic[i].text=="" || watsonResponse.result.output.generic[i].text==" "){
-                watsonResponse.result.output.generic.splice(i,1)
-            }
-        }
+        // for(i=0;i<=contar;i++){
+        //     if(watsonResponse.result.output.generic[i].text=="" || watsonResponse.result.output.generic[i].text==" "){
+        //         watsonResponse.result.output.generic.splice(i,1)
+        //     }
+        // }
 
         var contexto = watsonResponse.result.context
         console.log("********************este llega de watson*****************")
@@ -657,14 +661,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             {
                 respuesta.push({
                     response_type: "text",
-                    text: `El producto *${producto.nombre}* cuenta con las siguientes *caracteristicas:* ${producto.arrayCarac}`
+                    text: `El producto *${producto.nombre}* cuenta con las siguientes *características:* ${producto.arrayCarac}`
                 });
             }
             respuesta.push({
                 response_type: "text",
-                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '*- Crédito Directo Comandato*\n *- Tarjetas de Crédito o Débito*\n *- Efectivo*': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? ' *- Crédito Directo Comandato*' : ' *- Tarjetas de Crédito o Débito*\n *- Efectivo*' }\nIngresa el *método de pago* con el que deseas conocer el precio`
+                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗\n   *2) Tarjetas de Crédito* 💳\n   *3) Tarjetas de Débito* 💳\n   *4) Efectivo* 💸': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗' : '  *1) Efectivo* 💸\n  *2) Tarjetas de Crédito* 💳\n  *3) Tarjetas de Débito* 💳\n' }\nIngresa el *método de pago* con el que deseas conocer el precio`
             });
-
+            contexto['menuMetodoPago'] = "si"
             contexto['infoProductoSelected'] = {
                 'idproductoBot' : producto.idProductoBot,
                 'nombreProducto' : producto.nombre,
@@ -689,21 +693,34 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.marcaProductos
             delete contexto.productoSelected
             delete contexto.infoProductoSelected
-            if(contexto.hasOwnProperty('carritoActual'))
-            {
-                txtMenu = 'Indícame qué más deseas hacer:'
-                contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
-                respuesta.push({response_type:'text', text: txtMenu})
-            }
-            else
-            {
-                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- Ver *menú principal*\n- Seguir viendo el *catálogo* '})
-            }
+            // if(contexto.hasOwnProperty('carritoActual'))
+            // {
+            //     txtMenu = 'Indícame qué más deseas hacer:'
+            //     contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
+            //     respuesta.push({response_type:'text', text: txtMenu})
+            // }
+            // else
+            // {
+            //     respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- Ver *menú principal*\n- Seguir viendo el *catálogo* '})
+            // }
         }
         else if(strAccion=='agregarProductoAlCarrito')
         {
+            var metodoPagoCar = contexto.metodoPago
+            if(contexto.metodoPago=='Tarjeta de Crédito')
+            {
+                if(contexto.intereses != 'Corriente')
+                    metodoPagoCar = `${contexto.metodoPago} ${contexto.intereses}`
+                else 
+                    metodoPagoCar =  contexto.intereses
+            }
+            else if(contexto.metodoPago=='Tarjeta de Débito')
+            {
+                metodoPagoCar =  'Corriente'
+                contexto['intereses'] = 'Corriente'
+            }
             await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,contexto.infoProductoSelected.idproductoBot,
-                contexto.metodoPago,contexto.cantidadProductos,1)
+                metodoPagoCar,contexto.cantidadProductos,1)
             .then(resultQuery =>
             {
                 respuesta.push({response_type:'text', text: `Tienes un *carrito de compras activo* con el método de pago *${resultQuery[0].metodoPago}*`})
@@ -713,11 +730,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 if(!contexto.hasOwnProperty('menuCarrito'))
                 {                
                     menuCarrito = []
-                    menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito`})
-                    menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito`})
-                    menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras`})
-                    menuCarrito.push({opcion: 4, accion: `*Finalizar compra*`})
-                    menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras`})
+                    menuCarrito.push({opcion: 1, accion: `*Agregar productos* al carrito 💻`})
+                    menuCarrito.push({opcion: 2, accion: `*Quitar productos* del carrito ⛔`})
+                    menuCarrito.push({opcion: 3, accion: `*Consultar carrito* de compras 🛒`})
+                    menuCarrito.push({opcion: 4, accion: `*Finalizar* compra o *pagar* 💰`})
+                    menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras ❌`})
                     contexto['menuCarrito'] = menuCarrito
                 }
                 txtMenu = 'Indícame qué más deseas hacer:'
@@ -824,9 +841,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,3)
             .then( 
                 resultSQL => {
-                    respuesta.push({response_type: 'text', text: 'El carrito ha sido abandonado.'})
-                    respuesta.push({response_type: 'text', text: 'Actualmente no tiene un carrito activo'})
-                    respuesta.push({response_type:'text', text: `Indícame qué más deseas hacer: \n- Ver el *catálogo de productos*\n- Volver al *menú principal*`})
                     delete contexto.carritoActual
                     delete contexto.menuCarrito                    
                     delete contexto.identificadorMetodoPagoCarrito
@@ -839,7 +853,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
            respuesta.push({
                 response_type:'text',
+<<<<<<< HEAD
                 text: `http://79620b8cf931.ngrok.io/pago?numero_referencia=${contexto.numeroReferencia}`
+=======
+                text: `${subdominioComandato.url}/pago?numero_referencia=${contexto.numeroReferencia}`
+>>>>>>> 0688182bf3cfeb1101d01b0a874aa26da001d2de
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){
@@ -907,12 +925,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         else if(strAccion == 'enviarCorreoCompraFinalizada')
         {
             await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
-            .then(result => { console.log("kdsjflsdf", result)})
 
             await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,null,null,null,null,null,null,null,null,null,null,null,null,null,1)
             .then(resultSql => {
                 if(resultSql.length>0)
-                {            
+                {          
+                    var tipoIdentificacion = 'Cédula'
+                    if(contexto.tipoIdentificacion=='rucECU')
+                        tipoIdentificacion='RUC'  
                     let current_datetime = resultSql[0].fechaFinalizacion
                     let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
                     let titulo = `PRUEBAS DORA - Compra Finalizada - Factura: #${contexto.numeroReferencia} `
@@ -924,10 +944,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                         <p>Fecha de finalización: ${formattedDate}</p>
                                         <p>Nombres: ${contexto.primerNombre}</p>
                                         <p>Apellidos: ${contexto.primerApellido}</p>
-                                        <p>${contexto.tipoIdentificacion}: ${contexto.numIdentificacion}</p>
+                                        <p>${tipoIdentificacion}: ${contexto.numIdentificacion}</p>
                                         <p>Método de pago: ${contexto.carritoActual[0].metodoPago}</p>
                                         </div>`
-
                     var cabeceraTabla = `<tr>
                                             <th>N</th>
                                             <th>Cantidad</th>
@@ -971,15 +990,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                                     <td colspan="3">$${((totalFactura+3.51)*1.12).toFixed(2)}</td>
                                                 </tr>`
                                                               
-                                        var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
+                    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
                     var contenido = `${cabecera}${tabla}`
                     respuesta.push({response_type: 'text', text: `Tu compra está siendo procesada con el número de referencia ${contexto.numeroReferencia}`})
-
-
                     mailController.enviarEmail(titulo, contenido)
-                    .then(respuesta => {
-                        console.log(respuesta)
-                    })
+                    
+                    delete contexto.carritoActual
+                    delete contexto.menuCarrito                    
+                    delete contexto.identificadorMetodoPagoCarrito
+                    delete contexto.metodoPagoCarrito
             }
         })
         }        
@@ -996,44 +1015,74 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
               delete contexto.detalleTicket
             }
         }    
-        else if(strAccion == "validarCedula")
-        {
-            var mensajePresentacionInfo = null
-            if(contexto.hasOwnProperty("motivoTicket"))
-            {
-                mensajePresentacionInfo = `Tu información registrada es:\n   *Motivo de solicitud:* ${contexto.motivoTicket}\n   *Detalle de solicitud:* ${contexto.detalleTicket}\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
-            }
-            else 
-            {
-                mensajePresentacionInfo = `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
-            }
-
+        else if(strAccion == "validarDocumentoIdentificacion")
+        {            
+            const identificacion = contexto.numIdentificacion;
             if(contexto.tipoIdentificacion=='Cédula')
             {                
-                const ced = contexto.numIdentificacion;
-                let [suma, mul, index] = [0, 1, ced.length];
+                let [suma, mul, index] = [0, 1, identificacion.length];
                 while (index--) {
-                let num = ced[index] * mul;
+                let num = identificacion[index] * mul;
                 suma += num - (num > 9) * 9;
                 mul = 1 << index % 2;
                 }
 
                 if ((suma % 10 === 0) && (suma > 0)) {
-                    respuesta.push({response_type:'text', text: mensajePresentacionInfo})
-                    respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
-                    contexto['identificacionValidada'] =1
+                    contexto['docValido'] ="si"
+                    respuesta.push({response_type:'text', text: 'Por favor, ingresa tus dos nombres. Ubicando con mayúscula únicamente la primera letra de cada nombre.' })
+                    respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })
                 } else {
-                    respuesta.push({response_type:'text', text:`La cédula ingresada es incorrecta.`})                
-                    respuesta.push({response_type:'text', text:`Por favor, ingresa nuevamente el *número de cédula*.`})                
-                }
+                    contexto['docValido'] ="no"                    
+                    respuesta.push({response_type:'text', text: 'Cédula incorrecta. Por favor, ingresa nuevamente tu cédula' })
+                    respuesta.push({response_type:'text', text: 'Por ejemplo: *1313138918* _(Sin guion medio "-" )_' })
+                 }
             }
             else 
             {
-                respuesta.push({response_type:'text', text: mensajePresentacionInfo})
-                respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
-                contexto['identificacionValidada'] =1
+                contexto['docValido'] ="si"
+                respuesta.push({response_type:'text', text: 'Por favor, ingresa tus dos nombres. Ubicando con mayúscula únicamente la primera letra de cada nombre.' })
+                respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })               
             }
         }
+        // else if(strAccion == "validarCedula")
+        // {
+        //     delete contexto.pedirConfirmacionDatos
+        //     var mensajePresentacionInfo = null
+        //     if(contexto.hasOwnProperty("motivoTicket"))
+        //     {
+        //         mensajePresentacionInfo = `Tu información registrada es:\n   *Motivo de solicitud:* ${contexto.motivoTicket}\n   *Detalle de solicitud:* ${contexto.detalleTicket}\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
+        //     }
+        //     else 
+        //     {
+        //         mensajePresentacionInfo = `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
+        //     }
+
+        //     if(contexto.tipoIdentificacion=='Cédula')
+        //     {                
+        //         const ced = contexto.numIdentificacion;
+        //         let [suma, mul, index] = [0, 1, ced.length];
+        //         while (index--) {
+        //         let num = ced[index] * mul;
+        //         suma += num - (num > 9) * 9;
+        //         mul = 1 << index % 2;
+        //         }
+
+        //         if ((suma % 10 === 0) && (suma > 0)) {
+        //             respuesta.push({response_type:'text', text: mensajePresentacionInfo})
+        //             respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
+        //             contexto['identificacionValidada'] =1
+        //         } else {
+        //             respuesta.push({response_type:'text', text:`La cédula ingresada es incorrecta.`})                
+        //             respuesta.push({response_type:'text', text:`Por favor, ingresa nuevamente el *número de cédula*.`})                
+        //         }
+        //     }
+        //     else 
+        //     {
+        //         respuesta.push({response_type:'text', text: mensajePresentacionInfo})
+        //         respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
+        //         contexto['identificacionValidada'] =1
+        //     }
+        // }
         else if(strAccion=='enviarTicket')
         {
             let nombres = `${contexto.primerNombre} ${contexto.primerApellido}`

@@ -36,12 +36,33 @@ mailController.enviarEmail = async (subject, content) =>
 }
 
 
+mailController.enviarEmailCliente = async (destination, subject, content) =>
+{
+    console.log(subject, content)
+    var mailOptions = {
+        from: 'chatbot1@comandato.com',
+     //   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
+        to: destination,
+        subject: subject,
+        html: content
+      };
+
+    await transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+}
+
+
 mailController.MailErrorWSFacturacion = (jsonEnviado) => {
     var mailOptions = {
       from: 'chatbot1@comandato.com',
   //   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
-      to: 'bryan.garcia@gaiaconsultores.biz;dayana.bailon@gaiaconsultores.biz',
-      subject: 'Error de comunicación con WS de Facturacion Automatica',
+      to: 'dayana.bailon@gaiaconsultores.biz',
+      subject: 'Error de comunicación con WS de Facturacion Automática',
       html: `<!DOCTYPE html>
       <html>
       <body>
@@ -67,6 +88,40 @@ mailController.MailErrorWSFacturacion = (jsonEnviado) => {
 }
 
 
+mailController.MailErrorPaymentez = (jsonEnviado, transaction) => {
+  var mailOptions = {
+    from: 'chatbot1@comandato.com',
+//   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
+    to: 'dayana.bailon@gaiaconsultores.biz',
+    subject: 'Error en pago de tarjeta con Paymentez',
+    html: `<!DOCTYPE html>
+    <html>
+    <body>
+        <p>Estimados</p>
+        <p>La presente es para indicarles que un cliente ha intentado realizar un pago con tarjeta, pero se han presentado errores.</p>
+        <p>Los errores son detallados a continuación:</p>
+        <code>
+          ${JSON.stringify(transaction)}
+        </code>
+        <p>Los parametros del cliente y de la compra son presentados a continuación:</p>
+        <code>
+          ${JSON.stringify(jsonEnviado)}
+        </code>
+        <p>Saludos</p>
+    </body>
+    </html>`
+  };
+
+transporter.sendMail(mailOptions, function(error, info){
+  
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+}
+
 
     
 mailController.MailErrorWSTickets = (datos) => {
@@ -82,7 +137,7 @@ mailController.MailErrorWSTickets = (datos) => {
         <p>La presente es para indicarles que el web services de tickets o notificaciones ha fallado después de 3 intentos</p>
         <p>A continuación se muestran los parametros enviados:</p>
         <code>
-            ${JSON.stringify(datos)}
+            ${datos}
         </code>
         <p>Saludos</p>
     </body>

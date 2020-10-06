@@ -40,7 +40,8 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
                 nombres : data.recordset[0].nombres,
                 numeroTelefono: data.recordset[0].numeroTelefono,
                 idConversacionWatson : data.recordset[0].idConversacionWatson,
-                numeroReferencia : data.recordset[0].numeroReferencia
+                numeroReferencia : data.recordset[0].numeroReferencia,
+                numeroReferenciaCarritoViejo : data.recordset[0].numeroReferenciaCarritoViejo
             }
         } else {
             resultSQL = {}
@@ -688,7 +689,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
 //  }
 
 sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, email, numeroTelefono,
-    nombreReceptor, idCiudadEntrega, callePrincipalEntrega, calleSecundariaEntrega, barrioEntrega, referenciaEntrega, 
+    nombreReceptor, idCiudadEntrega, callePrincipalEntrega, calleSecundariaEntrega, numeroEntrega, referenciaEntrega, 
     tipoTarjeta, valorTotalPaymentez, mesesPlazo, primerosDigitosTarjetaPaymentez, ultimosDigitosTarjetaPaymentez, tidPaymentez
     ,opcion) =>
 {
@@ -728,7 +729,7 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
             @idCiudadEntrega = ${idCiudadEntrega},
             @callePrincipalEntrega = N'${callePrincipalEntrega}',
             @calleSecundariaEntrega = N'${calleSecundariaEntrega}',
-            @barrioEntrega = N'${barrioEntrega}',
+            @numeroEntrega = N'${numeroEntrega}',
             @referenciaEntrega = N'${referenciaEntrega}',
             @opcion = ${opcion}`
     }
@@ -853,4 +854,5 @@ sqlController.gestionNotificacion = async (idClienteCanalMensajeria, motivoNotif
     }) 
     return resultSQL
 }
+
 module.exports = sqlController
