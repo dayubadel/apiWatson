@@ -100,6 +100,7 @@ paymentezController.RespuestaPago = async (req, res) => {
         })
     }
     else if(transaction.hasOwnProperty("status")){
+        console.log(transaction)
         if(transaction.status == "failure"){     
             respuesta.push({
                 response_type:'text',
@@ -147,23 +148,37 @@ paymentezController.sendEmailCliente = async (objCabecera) => {
     let current_datetime = objCabecera.fechaFinalizacion
     let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
     var tipoIdentificacion = 'Cédula'
+    var nombreCliente = `${objCabecera.nombresCabecera} ${objCabecera.apellidosCabecera}`
     if(objCabecera.tipoIdentificacion=='rucECU')
+    {
         tipoIdentificacion='RUC'
+        nombreCliente = objCabecera.nombresCabecera
+    }
     let tituloCliente = `Comandato / Compra exitosa mediante Asistente Virtual Dora - Factura: #${objCabecera.numeroReferencia} `
     let cabeceraCliente = `<div>    
                         <p>Su pago ha sido procesado exitosamente a través del asistente virtual.</p>
-                        <p>A continuación, se muestran los datos relevantes de su compra.</p>
+                        <p>A continuación, se muestran los datos de su compra.</p>
                         <br>           
                         <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
                         <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
                         <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
                         <label><strong>Fecha de finalización:</strong> ${formattedDate}</label><br>
-                        <label><strong>Nombres:</strong> ${objCabecera.nombresCabecera}</label><br>
-                        <label><strong>Apellidos:</strong> ${objCabecera.apellidosCabecera}</label><br>
                         <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
+                        <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
                         <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
                         <label><strong>Correo electrónico:</strong> ${objCabecera.email}</label><br>
-                        <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago}</label><br>
+                        <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago.toUpperCase()}</label><br>
+                        </div>`
+    let datosEntrega = `<div>
+                            <p>Los datos para realizar la entrega del producto son:</p>
+                            <br>                            
+                            <label><strong>Persona que recibirá el producto:</strong> ${objCabecera.nombreReceptor.toUpperCase()}</label><br>
+                            <label><strong>Provincia:</strong> ${objCabecera.provincia.toUpperCase()}</label><br>
+                            <label><strong>Ciudad:</strong> ${objCabecera.ciudad.toUpperCase()}</label><br>
+                            <label><strong>Dirección:</strong> ${objCabecera.callePrincipalEntrega.toUpperCase()}</label><br> 
+                            <label><strong>Número de calle:</strong> ${objCabecera.numeroEntrega.toUpperCase()}</label><br> 
+                            <label><strong>Calle secundaria:</strong> ${objCabecera.calleSecundariaEntrega.toUpperCase()}</label><br>
+                            <label><strong>Referencia adicional:</strong> ${objCabecera.referenciaEntrega.toUpperCase()}</label><br>
                         </div>`
     var cabeceraTabla = `<tr>
                         <th>N</th>

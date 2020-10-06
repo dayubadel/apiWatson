@@ -155,7 +155,14 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
                              finalizado : element.finalizado,
                              tidPaymentez : element.tidPaymentez,
                              codigoAutorizacionPaymentez : element.codigoAutorizacionPaymentez,
-                             descripcionMetodoPago : element.descripcionMetodoPago
+                             descripcionMetodoPago : element.descripcionMetodoPago,
+                             ciudad : element.ciudad,
+                             provincia : element.provincia,
+                             nombreReceptor : element.nombreReceptor,
+                             callePrincipalEntrega : element.callePrincipalEntrega,
+                             calleSecundariaEntrega : element.calleSecundariaEntrega,
+                             numeroEntrega : element.numeroEntrega,
+                             referenciaEntrega : element.referenciaEntrega
                     }
                     resultSQL.push(datos)
                 }

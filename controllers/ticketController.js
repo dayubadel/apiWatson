@@ -40,7 +40,6 @@ ticketController.EnviarTicket = async (motivoTicket,detalleTicket,nombres,numIde
         })
         contador++
     }
-    mailController.MailErrorWSTickets(JSON.stringify(paramsWS))
     if(numeroSecuencia==null)
     {
         mailController.MailErrorWSTickets(JSON.stringify(paramsWS))
