@@ -73,8 +73,8 @@ sqlPaymentezController.GestionLugares = async (provincia, opcion) =>
 
 sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, apellidosCabecera, tipoIdentificacion, numIdentificacion, email, numeroTelefono,
     nombreReceptor, idCiudadEntrega, callePrincipalEntrega, calleSecundariaEntrega, numeroEntrega, referenciaEntrega, 
-    tipoTarjeta, valorTotalPaymentez, mesesPlazo, primerosDigitosTarjetaPaymentez, ultimosDigitosTarjetaPaymentez, tidPaymentez
-    ,opcion) =>
+    tipoTarjeta, valorTotalPaymentez, mesesPlazo, primerosDigitosTarjetaPaymentez, ultimosDigitosTarjetaPaymentez, tidPaymentez,
+    codigoAutorizacionPaymentez ,opcion) =>
 {
     
     let resultSQL = []
@@ -126,6 +126,7 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
         @primerosDigitosTarjetaPaymentez = N'${primerosDigitosTarjetaPaymentez}',
         @ultimosDigitosTarjetaPaymentez = N'${ultimosDigitosTarjetaPaymentez}',
         @tidPaymentez= N'${tidPaymentez}',
+        @codigoAutorizacionPaymentez = N'${codigoAutorizacionPaymentez}',
         @opcion = ${opcion}`
     }
     
@@ -162,7 +163,8 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
                              callePrincipalEntrega : element.callePrincipalEntrega,
                              calleSecundariaEntrega : element.calleSecundariaEntrega,
                              numeroEntrega : element.numeroEntrega,
-                             referenciaEntrega : element.referenciaEntrega
+                             referenciaEntrega : element.referenciaEntrega,
+                             idCabeceraVenta : element.idCabeceraVenta
                     }
                     resultSQL.push(datos)
                 }
@@ -237,6 +239,33 @@ sqlPaymentezController.gestionCarritoCompras = async (idClienteCanalMensajeria, 
          throw new Error('Error al registrar en BD')
      })
      return resultSQL
+ }
+
+ sqlPaymentezController.insertarHistoricoPago = async(idCabeceraVenta, codigoMensaje, detalleMensaje, tid, estado, detalleTransaccion) => {
+
+    let query
+    var resultSQL = []
+    var datos = {}
+    
+    query = `EXEC [dbo].[Sp_InsertarHistoricoPago]
+                @idCabeceraVenta = ${idCabeceraVenta},
+                @codigoMensaje = N'${codigoMensaje}',
+                @detalleMensaje = N'${detalleMensaje}',
+                @tid = N'${tid}',
+                @estado = N'${estado}',
+                @detalleTransaccion =N'${detalleTransaccion}' `
+                
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {          
+        }
+    })
+    .catch(err => {
+        console.log("Ha ocurrido un error al ingresar el histórico del pago")
+        console.log(err)
+        throw new Error('Error al registrar en BD')
+    })
+    return resultSQL
  }
 
 module.exports = sqlPaymentezController
