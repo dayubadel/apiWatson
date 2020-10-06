@@ -6,6 +6,7 @@ const mailController = require('./mailController')
 const whatsappController = require('./whatsappController');
 const { json } = require("body-parser");
 const sqlController = require("./sqlController.js");
+const { stringify } = require("querystring");
 
 
 const paymentezController = {}
@@ -17,7 +18,7 @@ paymentezController.GestionFactura = async (req, res) => {
     if(opcion == 1)
     {
         var numeroReferencia = req.body.numeroReferencia
-        respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+        respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
     }
     else if(opcion == 2)
     {
@@ -26,7 +27,7 @@ paymentezController.GestionFactura = async (req, res) => {
                                         datosFactura.last_name,datosFactura.user_tipo_identificacion,
                                         datosFactura.user_numero_identificacion,datosFactura.user_email.toLowerCase(),datosFactura.user_phone,
                                         datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal,datosFactura.calle_secundaria,
-                                        datosFactura.numero_calle,datosFactura.referencia_entrega,null,null,null,null,null,null,4)    
+                                        datosFactura.numero_calle,datosFactura.referencia_entrega,null,null,null,null,null,null,null,4)    
     }
     if(respuestaSql.length==0)
     {
@@ -77,7 +78,8 @@ paymentezController.RespuestaPago = async (req, res) => {
     var respuesta = []
     var respuestaGrupoWhatsap = []
     const transaction = req.body.myjson.transaction;
-    let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+    let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+    sqlPaymentezController.insertarHistoricoPago(respuestaSql[0].idCabeceraVenta,transaction.carrier_code,transaction.message,transaction.id,transaction.status, JSON.stringify(transaction))
     if(transaction.hasOwnProperty("type")){
         respuesta.push({
             response_type:'text',
@@ -100,7 +102,6 @@ paymentezController.RespuestaPago = async (req, res) => {
         })
     }
     else if(transaction.hasOwnProperty("status")){
-        console.log(transaction)
         if(transaction.status == "failure"){     
             respuesta.push({
                 response_type:'text',
@@ -125,7 +126,7 @@ paymentezController.RespuestaPago = async (req, res) => {
         else
         {
             let card = req.body.myjson.card
-            let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,6)
+            let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,transaction.authorization_code,6)
             paymentezController.sendEmailCliente(datosCabecera[0])
             var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
             respuesta.push({
@@ -158,7 +159,6 @@ paymentezController.sendEmailCliente = async (objCabecera) => {
     let cabeceraCliente = `<div>    
                         <p>Su pago ha sido procesado exitosamente a través del asistente virtual.</p>
                         <p>A continuación, se muestran los datos de su compra.</p>
-                        <br>           
                         <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
                         <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
                         <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
@@ -171,7 +171,6 @@ paymentezController.sendEmailCliente = async (objCabecera) => {
                         </div>`
     let datosEntrega = `<div>
                             <p>Los datos para realizar la entrega del producto son:</p>
-                            <br>                            
                             <label><strong>Persona que recibirá el producto:</strong> ${objCabecera.nombreReceptor.toUpperCase()}</label><br>
                             <label><strong>Provincia:</strong> ${objCabecera.provincia.toUpperCase()}</label><br>
                             <label><strong>Ciudad:</strong> ${objCabecera.ciudad.toUpperCase()}</label><br>
@@ -191,7 +190,6 @@ paymentezController.sendEmailCliente = async (objCabecera) => {
     numero = 1
     var totalFactura = 0
     var elementosFactura = await sqlPaymentezController.gestionCarritoCompras(objCabecera.idClienteCanalMensajeria,objCabecera.numeroReferencia,null,null,null,null,4)
-    console.log(objCabecera.idClienteCanalMensajeria,elementosFactura)
     elementosFactura.forEach(element =>
         {
             let total = element.cantidad*element.precioProducto
@@ -225,8 +223,9 @@ paymentezController.sendEmailCliente = async (objCabecera) => {
                                     <td colspan="3">$${((totalFactura+3.51)*1.12).toFixed(2)}</td>
                                 </tr>`
                                             
-    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
-    var contenido = `${cabeceraCliente}${tabla}`
+    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
+    let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
+    var contenido = `${cabeceraCliente}${tabla}${datosEntrega}${pieDeCorreo}`
     mailController.enviarEmailCliente(objCabecera.email, tituloCliente, contenido)
 }
 
