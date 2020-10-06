@@ -693,16 +693,16 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.marcaProductos
             delete contexto.productoSelected
             delete contexto.infoProductoSelected
-            if(contexto.hasOwnProperty('carritoActual'))
-            {
-                txtMenu = 'Indícame qué más deseas hacer:'
-                contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
-                respuesta.push({response_type:'text', text: txtMenu})
-            }
-            else
-            {
-                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- Ver *menú principal*\n- Seguir viendo el *catálogo* '})
-            }
+            // if(contexto.hasOwnProperty('carritoActual'))
+            // {
+            //     txtMenu = 'Indícame qué más deseas hacer:'
+            //     contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
+            //     respuesta.push({response_type:'text', text: txtMenu})
+            // }
+            // else
+            // {
+            //     respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- Ver *menú principal*\n- Seguir viendo el *catálogo* '})
+            // }
         }
         else if(strAccion=='agregarProductoAlCarrito')
         {
@@ -841,8 +841,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,3)
             .then( 
                 resultSQL => {
-                    respuesta.push({response_type: 'text', text: 'El carrito ha sido abandonado.'})
-                    respuesta.push({response_type: 'text', text: 'Actualmente no tiene un carrito activo'})
                     delete contexto.carritoActual
                     delete contexto.menuCarrito                    
                     delete contexto.identificadorMetodoPagoCarrito
@@ -927,7 +925,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,contexto.primerNombre,contexto.primerApellido,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,null,null,null,null,null,null,null,null,null,null,null,null,null,1)
             .then(resultSql => {
                 if(resultSql.length>0)
-                {            
+                {          
+                    var tipoIdentificacion = 'Cédula'
+                    if(contexto.tipoIdentificacion=='rucECU')
+                        tipoIdentificacion='RUC'  
                     let current_datetime = resultSql[0].fechaFinalizacion
                     let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
                     let titulo = `PRUEBAS DORA - Compra Finalizada - Factura: #${contexto.numeroReferencia} `
@@ -939,10 +940,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                         <p>Fecha de finalización: ${formattedDate}</p>
                                         <p>Nombres: ${contexto.primerNombre}</p>
                                         <p>Apellidos: ${contexto.primerApellido}</p>
-                                        <p>${contexto.tipoIdentificacion}: ${contexto.numIdentificacion}</p>
+                                        <p>${tipoIdentificacion}: ${contexto.numIdentificacion}</p>
                                         <p>Método de pago: ${contexto.carritoActual[0].metodoPago}</p>
                                         </div>`
-
                     var cabeceraTabla = `<tr>
                                             <th>N</th>
                                             <th>Cantidad</th>
@@ -986,15 +986,15 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                                     <td colspan="3">$${((totalFactura+3.51)*1.12).toFixed(2)}</td>
                                                 </tr>`
                                                               
-                                        var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
+                    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
                     var contenido = `${cabecera}${tabla}`
                     respuesta.push({response_type: 'text', text: `Tu compra está siendo procesada con el número de referencia ${contexto.numeroReferencia}`})
-
+                    mailController.enviarEmail(titulo, contenido)
+                    
                     delete contexto.carritoActual
                     delete contexto.menuCarrito                    
                     delete contexto.identificadorMetodoPagoCarrito
                     delete contexto.metodoPagoCarrito
-                    mailController.enviarEmail(titulo, contenido)
             }
         })
         }        

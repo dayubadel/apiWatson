@@ -152,7 +152,10 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
                              email : element.email,
                              identificadorMetodoPago : element.identificadorMetodoPago,
                              idConversacionCanal : element.idConversacionCanal,
-                             finalizado : element.finalizado
+                             finalizado : element.finalizado,
+                             tidPaymentez : element.tidPaymentez,
+                             codigoAutorizacionPaymentez : element.codigoAutorizacionPaymentez,
+                             descripcionMetodoPago : element.descripcionMetodoPago
                     }
                     resultSQL.push(datos)
                 }
@@ -166,5 +169,67 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
     })
     return resultSQL
 }
+
+sqlPaymentezController.gestionCarritoCompras = async (idClienteCanalMensajeria, numeroReferencia, idDetalleVenta, idProductoBot, metodoPago, cantidad, opcion) =>
+ {
+     let query
+     let datos = {}
+     let resultSQL = []
+     if(opcion==1) //insertar producto al carrito
+     {
+         query = `[dbo].[sp_GestionCarritoDeCompras]
+                 @idClienteCanalMensajeria=${idClienteCanalMensajeria},
+                 @idProductoBot=${idProductoBot},
+                 @metodoPago=N'${metodoPago}',
+                 @cantidad=${cantidad},
+                 @opcion=${opcion}`
+     }
+     else if(opcion==2) //consultar carrito
+     {
+         query = `[dbo].[sp_GestionCarritoDeCompras]
+                 @idClienteCanalMensajeria=${idClienteCanalMensajeria},
+                 @opcion=${opcion}`
+     }
+     else if(opcion==3) //eliminar producto de carrito
+     {
+         query = `[dbo].[sp_GestionCarritoDeCompras]
+                 @idClienteCanalMensajeria=${idClienteCanalMensajeria},
+                 @idDetalleVenta=${idDetalleVenta},
+                 @opcion=${opcion}`
+     }
+     else if(opcion==4) //consultar carrito por numero ref de la factura
+     {
+         query = `[dbo].[sp_GestionCarritoDeCompras]
+                @idClienteCanalMensajeria=${idClienteCanalMensajeria},
+                 @numeroReferencia=${numeroReferencia},
+                 @opcion=${opcion}`
+     }
+ 
+     await request.query(query)
+     .then(async data => {
+         if (data.recordset != undefined && data.recordset.length > 0) {
+                data.recordset.forEach(element =>
+                     {
+                         datos = {
+                             idProductoBot : element.idProductoBot,
+                             nombreProducto : element.nombreProducto,
+                             cantidad : element.cantidad,
+                             precioProducto : element.precioProducto,
+                             metodoPago : element.metodoPago,
+                             identificadorMetodoPago: element.identificadorMetodoPago,
+                             idDetalleVenta : element.idDetalleVenta,
+                             numeroReferencia : element.numeroReferencia
+                         }
+                         resultSQL.push(datos)
+                     })             
+            }
+     })
+     .catch(err => {
+         console.log("Error al gestionar el carrito de compras")
+         console.log(err)
+         throw new Error('Error al registrar en BD')
+     })
+     return resultSQL
+ }
 
 module.exports = sqlPaymentezController
