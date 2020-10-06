@@ -154,7 +154,7 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
             }
         });
     }
-
+    console.log(JSON.stringify(jsonCompra))
     await (async () => {        
         for (let i = 0; i < 3; i++) {
             facuturaCreada = await paymentezController.CallWS(jsonCompra)
