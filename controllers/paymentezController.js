@@ -162,7 +162,7 @@ paymentezController.sendEmailCliente = async (objCabecera) => {
                         <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
                         <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
                         <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
-                        <label><strong>Fecha de finalización:</strong> ${formattedDate}</label><br>
+                        <label><strong>Fecha:</strong> ${formattedDate}</label><br>
                         <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
                         <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
                         <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
