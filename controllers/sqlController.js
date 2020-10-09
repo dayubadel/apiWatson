@@ -768,7 +768,11 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
                              idClienteCanalMensajeria : element.idClienteCanalMensajeria,
                              email : element.email,
                              identificadorMetodoPago : element.identificadorMetodoPago,
-                             idConversacionCanal : element.idConversacionCanal
+                             idConversacionCanal : element.idConversacionCanal,
+                             valorTotalPaymentez : element.valorTotalPaymentez,
+                             finalizado : element.finalizado,
+                             tidPaymentez : element.tidPaymentez,
+                             abandonado : element.abandonado
                     }
                     resultSQL.push(datos)
                 }

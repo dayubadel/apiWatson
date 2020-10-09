@@ -18,9 +18,15 @@ module.exports = {
     wsTickets: {
         token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
         urlSoapTickets : 'https://appchatbot.comandato.com/wsChatBot.asmx?WSDL'
-    },
+    },   
     subdominioComandato : {
-        url : 'http://16be76c629e0.ngrok.io'
+        url : 'http://6e66c28d00db.ngrok.io'
+    },
+    refoundPaymentez : {
+        apiLogin: 'CHATBOTSTG-EC-SERVER',
+        apiKey: 'gNSpExwDkOEeqich5Jc9A3QJg7fqES',
+        url : 'ccapi-stg.paymentez.com',
+        path : '/v2/transaction/refund/'
     },
     // sql: {
     //     config_sql : {

@@ -5,11 +5,61 @@ const util = require('util')
 const mailController = require('./mailController')
 const whatsappController = require('./whatsappController');
 const { json } = require("body-parser");
-const sqlController = require("./sqlController.js");
 const { stringify } = require("querystring");
+const sha256 = require('js-sha256');
+var https = require('follow-redirects').https;
+
+const paymentezController = {}   
+
+paymentezController.postRefound  = async (tidPaymentez) => {
+    const url = config.refoundPaymentez.url
+    const path = config.refoundPaymentez.path
+    const apiKey = config.refoundPaymentez.apiKey
+    const apiLogin = config.refoundPaymentez.apiLogin
+    let token = await paymentezController.GenerarToken(apiLogin,apiKey)  
+    var estado = true
+    var options = {
+        'method': 'POST',
+        'hostname': url,
+        'path': path,
+        'headers': {
+          'Auth-Token': token,
+          'Content-Type': 'application/json'
+        },
+        'maxRedirects': 20
+      };
+      var req = https.request(options, function (res) {
+        var chunks = [];      
+        res.on("data", function (chunk) {
+          chunks.push(chunk);
+        });      
+        res.on("end", function (chunk) {
+          var body = Buffer.concat(chunks);
+          console.log(body.toString());
+        });      
+        res.on("error", function (error) {            
+          estado = false
+          console.error(error);
+        });
+      });
+      var postData = JSON.stringify({"transaction":{"id":tidPaymentez}});
+      req.write(postData);      
+      req.end();
+      return estado
+}
 
 
-const paymentezController = {}
+paymentezController.GenerarToken = async (apiLogin, apiKey) => {
+   const server_application_code = apiLogin
+   const server_app_key = apiKey
+   const unix_timestamp = Math.floor(Date.now() / 1000)
+   const uniq_token_string = `${server_app_key}${unix_timestamp}`
+   const uniq_token_hash = sha256(uniq_token_string)
+   const buf = Buffer.from(`${server_application_code};${unix_timestamp};${uniq_token_hash}`)
+   const auth_token = buf.toString('base64');
+    return auth_token
+}
+
 
 
 paymentezController.GestionFactura = async (req, res) => {

@@ -6,6 +6,7 @@ const config = require("../config/config.js");
 const { json } = require('body-parser');
 const { sql, valorGlobales, subdominioComandato } = require('../config/config.js');
 const ticketController = require('./ticketController.js');
+const paymentezController = require('./paymentezController.js');
 // const pedidoModel = require('./../models/pedido.js')
 
 const id_workspace = config.Watson.id_workspace
@@ -1040,45 +1041,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })               
             }
         }
-        // else if(strAccion == "validarCedula")
-        // {
-        //     delete contexto.pedirConfirmacionDatos
-        //     var mensajePresentacionInfo = null
-        //     if(contexto.hasOwnProperty("motivoTicket"))
-        //     {
-        //         mensajePresentacionInfo = `Tu información registrada es:\n   *Motivo de solicitud:* ${contexto.motivoTicket}\n   *Detalle de solicitud:* ${contexto.detalleTicket}\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
-        //     }
-        //     else 
-        //     {
-        //         mensajePresentacionInfo = `Tu información registrada es:\n   *Nombres:* ${contexto.primerNombre}\n   *Apellidos:* ${contexto.primerApellido}\n   *${contexto.tipoIdentificacion}:* ${contexto.numIdentificacion}\n   *Teléfono:* ${contexto.telefono}`
-        //     }
-
-        //     if(contexto.tipoIdentificacion=='Cédula')
-        //     {                
-        //         const ced = contexto.numIdentificacion;
-        //         let [suma, mul, index] = [0, 1, ced.length];
-        //         while (index--) {
-        //         let num = ced[index] * mul;
-        //         suma += num - (num > 9) * 9;
-        //         mul = 1 << index % 2;
-        //         }
-
-        //         if ((suma % 10 === 0) && (suma > 0)) {
-        //             respuesta.push({response_type:'text', text: mensajePresentacionInfo})
-        //             respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
-        //             contexto['identificacionValidada'] =1
-        //         } else {
-        //             respuesta.push({response_type:'text', text:`La cédula ingresada es incorrecta.`})                
-        //             respuesta.push({response_type:'text', text:`Por favor, ingresa nuevamente el *número de cédula*.`})                
-        //         }
-        //     }
-        //     else 
-        //     {
-        //         respuesta.push({response_type:'text', text: mensajePresentacionInfo})
-        //         respuesta.push({response_type:'text', text: '¿Confirma que es correcta?'})
-        //         contexto['identificacionValidada'] =1
-        //     }
-        // }
         else if(strAccion=='enviarTicket')
         {
             let nombres = `${contexto.primerNombre} ${contexto.primerApellido}`
@@ -1090,6 +1052,75 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             }
             else
                 sqlController.gestionNotificacion(idClienteCanalMensajeria,contexto.motivoTicket,nombres,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,contexto.detalleTicket,null,1)
+        }
+        else if(strAccion=='validarNumeroReferenciaDevolucion')
+        {
+            let objCabecera = await sqlController.gestionCabeceraVenta(contexto.referenciaDevolucion,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+            contexto['validacionDevolucion']='no'
+            if(objCabecera.length==0)
+            {
+                respuesta.push({response_type: 'text', text: `No encontré el código de referencia *${contexto.referenciaDevolucion}* en mis registros`})
+                respuesta.push({response_type: 'text', text:'¿Te gustaría intentar con otro código?'})
+            }
+            else
+            {
+               
+                if(objCabecera[0].identificadorMetodoPago==1 || objCabecera[0].identificadorMetodoPago==2)
+                {
+                    respuesta.push({response_type: 'text', text:'Solo puedo aplicar devoluciones en las compras pagadas con tarjeta de crédito o débito.'})
+                    respuesta.push({response_type: 'text', text:'¿Te gustaría intentar con otro código?'})
+                }
+                else if(objCabecera[0].abandonado==true)
+                {
+                    respuesta.push({response_type: 'text', text:'Esa compra ha sido abandonada. No puedes aplicar para una devolución.'})
+                    respuesta.push({response_type: 'text', text:'¿Te gustaría intentar con otro código?'})
+                }
+                else if(objCabecera[0].finalizado==false)
+                {
+                    respuesta.push({response_type: 'text', text:'Esa compra aún no ha sido pagada. No puedes aplicar para una devolución.'})
+                    respuesta.push({response_type: 'text', text:'¿Te gustaría intentar con otro código?'})
+                }
+                else
+                {
+                    let hoy = new Date();
+                    let fechaHoy = hoy.getFullYear()+'-'+(hoy.getMonth()+1)+'-'+hoy.getDate();
+                    let fCompra = objCabecera[0].fechaFinalizacion
+                    let fechaCompra = fCompra.getFullYear()+'-'+(fCompra.getMonth()+1)+'-'+fCompra.getDate();
+                    if(fechaHoy!=fechaCompra)
+                    {
+                        respuesta.push({response_type: 'text', text:'Solo puedo realizar devoluciones automáticas si lo solicitas el mismo día de la compra, antes de las 16:50.'})
+                        respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})
+                        respuesta.push({response_type: 'text', text:'¿Deseas que envíe dicho correo?'})
+                        contexto['validacionDevolucion']='correo'
+                    }
+                    else if(hoy.getHours()>20 || ( hoy.getHours()>20 && hoy.getMinutes()>50))
+                    {
+                        respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 16:50.'})
+                        respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})
+                        respuesta.push({response_type: 'text', text:'¿Deseas que envíe dicho correo?'})
+                        contexto['validacionDevolucion']='correo'
+                    }
+                    else 
+                    {
+                        respuesta.push({response_type: 'text', text:'He encontrado tu compra, necesito un último dato de confirmación para proceder con la devolución.'})
+                        respuesta.push({response_type: 'text', text:`En el mismo correo de confirmación del pago, te envié el *identificador del pago*.`})
+                        respuesta.push({response_type: 'text', text:`Por favor ingresa ese *identificador del pago*.`})
+                        contexto['validacionDevolucion']='si'
+                        contexto['tidPaymentezDevolucion']=objCabecera[0].tidPaymentez
+                        contexto['valorTotalDevolucion']=objCabecera[0].valorTotalOrden
+                    }
+                }
+            }
+        }
+        else if(strAccion=='aplicarRefound')
+        {
+            const tidPaymentez = contexto.tidPaymentezDevolucion
+            var estadoRespuesta = await paymentezController.postRefound(tidPaymentez)
+            console.log(estadoRespuesta)
+            if(estadoRespuesta==true)
+            {
+                respuesta.push({response_type:'text',text:'Se ha realizado la devolución automática de forma exitosa.'})
+            }
         }
         /*comentado v 2.0 rama desarrollo
         else if (strAccion=='consultarProductosPorMarcaPorCategoriaGeneral' || strAccion == 'consultarMarcasPorCategoriaGeneral' || strAccion == 'consultarCategoriasPorCategoria' )
