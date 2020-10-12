@@ -2868,14 +2868,10 @@ body.is-menu-visible #menu {
       window.onload = function() {
 
       const queryString = window.location.search;
-      urlComandato = 'http://16be76c629e0.ngrok.io'
+      urlComandato = 'http://6e66c28d00db.ngrok.io'
       const urlParams = new URLSearchParams(queryString);
       $.ajax({
-<<<<<<< HEAD
-          url :  "http://79620b8cf931.ngrok.io/pago/gestionlugares",
-=======
           url :  `${urlComandato}/pago/gestionlugares`,
->>>>>>> 0688182bf3cfeb1101d01b0a874aa26da001d2de
           method : "post",
           dataType : "JSON",
           data : { opcion : 1, provincia : null},
@@ -2896,11 +2892,7 @@ body.is-menu-visible #menu {
       function consultarFactura(numeroReferencia)
       {
           $.ajax({            
-<<<<<<< HEAD
-            url: "http://79620b8cf931.ngrok.io/pago/gestionfactura",
-=======
             url: `${urlComandato}/pago/gestionfactura`,
->>>>>>> 0688182bf3cfeb1101d01b0a874aa26da001d2de
             type: "post",
             dataType: "JSON",
             data: { numeroReferencia: numeroReferencia, opcion : 1 },
@@ -3064,11 +3056,7 @@ body.is-menu-visible #menu {
     {
         let provincia = $('#provincia').val()
         $.ajax({
-<<<<<<< HEAD
-          url :  "http://79620b8cf931.ngrok.io/pago/gestionlugares",
-=======
           url : `${urlComandato}/pago/gestionlugares`,
->>>>>>> 0688182bf3cfeb1101d01b0a874aa26da001d2de
           method : "post",
           dataType : "JSON",
           data : { opcion : 2, provincia : provincia},
@@ -3117,20 +3105,6 @@ body.is-menu-visible #menu {
         }
         else 
         {
-<<<<<<< HEAD
-          $(".js-payment-checkout").trigger("click");
-          $.ajax({            
-            url: "http://79620b8cf931.ngrok.io/pago/gestionfactura",
-            type: "post",
-            dataType: "JSON",
-            data: { opcion : 2, numeroReferencia: order_reference, first_name : first_name, 
-                    last_name :last_name, user_tipo_identificacion: user_tipo_identificacion, 
-                    user_numero_identificacion : user_numero_identificacion, user_email : user_email,
-                    user_phone : user_phone, nombre_receptor : nombre_receptor, provincia : provincia,
-                    ciudad : ciudad, calle_principal : calle_principal, numero_calle : numero_calle,
-                    barrio_entrega : barrio_entrega, referencia_entrega : referencia_entrega },
-            success:  function(data)
-=======
           var first_name = $('#firstname').val()
           var last_name = $('#lastname').val()
           var user_tipo_identificacion = $('#tipoidentificacion').val()
@@ -3249,7 +3223,6 @@ body.is-menu-visible #menu {
           {
             first_name = first_name.toUpperCase()
             if(user_tipo_identificacion=="cedulaECU")
->>>>>>> 0688182bf3cfeb1101d01b0a874aa26da001d2de
             {
               last_name = last_name.toUpperCase()
             }
@@ -3305,11 +3278,7 @@ body.is-menu-visible #menu {
       onResponse: function (response) { // The callback to invoke when the Checkout process is completed
         
         $.ajax({
-<<<<<<< HEAD
-          url :  "http://79620b8cf931.ngrok.io/pago/respuestapago",
-=======
           url : `${urlComandato}/pago/respuestapago`,
->>>>>>> 0688182bf3cfeb1101d01b0a874aa26da001d2de
           method : "post",
           dataType : "JSON",
           data : { myjson: response},
