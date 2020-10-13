@@ -669,6 +669,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 response_type: "text",
                 text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗\n   *2) Tarjetas de Crédito* 💳\n   *3) Tarjetas de Débito* 💳\n   *4) Efectivo* 💸': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗' : '  *1) Efectivo* 💸\n  *2) Tarjetas de Crédito* 💳\n  *3) Tarjetas de Débito* 💳\n' }\nIngresa el *método de pago* con el que deseas conocer el precio`
             });
+            contexto['productoActualMP'] = contexto.productoSelected
             contexto['menuMetodoPago'] = "si"
             contexto['infoProductoSelected'] = {
                 'idproductoBot' : producto.idProductoBot,
@@ -686,6 +687,19 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
             await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,null,null,producto.nombre)
         }    
+        else if(strAccion=="consultarMetodosPago")
+        {
+            let producto,
+                txtCarac = '';
+            console.log(contexto.productoActualMP)
+            producto = await sqlController.consultarInfoProducto(contexto.productoActualMP)
+            respuesta.push({response_type: "text", text:'La opción seleccionada no es válida.'})
+            respuesta.push({
+                response_type: "text",
+                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗\n   *2) Tarjetas de Crédito* 💳\n   *3) Tarjetas de Débito* 💳\n   *4) Efectivo* 💸': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗' : '  *1) Efectivo* 💸\n  *2) Tarjetas de Crédito* 💳\n  *3) Tarjetas de Débito* 💳\n' }\nIngresa el *método de pago* con el que deseas conocer el precio`
+            });
+            contexto['menuMetodoPago'] = "si"
+        }
         else if (strAccion=="limpiarDatosContexto")
         {
             delete contexto.mostrarCarrito
@@ -1026,7 +1040,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
                 if ((suma % 10 === 0) && (suma > 0)) {
                     contexto['docValido'] ="si"
-                    respuesta.push({response_type:'text', text: 'Por favor, ingresa tus dos nombres. Ubicando con mayúscula únicamente la primera letra de cada nombre.' })
+                    respuesta.push({response_type:'text', text: 'Por favor, ingresa tus *dos nombres*. Ubicando con *mayúscula* únicamente la *primera letra* de cada nombre.' })
                     respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })
                 } else {
                     contexto['docValido'] ="no"                    
