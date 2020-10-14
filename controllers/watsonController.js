@@ -29,7 +29,7 @@ watsonController.ControlMensajes = async (req, res) => {
     let idChat = req.body.idChat //es el idConversacionCanal
     let txtMsg = req.body.textMensajeReq
     let idCanal = req.body.idCanal
-
+    console.log(req.body)
     try {
         let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
 
@@ -129,9 +129,9 @@ watsonController.ControlMensajes = async (req, res) => {
         // }
 
         var contexto = watsonResponse.result.context
-        console.log("********************este llega de watson*****************")
-        console.log(JSON.stringify(watsonResponse.result,null,4))
-        console.log("********************este llega de watson*****************")
+        // console.log("********************este llega de watson*****************")
+        // console.log(JSON.stringify(watsonResponse.result,null,4))
+        // console.log("********************este llega de watson*****************")
 
         if(contexto.hasOwnProperty('_actionNode'))
         {
@@ -193,6 +193,10 @@ watsonController.ControlMensajes = async (req, res) => {
 
         var contextoConversacion = watsonResponse.result
         await watsonController.RegistrarMensajes(idClienteCanalMensajeria,inputTextUsuario,outputWatsonRespuesta,intencionesWatson,entidadesWatson,contextoConversacion)
+        let newArrRespuesta = watsonController.MessageFormat(idCanal,watsonResponse.result.output.generic)
+        watsonResponse.result.output.generic = []
+        watsonResponse.result.output.generic = newArrRespuesta
+        // console.log(newArrRespuesta)
         res.send(watsonResponse.result.output.generic)
 
     } catch (error) {
@@ -201,6 +205,36 @@ watsonController.ControlMensajes = async (req, res) => {
     }
 }
 
+
+watsonController.MessageFormat = (idCanal,arrRespuesta) => {
+    var newArrRespuesta = []
+    if(idCanal == 1) {
+        newArrRespuesta = arrRespuesta
+    }
+    if(idCanal == 2){
+        // console.log(arrRespuesta)
+        arrRespuesta.forEach(jsonRespuesta => {
+            console.log(jsonRespuesta)
+            if(jsonRespuesta.response_type == "image" ){
+                if(typeof(jsonRespuesta.title) == 'string' ){
+                    newArrRespuesta.push({
+                        response_type: 'text',
+                        text: jsonRespuesta.title.replace(/[*|_]+/g,'')
+                    })
+                    jsonRespuesta.title = ''
+                }
+                newArrRespuesta.push(jsonRespuesta)
+                // arrRespuesta.splice(arrRespuesta.indexOf(jsonRespuesta),0,newJsonRespuesta)
+            }else if(jsonRespuesta.response_type != "image" ){
+                console.log(jsonRespuesta.text)
+                jsonRespuesta.text = jsonRespuesta.text.replace(/[*|_]+/g,'')
+                newArrRespuesta.push(jsonRespuesta)
+            }
+        });
+    }
+
+    return newArrRespuesta
+}
 
 watsonController.RegistrarCliente = async (idCliente, contexto) =>
 {
@@ -691,7 +725,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         {
             let producto,
                 txtCarac = '';
-            console.log(contexto.productoActualMP)
             producto = await sqlController.consultarInfoProducto(contexto.productoActualMP)
             respuesta.push({response_type: "text", text:'La opción seleccionada no es válida.'})
             respuesta.push({
@@ -1266,14 +1299,12 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let marcaProductos = contexto.marcaProductos
             await sqlController.consultarCategoriasMarcasGeneral(marcaProductos,categoriaUltimoNivel)
             .then(result => {
-                console.log(result)
                 var tipoResultado = result[0].tipoResultado,
                 num = 1
                 menuMostradoProductos = {
                     "tipoMenu" : "",
                     'menuMostrado' : []
                 };
-                console.log(tipoResultado)
                 if(tipoResultado=="categorias")
                 {
                     var txtCategoriasHijas = '',
