@@ -20,7 +20,7 @@ module.exports = {
         urlSoapTickets : 'https://appchatbot.comandato.com/wsChatBot.asmx?WSDL'
     },   
     subdominioComandato : {
-        url : 'http://6e66c28d00db.ngrok.io'
+        url : 'http://b913557c0b89.ngrok.io'
     },
     refoundPaymentez : {
         apiLogin: 'CHATBOTSTG-EC-SERVER',
@@ -28,32 +28,32 @@ module.exports = {
         url : 'ccapi-stg.paymentez.com',
         path : '/v2/transaction/refund/'
     },
-    // sql: {
-    //     config_sql : {
-    //         user : 'sa',
-    //         password: '1234',
-    //         server: 'DESKTOP-TU6JTR4\\SQLEXPRESS',
-    //         port: 1433,
-    //         database: 'chatbotComandato',
-    //         options:{
-    //           'encrypt' : true,
-    //           'enableArithAbort': true
-    //         }
-    //     }
-    //   }
-     sql: {
-         config_sql : {
-             user : 'sa',
-             password: 'dayu2020',
-             server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
-             port: 1433,
-             database: 'chatbotComandato',
-             options:{
-               'encrypt' : true,
-               'enableArithAbort': true
-             }
-         }
+    sql: {
+        config_sql : {
+            user : 'sa',
+            password: '1234',
+            server: 'DESKTOP-TU6JTR4\\SQLEXPRESS',
+            port: 1433,
+            database: 'chatbotComandato',
+            options:{
+              'encrypt' : true,
+              'enableArithAbort': true
+            }
         }
+      }
+    //  sql: {
+    //      config_sql : {
+    //          user : 'sa',
+    //          password: 'dayu2020',
+    //          server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
+    //          port: 1433,
+    //          database: 'chatbotComandato',
+    //          options:{
+    //            'encrypt' : true,
+    //            'enableArithAbort': true
+    //          }
+    //      }
+    //     }
     // sql: {
     //     config_sql : {
     //         user : 'userGaia',
