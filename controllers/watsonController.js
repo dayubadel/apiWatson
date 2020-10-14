@@ -669,6 +669,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 response_type: "text",
                 text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗\n   *2) Tarjetas de Crédito* 💳\n   *3) Tarjetas de Débito* 💳\n   *4) Efectivo* 💸': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗' : '  *1) Efectivo* 💸\n  *2) Tarjetas de Crédito* 💳\n  *3) Tarjetas de Débito* 💳\n' }\nIngresa el *método de pago* con el que deseas conocer el precio`
             });
+            contexto['productoActualMP'] = contexto.productoSelected
             contexto['menuMetodoPago'] = "si"
             contexto['infoProductoSelected'] = {
                 'idproductoBot' : producto.idProductoBot,
@@ -686,6 +687,19 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
             await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,null,null,producto.nombre)
         }    
+        else if(strAccion=="consultarMetodosPago")
+        {
+            let producto,
+                txtCarac = '';
+            console.log(contexto.productoActualMP)
+            producto = await sqlController.consultarInfoProducto(contexto.productoActualMP)
+            respuesta.push({response_type: "text", text:'La opción seleccionada no es válida.'})
+            respuesta.push({
+                response_type: "text",
+                text: `Este producto está disponible con los siguientes *métodos de pago:*\n ${(producto.stockCC > 0 && producto.stockOtroPago > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗\n   *2) Tarjetas de Crédito* 💳\n   *3) Tarjetas de Débito* 💳\n   *4) Efectivo* 💸': (producto.stockCC > 0 && producto.isMarketplace == 'no') ? '  *1) Crédito Directo Comandato* 📗' : '  *1) Efectivo* 💸\n  *2) Tarjetas de Crédito* 💳\n  *3) Tarjetas de Débito* 💳\n' }\nIngresa el *método de pago* con el que deseas conocer el precio`
+            });
+            contexto['menuMetodoPago'] = "si"
+        }
         else if (strAccion=="limpiarDatosContexto")
         {
             delete contexto.mostrarCarrito
@@ -1026,7 +1040,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
                 if ((suma % 10 === 0) && (suma > 0)) {
                     contexto['docValido'] ="si"
-                    respuesta.push({response_type:'text', text: 'Por favor, ingresa tus dos nombres. Ubicando con mayúscula únicamente la primera letra de cada nombre.' })
+                    respuesta.push({response_type:'text', text: 'Por favor, ingresa tus *dos nombres*. Ubicando con *mayúscula* únicamente la *primera letra* de cada nombre.' })
                     respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })
                 } else {
                     contexto['docValido'] ="no"                    
@@ -1064,8 +1078,23 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             }
             else
             {
-               
-                if(objCabecera[0].identificadorMetodoPago==1 || objCabecera[0].identificadorMetodoPago==2)
+                if(objCabecera[0].fechaDevolucionAutomatica!=null)
+                {
+                    let current_datetime = objCabecera[0].fechaDevolucionAutomatica
+                    let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
+
+                    respuesta.push({response_type: 'text', text: `Realicé la devolución de esta compra el día ${formattedDate}. No puedes aplicar para otra devolución.`})
+                    respuesta.push({response_type: 'text', text:'¿Te gustaría intentar con otro código?'})
+                }
+                else if(objCabecera[0].fechaDevolucionCorreo!=null)
+                {
+                    let current_datetime = objCabecera[0].fechaDevolucionCorreo
+                    let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
+
+                    respuesta.push({response_type: 'text', text: `Envié un correo al personal de Comandato el día ${formattedDate}. Por favor, espera que ellos continúen con el proceso.`})
+                    respuesta.push({response_type: 'text', text:'¿Te gustaría intentar con otro código?'})
+                }               
+                else if(objCabecera[0].identificadorMetodoPago==1 || objCabecera[0].identificadorMetodoPago==2)
                 {
                     respuesta.push({response_type: 'text', text:'Solo puedo aplicar devoluciones en las compras pagadas con tarjeta de crédito o débito.'})
                     respuesta.push({response_type: 'text', text:'¿Te gustaría intentar con otro código?'})
@@ -1092,12 +1121,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})
                         respuesta.push({response_type: 'text', text:'¿Deseas que envíe dicho correo?'})
                         contexto['validacionDevolucion']='correo'
+                        contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                     }
                     else if(hoy.getHours()>20 || ( hoy.getHours()>20 && hoy.getMinutes()>50))
                     {
                         respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 16:50.'})
                         respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})
                         respuesta.push({response_type: 'text', text:'¿Deseas que envíe dicho correo?'})
+                        contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                         contexto['validacionDevolucion']='correo'
                     }
                     else 
@@ -1105,6 +1136,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         respuesta.push({response_type: 'text', text:'He encontrado tu compra, necesito un último dato de confirmación para proceder con la devolución.'})
                         respuesta.push({response_type: 'text', text:`En el mismo correo de confirmación del pago, te envié el *identificador del pago*.`})
                         respuesta.push({response_type: 'text', text:`Por favor ingresa ese *identificador del pago*.`})
+                        contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                         contexto['validacionDevolucion']='si'
                         contexto['tidPaymentezDevolucion']=objCabecera[0].tidPaymentez
                         contexto['valorTotalDevolucion']=objCabecera[0].valorTotalOrden
@@ -1112,14 +1144,119 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 }
             }
         }
+        else if(strAccion == 'enviarCorreoDevolucion')
+        {            
+            sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,2)
+            let objCabecera = await sqlController.gestionCabeceraVenta(contexto.numeroReferenciaDevolucion,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+            objCabecera = objCabecera[0]
+            let current_datetime = objCabecera.fechaFinalizacion
+            let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
+            var tipoIdentificacion = 'Cédula'
+            var nombreCliente = `${objCabecera.nombresCabecera} ${objCabecera.apellidosCabecera}`
+            if(objCabecera.tipoIdentificacion=='rucECU')
+            {
+                tipoIdentificacion='RUC'
+                nombreCliente = objCabecera.nombresCabecera
+            }
+            let tituloCliente = `Requerimiento de devolución de una compra - Factura: #${objCabecera.numeroReferencia} `
+            let cabeceraCliente = `<div>    
+                                <p>Estimados, su ayuda con la solictud de un cliente para la devolución de su dinero por una compra.</p>
+                                <p>La solicitud fue realizada después de la hora establecida para la devolución automática.</p>
+                                <p>A continuación, se muestran los datos del cliente y su compra.</p>
+                                <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
+                                <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
+                                <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
+                                <label><strong>Fecha:</strong> ${formattedDate}</label><br>
+                                <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
+                                <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
+                                <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
+                                <label><strong>Correo electrónico:</strong> ${objCabecera.email}</label><br>
+                                <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago.toUpperCase()}</label><br>
+                                </div>`
+            cabeceraCliente = `${cabeceraCliente} Los datos de la compra y de la tarjeta están en su sistema de facturación.`
+            let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
+            var contenido = `${cabeceraCliente}${pieDeCorreo}` 
+            let correoVentas = 'dayana.bailon@gaiaconsultores.biz'              
+            mailController.enviarEmailCliente(correoVentas, tituloCliente, contenido) 
+        }
         else if(strAccion=='aplicarRefound')
         {
             const tidPaymentez = contexto.tidPaymentezDevolucion
             var estadoRespuesta = await paymentezController.postRefound(tidPaymentez)
-            console.log(estadoRespuesta)
             if(estadoRespuesta==true)
-            {
-                respuesta.push({response_type:'text',text:'Se ha realizado la devolución automática de forma exitosa.'})
+            {  
+                sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,1)
+                respuesta.push({response_type:'text',text:'He realizado la devolución automática de forma exitosa.'})
+                respuesta.push({response_type:'text',text:'Además, te envié un mensaje de confirmación al correo registrado en la compra.'})
+                let objCabecera = await sqlController.gestionCabeceraVenta(contexto.numeroReferenciaDevolucion,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+                objCabecera = objCabecera[0]
+                let current_datetime = objCabecera.fechaFinalizacion
+                let current_datetime_devolucion = objCabecera.fechaDevolucionAutomatica
+                let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
+                let formattedDateDevolucion = current_datetime_devolucion.getFullYear() + "-" + (current_datetime_devolucion.getMonth() + 1) + "-" + current_datetime_devolucion.getDate() 
+                var tipoIdentificacion = 'Cédula'
+                var nombreCliente = `${objCabecera.nombresCabecera} ${objCabecera.apellidosCabecera}`
+                if(objCabecera.tipoIdentificacion=='rucECU')
+                {
+                    tipoIdentificacion='RUC'
+                    nombreCliente = objCabecera.nombresCabecera
+                }
+                let tituloCliente = `Devolución de compra - Factura: #${objCabecera.numeroReferencia} `
+                let cabeceraCliente = `<div>    
+                                    <p>Estimado cliente, he completado con éxito la devolución de una compra. </p>
+                                    <p>Gracias por su confinza.</p>
+                                    <p>A continuación, se muestran sus datos relevantes.</p>
+                                    <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
+                                    <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
+                                    <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
+                                    <label><strong>Fecha de compra:</strong> ${formattedDate}</label><br>
+                                    <label><strong>Fecha de devolución:</strong> ${formattedDateDevolucion}</label><br>
+                                    <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
+                                    <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
+                                    <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
+                                    <label><strong>Correo electrónico:</strong> ${objCabecera.email}</label><br>
+                                    <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago.toUpperCase()}</label><br>
+                                    </div>`
+                let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
+                var contenido = `${cabeceraCliente}${pieDeCorreo}`             
+                mailController.enviarEmailCliente(objCabecera.email, tituloCliente, contenido) 
+            }
+            else
+            {                
+                sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,2)
+                let objCabecera = await sqlController.gestionCabeceraVenta(contexto.numeroReferenciaDevolucion,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+                let current_datetime = objCabecera.fechaFinalizacion
+                let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
+                var tipoIdentificacion = 'Cédula'
+                var nombreCliente = `${objCabecera.nombresCabecera} ${objCabecera.apellidosCabecera}`
+                if(objCabecera.tipoIdentificacion=='rucECU')
+                {
+                    tipoIdentificacion='RUC'
+                    nombreCliente = objCabecera.nombresCabecera
+                }
+                let tituloCliente = `Requerimiento de devolución de una compra - Factura: #${objCabecera.numeroReferencia} `
+                let cabeceraCliente = `<div>    
+                                    <p>Estimados, su ayuda con la solictud de un cliente para la devolución de su dinero por una compra.</p>
+                                    <p>La solicitud fue realizada dentro del rango establecido para la devolución automática, sin embargo, hay problemas con los servidores de Paymentez.</p>
+                                    <p>A continuación, se muestran los datos del cliente y su compra.</p>
+                                    <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
+                                    <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
+                                    <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
+                                    <label><strong>Fecha:</strong> ${formattedDate}</label><br>
+                                    <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
+                                    <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
+                                    <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
+                                    <label><strong>Correo electrónico:</strong> ${objCabecera.email}</label><br>
+                                    <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago.toUpperCase()}</label><br>
+                                    </div>`
+                cabeceraCliente = `${cabeceraCliente} Los datos de la compra y de la tarjeta están en su sistema de facturación.`
+                let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
+                var contenido = `${cabeceraCliente}${pieDeCorreo}` 
+                let correoVentas = 'dayana.bailon@gaiaconsultores.biz'              
+                mailController.enviarEmailCliente(correoVentas, tituloCliente, contenido) 
+                respuesta.push({response_type:'text',text:'Ha ocurrido un problema con el proceso automático de devolución.'})
+                respuesta.push({response_type:'text',text:'He enviado un correo al personal correspondiente de Comandato. Por favor espera, en menos de 72 horas se contactarán contigo.'})
+                respuesta.push({response_type:'text',text:'Si deseas agilitar el proceso, por favor comunícate a este número:  https://api.whatsapp.com/send?phone=593993227987.'})
             }
         }
         /*comentado v 2.0 rama desarrollo

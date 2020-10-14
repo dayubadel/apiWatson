@@ -177,7 +177,7 @@ paymentezController.RespuestaPago = async (req, res) => {
         {
             let card = req.body.myjson.card
             let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,transaction.authorization_code,6)
-            paymentezController.sendEmailCliente(datosCabecera[0])
+            paymentezController.sendEmailClienteVentas(datosCabecera[0],null,2)
             var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
             respuesta.push({
                 response_type:'text',
@@ -195,7 +195,7 @@ paymentezController.RespuestaPago = async (req, res) => {
     }
 }
 
-paymentezController.sendEmailCliente = async (objCabecera) => {
+paymentezController.sendEmailClienteVentas = async (objCabecera, correo, opcion) => {
     let current_datetime = objCabecera.fechaFinalizacion
     let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
     var tipoIdentificacion = 'Cédula'
@@ -205,10 +205,19 @@ paymentezController.sendEmailCliente = async (objCabecera) => {
         tipoIdentificacion='RUC'
         nombreCliente = objCabecera.nombresCabecera
     }
-    let tituloCliente = `Comandato / Compra exitosa mediante Asistente Virtual Dora - Factura: #${objCabecera.numeroReferencia} `
-    let cabeceraCliente = `<div>    
-                        <p>Su pago ha sido procesado exitosamente a través del asistente virtual.</p>
-                        <p>A continuación, se muestran los datos de su compra.</p>
+    var tituloCliente = `Comandato / Compra exitosa mediante Asistente Virtual Dora - Factura: #${objCabecera.numeroReferencia} `
+    var encabezado= `<div><p>Su pago ha sido procesado exitosamente a través del asistente virtual.</p>
+                    <p>A continuación, se muestran los datos de su compra.</p>`
+    var direccionCorreo = objCabecera.email
+    if(opcion==1)
+    {
+        tituloCliente = `Falla en la facturación automática - Factura: #${objCabecera.numeroReferencia}`
+        encabezado = `<div><p>Estimados,</p>
+        <p>Un cliente ha pagado con éxito una compra. Pero la facturación automática ha fallado después de 3 intentos</p>
+        <p>A continuación se muestran los datos del cliente y de la compra.</p>`
+        direccionCorreo=correo
+    }
+    let cabeceraCliente = `${encabezado}
                         <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
                         <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
                         <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
@@ -276,7 +285,7 @@ paymentezController.sendEmailCliente = async (objCabecera) => {
     var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
     let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
     var contenido = `${cabeceraCliente}${tabla}${datosEntrega}${pieDeCorreo}`
-    mailController.enviarEmailCliente(objCabecera.email, tituloCliente, contenido)
+    mailController.enviarEmailCliente(direccionCorreo, tituloCliente, contenido)
 }
 
 
@@ -336,6 +345,9 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 
     if(!facuturaCreada){
         mailController.MailErrorWSFacturacion(jsonCompra);
+        let correoVentas = 'dayana.bailon@gaiaconsultores.biz'
+        let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+        paymentezController.sendEmailClienteVentas(datosCabecera[0],correoVentas,1)
         var respuestaGrupoWhatsap = []
         var grupoWhatsapp = '593963206990-1601935738@g.us'
         respuestaGrupoWhatsap.push(

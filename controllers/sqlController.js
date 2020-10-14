@@ -92,7 +92,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
 
 //nueva version reportes
 sqlController.gestionMensajes = async(idClienteCanalMensajeria, textoUsuario, textoWatson,intenciones,coincidecia,entidades,contextoConversacion,comentarioUsuario) => {
-    let query
+   let query
 
     query = `[dbo].[sp_GestionMensajes]
 		@idClienteCanalMensajeria = ${idClienteCanalMensajeria},
@@ -772,7 +772,12 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
                              valorTotalPaymentez : element.valorTotalPaymentez,
                              finalizado : element.finalizado,
                              tidPaymentez : element.tidPaymentez,
-                             abandonado : element.abandonado
+                             abandonado : element.abandonado,
+                             fechaFinalizacion : element.fechaFinalizacion,
+                             descripcionMetodoPago : element.descripcionMetodoPago,
+                             codigoAutorizacionPaymentez : element.codigoAutorizacionPaymentez,
+                             fechaDevolucionAutomatica : element.fechaDevolucionAutomatica,
+                             fechaDevolucionCorreo : element.fechaDevolucionCorreo
                     }
                     resultSQL.push(datos)
                 }
@@ -852,7 +857,32 @@ sqlController.gestionNotificacion = async (idClienteCanalMensajeria, motivoNotif
         }
     }) 
     .catch(err => {
-            console.log("Error al gestionar cabecera venta")
+            console.log("Error al gestionar la notificacion")
+            console.log(err)
+            throw new Error('Error al registrar en BD')
+    }) 
+    return resultSQL
+}
+
+sqlController.gestionDevolucion = async (numeroReferencia, opcion) =>
+{
+    let query
+    var resultSQL =[]
+    var datos = {}
+    if(opcion==1 || opcion==2)
+    {
+        query = `[dbo].[Sp_GestionDevolucion]
+        @numeroReferencia = N'${numeroReferencia}',
+        @opcion = ${opcion}`
+    }
+
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+        }
+    }) 
+    .catch(err => {
+            console.log("Error al gestionar la devolucion")
             console.log(err)
             throw new Error('Error al registrar en BD')
     }) 
