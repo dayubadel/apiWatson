@@ -901,7 +901,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
            respuesta.push({
                 response_type:'text',
-                text: `${subdominioComandato.url}/pago?numero_referencia=${contexto.numeroReferencia}`
+                text: `${subdominioComandato.url}/pago?numeroreferencia=${contexto.numeroReferencia}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){

@@ -2887,7 +2887,8 @@ body.is-menu-visible #menu {
           }
         });
 
-      order_reference = urlParams.get('numero_referencia')
+      order_reference = urlParams.get('numeroreferencia')
+      console.log(order_reference)
       consultarFactura(order_reference)
       function consultarFactura(numeroReferencia)
       {

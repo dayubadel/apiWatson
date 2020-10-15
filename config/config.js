@@ -9,7 +9,9 @@ module.exports = {
         IVAPercent : 12,
         valorEnvio : 3.99,
         urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL',
-        uriWhatsapp : 'http://localhost:8011/sendmessage'
+        uriWhatsapp : 'http://localhost:8011/sendmessage',
+        uriMessenger : 'https://186.3.247.227:8443/wts',
+        idPaginaFacebook : '1977616389118850'
     },
     wsFacturacion: {
         token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
