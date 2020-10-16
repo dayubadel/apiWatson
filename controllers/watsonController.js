@@ -29,7 +29,6 @@ watsonController.ControlMensajes = async (req, res) => {
     let idChat = req.body.idChat //es el idConversacionCanal
     let txtMsg = req.body.textMensajeReq
     let idCanal = req.body.idCanal
-    console.log(req.body)
     try {
         let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
 
@@ -130,8 +129,8 @@ watsonController.ControlMensajes = async (req, res) => {
 
         var contexto = watsonResponse.result.context
         // console.log("********************este llega de watson*****************")
-        // console.log(JSON.stringify(watsonResponse.result,null,4))
-        // console.log("********************este llega de watson*****************")
+        console.log(JSON.stringify(watsonResponse.result,null,4))
+        console.log("********************este llega de watson*****************")
 
         if(contexto.hasOwnProperty('_actionNode'))
         {
@@ -901,7 +900,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
            await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
            respuesta.push({
                 response_type:'text',
-                text: `${subdominioComandato.url}/pago?numero_referencia=${contexto.numeroReferencia}`
+                text: `${subdominioComandato.url}/pago?numeroreferencia=${contexto.numeroReferencia}`
             })
         }
         else if(strAccion == "consultarAlternativaProducto"){
