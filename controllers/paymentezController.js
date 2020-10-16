@@ -3,7 +3,7 @@ const sqlPaymentezController = require('./sqlPaymentezController.js')
 const soap = require('soap')
 const util = require('util')
 const mailController = require('./mailController')
-const whatsappController = require('./whatsappController');
+const canalesMensajeriaController = require('./canalesMensajeriaController');
 const { json } = require("body-parser");
 const { stringify } = require("querystring");
 const sha256 = require('js-sha256');
@@ -35,7 +35,7 @@ paymentezController.postRefound  = async (tidPaymentez) => {
         });      
         res.on("end", function (chunk) {
           var body = Buffer.concat(chunks);
-          console.log(body.toString());
+        //   console.log(body.toString());
         });      
         res.on("error", function (error) {            
           estado = false
@@ -63,12 +63,14 @@ paymentezController.GenerarToken = async (apiLogin, apiKey) => {
 
 
 paymentezController.GestionFactura = async (req, res) => {
+    // console.log(req.body)
     let opcion = req.body.opcion
     var respuestaSql
     if(opcion == 1)
     {
         var numeroReferencia = req.body.numeroReferencia
         respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+        // console.log(numeroReferencia)
     }
     else if(opcion == 2)
     {
@@ -79,6 +81,7 @@ paymentezController.GestionFactura = async (req, res) => {
                                         datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal,datosFactura.calle_secundaria,
                                         datosFactura.numero_calle,datosFactura.referencia_entrega,null,null,null,null,null,null,null,4)    
     }
+    // console.log(respuestaSql)
     if(respuestaSql.length==0)
     {
         res.send({estado: false, mensaje: 'Ocurrió un error con el número de referencia del pedido.'})
@@ -137,7 +140,8 @@ paymentezController.RespuestaPago = async (req, res) => {
         })
         var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
         mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
-        paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+        paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
+        // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
         respuestaGrupoWhatsap.push(
             {
                 response_type:'text',
@@ -157,7 +161,8 @@ paymentezController.RespuestaPago = async (req, res) => {
                 response_type:'text',
                 text: 'Lamentamos informarle que su tarjeta ha sido rechazada.' 
             })       
-            paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+            paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
+            // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
             var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
             mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
             respuestaGrupoWhatsap.push(
@@ -183,7 +188,8 @@ paymentezController.RespuestaPago = async (req, res) => {
                 response_type:'text',
                 text: `${mensajeF}` 
             })
-            paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+            paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
+            // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
             paymentezController.WSFacturacion(transaction.dev_reference)
             res.send(
                 {
@@ -335,7 +341,7 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 
     await (async () => {        
         for (let i = 0; i < 3; i++) {
-            console.log(jsonCompra)
+            // console.log(jsonCompra)
             facuturaCreada = await paymentezController.CallWS(jsonCompra)
             if(facuturaCreada == true){
                 break;
@@ -375,7 +381,7 @@ paymentezController.CallWS = async (jsonCompra) => {
         return soapCreateOrder(paramsWS)
     })
     .then(clientRes => {
-        console.log("res",clientRes)
+        // console.log("res",clientRes)
         if(clientRes.CreateOrderResult.O_TIPOM == 'S'){
             facturaCreada = true
         }else{
@@ -391,8 +397,19 @@ paymentezController.CallWS = async (jsonCompra) => {
     return facturaCreada
 }
 
+paymentezController.EnviarMensajeCanal = (idCanal, objRespuesta, idUsuario) => {
+
+    if(idCanal == 1){
+        canalesMensajeriaController.enviarMensajeWhatsapp(objRespuesta,idUsuario)
+        // paymentezController.sendWhatsapp(objRespuesta, idWhatsapp)
+    }else if(idCanal == 2){
+        //aqui llamar metodo envio a messenger
+        canalesMensajeriaController.EnviarMensajeMessenger(objRespuesta[0],idUsuario)
+    }
+}
+
 paymentezController.sendWhatsapp = (objRespuesta, idWhatsapp) => {
-    whatsappController.enviarMensaje(objRespuesta,idWhatsapp)
+    // canalesMensajeriaController.enviarMensajeWhatsapp(objRespuesta,idWhatsapp)
 }
 
 module.exports = paymentezController;
