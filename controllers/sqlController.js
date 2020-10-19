@@ -841,6 +841,12 @@ sqlController.gestionNotificacion = async (idClienteCanalMensajeria, motivoNotif
         @numeroSecuencialSAP = N'${numeroSecuencialSAP}',
         @opcion = ${opcion}`
     }
+    else if(opcion==2)
+    {
+        query = `[dbo].[sp_GestionNotificaciones]        
+        @motivoNotificacion = N'${motivoNotificacion}',        
+        @opcion = ${opcion}`
+    }
 
     await request.query(query)
     .then(async data => {
@@ -849,7 +855,8 @@ sqlController.gestionNotificacion = async (idClienteCanalMensajeria, motivoNotif
                {
                    datos = 
                    {
-                       idNotificacion : element.idNotificacion
+                       idNotificacion : element.idNotificacion,
+                       descripcion :element.descripcion
                    }
                    resultSQL.push(datos)
                 }

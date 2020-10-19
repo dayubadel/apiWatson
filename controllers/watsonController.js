@@ -71,7 +71,6 @@ watsonController.ControlMensajes = async (req, res) => {
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
 
         var carritoCompras = await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,0,null,0,2)
-
         if(carritoCompras.length>0)
         {
             contextoAnterior['identificadorMetodoPagoCarrito'] = carritoCompras[0].identificadorMetodoPago
@@ -253,7 +252,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }else if(strAccion == 'consultarMarcasPorCategoriaUltimoNivel'){
             contexto.categoriaUltimoNivel = contexto.varAnterior
         }else if(strAccion == 'consultarProductosPorMarcaPorCategoriaUltimoNivel'){
+            console.log(contexto.varAnterior)
             contexto.categoriaUltimoNivel = contexto.varAnterior
+            contexto.marca = 'Imaco'
         }else if(strAccion == 'consultarAlternativaProducto'){
             contexto.categoriaUltimoNivel = contexto.varAnterior
         }
@@ -618,7 +619,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
                 respuesta.push({
                     response_type: "text",
-                    text:"No disponemos *"+categoriaUltimoNivel+"* en la marca *"+marcaProductos+"*\nDisponemos de las siguientes *marcas:* "
+                    text:"No disponemos de *"+categoriaUltimoNivel+"* en la marca *"+marcaProductos+"*\nDisponemos de las siguientes *marcas:* "
                 });
                 result.forEach(marca => {
                     txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
@@ -689,7 +690,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 if(contexto.hasOwnProperty('menuMostradoProductos')){
                     delete contexto.menuMostradoProductos
                 }
-                contexto['menuMostradoProductos'] = menuMostradoProductos;
+                contexto['menuMostradoProductos'] = menuMostradoProductos;                
+                delete contexto.categoriaUltimoNivel
+                delete contexto.marcaProductos
             }
             await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,categoriaUltimoNivel,marcaProductos,null)
 
@@ -755,7 +758,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         delete contexto.mostrarCarrito
         delete contexto.marcaProductos
         delete contexto.categoriaUltimoNivel
-        delete contexto.marcaProductos
         delete contexto.productoSelected
         delete contexto.infoProductoSelected
         // if(contexto.hasOwnProperty('carritoActual'))
@@ -809,7 +811,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.mostrarCarrito
             delete contexto.marcaProductos
             delete contexto.categoriaUltimoNivel
-            delete contexto.marcaProductos
             delete contexto.productoSelected
             delete contexto.infoProductoSelected
         })
@@ -896,7 +897,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.mostrarCarrito
             delete contexto.marcaProductos
             delete contexto.categoriaUltimoNivel
-            delete contexto.marcaProductos
             delete contexto.productoSelected
             delete contexto.infoProductoSelected
         })
@@ -1092,29 +1092,31 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
 
             if ((suma % 10 === 0) && (suma > 0)) {
                 contexto['docValido'] ="si"
-                respuesta.push({response_type:'text', text: 'Por favor, ingresa tus *dos nombres*. Ubicando con *mayúscula* únicamente la *primera letra* de cada nombre.' })
+                respuesta.push({response_type:'text', text: 'Por favor, ingresa *dos nombres*. Ubicando con *mayúscula* únicamente la *primera letra* de cada nombre.' })
                 respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })
             } else {
                 contexto['docValido'] ="no"                    
-                respuesta.push({response_type:'text', text: 'Cédula incorrecta. Por favor, ingresa nuevamente tu cédula' })
+                respuesta.push({response_type:'text', text: 'Cédula incorrecta. Por favor, ingresa nuevamente el número de *cédula*.' })
                 respuesta.push({response_type:'text', text: 'Por ejemplo: *1313138918* _(Sin guion medio "-" )_' })
                 }
         }
         else 
         {
             contexto['docValido'] ="si"
-            respuesta.push({response_type:'text', text: 'Por favor, ingresa tus dos nombres. Ubicando con mayúscula únicamente la primera letra de cada nombre.' })
+            respuesta.push({response_type:'text', text: 'Por favor, ingresa *dos nombres*. Ubicando con *mayúscula* únicamente la *primera letra* de cada nombre.' })
             respuesta.push({response_type:'text', text: 'Por ejemplo: *María Victoria*.' })               
         }
     }
     else if(strAccion=='enviarTicket')
     {
+        let resultQuery = await sqlController.gestionNotificacion(0,contexto.motivoTicket,null,null,null,null,null,null,2)
         let nombres = `${contexto.primerNombre} ${contexto.primerApellido}`
-        let respuestaWS = await ticketController.EnviarTicket(contexto.motivoTicket,contexto.detalleTicket,nombres,contexto.numIdentificacion,contexto.telefono)
+        console.log(resultQuery[0].descripcion,contexto.detalleTicket,nombres,contexto.numIdentificacion,contexto.telefono)
+        let respuestaWS = await ticketController.EnviarTicket(resultQuery[0].descripcion,contexto.detalleTicket,nombres,contexto.numIdentificacion,contexto.telefono)
         if(respuestaWS!=null)
         {
             sqlController.gestionNotificacion(idClienteCanalMensajeria,contexto.motivoTicket,nombres,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,contexto.detalleTicket,respuestaWS,1) 
-            respuesta.push({response_type: 'text', text: `Número de ticket generado por su solicitud: ${respuestaWS}`})
+            respuesta.push({response_type: 'text', text: `Número de ticket generado por tu solicitud: ${respuestaWS}`})
         }
         else
             sqlController.gestionNotificacion(idClienteCanalMensajeria,contexto.motivoTicket,nombres,contexto.tipoIdentificacion,contexto.numIdentificacion,contexto.telefono,contexto.detalleTicket,null,1)
@@ -1175,7 +1177,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contexto['validacionDevolucion']='correo'
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                 }
-                else if(hoy.getHours()>20 || ( hoy.getHours()>20 && hoy.getMinutes()>50))
+                else if(hoy.getHours()>17 || ( hoy.getHours()>17 && hoy.getMinutes()>10))
                 {
                     respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 16:50.'})
                     respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})

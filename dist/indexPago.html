@@ -2868,7 +2868,7 @@ body.is-menu-visible #menu {
       window.onload = function() {
 
       const queryString = window.location.search;
-      urlComandato = 'http://7b8e0ef79799.ngrok.io'
+      urlComandato = 'http://756b7adcb971.ngrok.io'
       const urlParams = new URLSearchParams(queryString);
       $.ajax({
           url :  `${urlComandato}/pago/gestionlugares`,
@@ -2888,10 +2888,6 @@ body.is-menu-visible #menu {
         });
 
       order_reference = urlParams.get('numeroreferencia')
-<<<<<<< HEAD
-=======
-      console.log(order_reference)
->>>>>>> 16f89f1a79444250a6d4666a620d348378ac04c4
       consultarFactura(order_reference)
       function consultarFactura(numeroReferencia)
       {
