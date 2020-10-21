@@ -7,6 +7,7 @@ const { json } = require('body-parser');
 const { sql, valorGlobales, subdominioComandato } = require('../config/config.js');
 const ticketController = require('./ticketController.js');
 const paymentezController = require('./paymentezController.js');
+const { columns } = require('mssql');
 // const pedidoModel = require('./../models/pedido.js')
 
 const id_workspace = config.Watson.id_workspace
@@ -30,6 +31,7 @@ watsonController.ControlMensajes = async (req, res) => {
     let txtMsg = req.body.textMensajeReq
     let idCanal = req.body.idCanal
     try {
+        console.log(idCanal,idChat)
         let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
 
         let idClienteCanalMensajeria = (objMensajeria.idClienteCanalMensajeria == undefined) ? 0 :  objMensajeria.idClienteCanalMensajeria;
@@ -58,7 +60,7 @@ watsonController.ControlMensajes = async (req, res) => {
         {
             contextoAnterior['idClienteCanalMensajeria'] = objMensajeria.idClienteCanalMensajeria
         }
-
+        console.log(objMensajeria)
         if(objMensajeria.numeroReferencia!=null)
         {
             contextoAnterior['numeroReferencia'] = objMensajeria.numeroReferencia
@@ -712,6 +714,18 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 source: imgItem.ImageUrl
             })
         });
+        let caracteristicas = producto.arrayCarac
+        let caracteristicasSimplificadas =  caracteristicas.replace(" \r \n","")
+        console.log(caracteristicas)
+        console.log(caracteristicasSimplificadas)
+
+        var cadena = "cadena de texto",
+        patron = "texto",
+        nuevoValor    = "oro",
+        nuevaCadena = cadena.replace(patron, nuevoValor);
+
+    console.log(nuevaCadena);
+
         if(producto.arrayCarac!='')
         {
             respuesta.push({
@@ -916,6 +930,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
     else if(strAccion=='enviarLinkPago'){
         // datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
         await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
+        console.log(contexto.numeroReferencia)
         respuesta.push({
             response_type:'text',
             text: `${subdominioComandato.url}/pago?numeroreferencia=${contexto.numeroReferencia}`

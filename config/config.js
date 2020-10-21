@@ -22,7 +22,7 @@ module.exports = {
         urlSoapTickets : 'https://appchatbot.comandato.com/wsChatBot.asmx?WSDL'
     },   
     subdominioComandato : {
-        url : 'http://756b7adcb971.ngrok.io'
+        url : 'http://9a756d2657f8.ngrok.io'
     },
     refoundPaymentez : {
         apiLogin: 'CHATBOTSTG-EC-SERVER',
