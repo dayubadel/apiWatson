@@ -304,7 +304,47 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         contador++
                 }
             )})
-        }
+        
+            await sqlController.consultarCategoriasNivelMasBajo()
+            .then(sqlResult => {
+                respuesta.push({
+                    response_type: "text",
+                    text: `Puedes acercarte en *${ciudad}* y adquirir uno de nuestros productos.`
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: `A continuación, te presento nuestro *catálogo*:`
+                });
+                let arrayCategorias = '',
+                    num = 1
+                    menuMostradoProductos = {
+                        "tipoMenu" : "categoria",
+                        'menuMostrado' : [],
+                        "actionNodeAnterior" : strAccion,
+                        "pasoAnterior" : 'catalogo'
+                    };
+                sqlResult.forEach(cat => {
+                    arrayCategorias = `${arrayCategorias}${(arrayCategorias=='') ? '' : '\n'}*${num}) ${cat.nombreCategoria}*`;
+                    menuMostradoProductos.menuMostrado.push({
+                        "pocision": ''+num,
+                        "nombre" : cat.nombreCategoria,
+                        "tipoCategoria":cat.tipoCategoria
+                    });
+                    num++;
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: arrayCategorias//cat.nombreCategoria
+                });
+    
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
+    
+            });
+   
+    }
     else if(strAccion == "consultarSectoresAgrupadosPorCiudad"){
         var ciudad = contexto.Ciudad
         var sectores =''
@@ -312,14 +352,20 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
     await sqlController.consultarSectoresAgrupadosPorCiudad(ciudad)
         .then(data =>{
             data.forEach(element => {
-                    sectores = sectores + element.sector + ' - '
+                    sectores = `${sectores} *${element.sector}* / `
             })
-            
-            let sectorRespuesta =  {
+            respuesta.push({
                 response_type: 'text',
-                text: `En *${ciudad}* tenemos almacenes en los sectores: ${sectores}.\nPor favor, indicame en qué *sector* deseas consultar.`
-            }
-            respuesta.push(sectorRespuesta)
+                text: `En *${ciudad}* tenemos almacenes en los sectores: ${sectores}.`
+            })
+            respuesta.push({
+                response_type: 'text',
+                text: `Por favor, ingresa el *sector* de ${ciudad} que deseas consultar.`
+            })
+            respuesta.push({
+                response_type: 'text',
+                text: `O indícame si deseas ver en *todos los sectores*`
+            })
         })
     }
     else   if(strAccion == "consultarTiendasPorCiudadPorSector"){
@@ -365,6 +411,47 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contador++
             }
             )})
+
+            
+            await sqlController.consultarCategoriasNivelMasBajo()
+            .then(sqlResult => {
+                respuesta.push({
+                    response_type: "text",
+                    text: `Puedes acercarte en *${ciudad}* sector *${sector}* y adquirir uno de nuestros productos.`
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: `A continuación, te presento nuestro *catálogo*:`
+                });
+                let arrayCategorias = '',
+                    num = 1
+                    menuMostradoProductos = {
+                        "tipoMenu" : "categoria",
+                        'menuMostrado' : [],
+                        "actionNodeAnterior" : strAccion,
+                        "pasoAnterior" : 'catalogo'
+                    };
+                sqlResult.forEach(cat => {
+                    arrayCategorias = `${arrayCategorias}${(arrayCategorias=='') ? '' : '\n'}*${num}) ${cat.nombreCategoria}*`;
+                    menuMostradoProductos.menuMostrado.push({
+                        "pocision": ''+num,
+                        "nombre" : cat.nombreCategoria,
+                        "tipoCategoria":cat.tipoCategoria
+                    });
+                    num++;
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: arrayCategorias//cat.nombreCategoria
+                });
+    
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
+    
+            });
+   
     }
     else if(strAccion == "consultarTiendasPorNombreTienda"){
         var nombreTienda = contexto.nombreTienda
@@ -408,6 +495,45 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contador++
             }
             )})
+            await sqlController.consultarCategoriasNivelMasBajo()
+            .then(sqlResult => {
+                respuesta.push({
+                    response_type: "text",
+                    text: `Puedes acercarte en *${nombreTienda}* y adquirir uno de nuestros productos.`
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: `A continuación, te presento nuestro *catálogo*:`
+                });
+                let arrayCategorias = '',
+                    num = 1
+                    menuMostradoProductos = {
+                        "tipoMenu" : "categoria",
+                        'menuMostrado' : [],
+                        "actionNodeAnterior" : strAccion,
+                        "pasoAnterior" : 'catalogo'
+                    };
+                sqlResult.forEach(cat => {
+                    arrayCategorias = `${arrayCategorias}${(arrayCategorias=='') ? '' : '\n'}*${num}) ${cat.nombreCategoria}*`;
+                    menuMostradoProductos.menuMostrado.push({
+                        "pocision": ''+num,
+                        "nombre" : cat.nombreCategoria,
+                        "tipoCategoria":cat.tipoCategoria
+                    });
+                    num++;
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: arrayCategorias//cat.nombreCategoria
+                });
+    
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
+    
+            });
+   
     }
     else if(strAccion == "insertarValoracion"){
         var valor = contexto.valorfeedback
