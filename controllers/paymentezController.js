@@ -127,7 +127,7 @@ paymentezController.GetFormulario = (req, res) => {
 }
 
 paymentezController.RespuestaPago = async (req, res) => {    
-    var grupoWhatsapp = '593963206990-1601935738@g.us'
+    var grupoWhatsapp = '593980841352-1484834721@g.us' //'593963206990-1601935738@g.us'//
     var respuesta = []
     var respuestaGrupoWhatsap = []
     const transaction = req.body.myjson.transaction;
@@ -165,6 +165,11 @@ paymentezController.RespuestaPago = async (req, res) => {
             // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
             var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
             mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
+            respuestaGrupoWhatsap.push(
+                {
+                    response_type:'text',
+                    text: 'Esto es una prueba.'
+                })
             respuestaGrupoWhatsap.push(
                 {
                     response_type:'text',
@@ -355,7 +360,7 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
         let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
         paymentezController.sendEmailClienteVentas(datosCabecera[0],correoVentas,1)
         var respuestaGrupoWhatsap = []
-        var grupoWhatsapp = '593963206990-1601935738@g.us'
+        var grupoWhatsapp = '593980841352-1484834721@g.us' //'593963206990-1601935738@g.us'
         respuestaGrupoWhatsap.push(
             {
                 response_type:'text',
@@ -409,7 +414,7 @@ paymentezController.EnviarMensajeCanal = (idCanal, objRespuesta, idUsuario) => {
 }
 
 paymentezController.sendWhatsapp = (objRespuesta, idWhatsapp) => {
-    // canalesMensajeriaController.enviarMensajeWhatsapp(objRespuesta,idWhatsapp)
+     canalesMensajeriaController.enviarMensajeWhatsapp(objRespuesta,idWhatsapp)
 }
 
 module.exports = paymentezController;

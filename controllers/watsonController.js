@@ -360,11 +360,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             })
             respuesta.push({
                 response_type: 'text',
-                text: `Por favor, ingresa el *sector* de ${ciudad} que deseas consultar.`
+                text: `Por favor, ingresa el *sector* de ${ciudad} que deseas consultar`
             })
             respuesta.push({
                 response_type: 'text',
-                text: `O indícame si deseas ver en *todos los sectores*`
+                text: `O indícame si deseas ver en *todos los sectores.*`
             })
         })
     }
