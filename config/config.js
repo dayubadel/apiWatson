@@ -22,12 +22,15 @@ module.exports = {
         urlSoapTickets : 'https://appchatbot.comandato.com/wsChatBot.asmx?WSDL'
     },   
     subdominioComandato : {
-        url : 'http://ce16e13e49fc.ngrok.io'
+        url : 'http://0da601b6a1fe.ngrok.io'
     },
     refoundPaymentez : {
-        apiLogin: 'CHATBOTSTG-EC-SERVER',
-        apiKey: 'gNSpExwDkOEeqich5Jc9A3QJg7fqES',
-        url : 'ccapi-stg.paymentez.com',
+        //apiLogin: 'CHATBOTSTG-EC-SERVER',
+        //apiKey: 'gNSpExwDkOEeqich5Jc9A3QJg7fqES',
+        //url : 'ccapi-stg.paymentez.com',
+        apiLogin: 'CHATBOT-EC-SERVER',
+        apiKey: 'ZsWJNYnTEr6kle7N8fauU6qrJshQJG',
+        url : 'ccapi.paymentez.com',
         path : '/v2/transaction/refund/'
     },
     // sql: {
