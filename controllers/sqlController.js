@@ -531,11 +531,15 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                 precioCC : data.recordset[0].precioCC,
                 precioConIntereses : data.recordset[0].precioConIntereses,
                 precioSinIntereses : data.recordset[0].precioSinIntereses,
+                precioCCNoIva : data.recordset[0].precioCCNoIva,
+                precioConInteresesNoIva : data.recordset[0].precioConInteresesNoIva,
+                precioSinInteresesNoIva : data.recordset[0].precioSinInteresesNoIva,
                 cuotasPrecioCC : data.recordset[0].cuotasPrecioCC,
                 plazoGarantia : data.recordset[0].mesesGarantia,
                 arrayImagenes : JSON.parse(data.recordset[0].arrayImagenes),
                 arrayCarac : '',
-                isMarketplace : data.recordset[0].isMarketplace
+                isMarketplace : data.recordset[0].isMarketplace,
+                iva : data.recordset[0].iva
             }
             data.recordset.forEach(element => 
              {
@@ -636,7 +640,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
                              metodoPago : element.metodoPago,
                              identificadorMetodoPago: element.identificadorMetodoPago,
                              idDetalleVenta : element.idDetalleVenta,
-                             numeroReferencia : element.numeroReferencia
+                             numeroReferencia : element.numeroReferencia,
+                             iva : element.iva
                          }
                          resultSQL.push(datos)
                      })             

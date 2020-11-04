@@ -228,7 +228,8 @@ sqlPaymentezController.gestionCarritoCompras = async (idClienteCanalMensajeria, 
                              metodoPago : element.metodoPago,
                              identificadorMetodoPago: element.identificadorMetodoPago,
                              idDetalleVenta : element.idDetalleVenta,
-                             numeroReferencia : element.numeroReferencia
+                             numeroReferencia : element.numeroReferencia,
+                             iva : element.iva
                          }
                          resultSQL.push(datos)
                      })             

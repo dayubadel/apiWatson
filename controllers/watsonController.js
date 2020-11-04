@@ -82,7 +82,8 @@ watsonController.ControlMensajes = async (req, res) => {
                 carritoActual.push({    
                     p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, 
                     nombreProducto: element.nombreProducto, cantidad: element.cantidad,
-                    precioProducto: element.precioProducto, metodoPago : element.metodoPago
+                    precioProducto: element.precioProducto, metodoPago : element.metodoPago,
+                    ivaProducto: element.iva
                 })
                 numeroRegistro++
             })
@@ -843,17 +844,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 source: imgItem.ImageUrl
             })
         });
-        let caracteristicas = producto.arrayCarac
-        let caracteristicasSimplificadas =  caracteristicas.replace(" \r \n","")
-        console.log(caracteristicas)
-        console.log(caracteristicasSimplificadas)
-
-        var cadena = "cadena de texto",
-        patron = "texto",
-        nuevoValor    = "oro",
-        nuevaCadena = cadena.replace(patron, nuevoValor);
-
-    console.log(nuevaCadena);
 
         if(producto.arrayCarac!='')
         {
@@ -879,7 +869,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             'precioSinIntereses' : producto.precioSinIntereses,
             'cuotasPrecioCC' : producto.cuotasPrecioCC,
             'plazoGarantia' : producto.plazoGarantia,
-            'isMarketplace' : producto.isMarketplace
+            'isMarketplace' : producto.isMarketplace,
+            'iva' : producto.iva,
+            'precioCCNoIva' : producto.precioCCNoIva,
+            'precioConInteresesNoIva' : producto.precioConInteresesNoIva,
+            'precioSinInteresesNoIva' : producto.precioSinInteresesNoIva
         }
 
         await sqlController.InsertarProductoSeleccionado(idClienteCanalMensajeria,null,null,producto.nombre)
@@ -929,14 +923,19 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             metodoPagoCar =  'Corriente'
             contexto['intereses'] = 'Corriente'
         }
-        await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,contexto.infoProductoSelected.idproductoBot,
+        let resultQuery = await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,contexto.infoProductoSelected.idproductoBot,
             metodoPagoCar,contexto.cantidadProductos,1)
-        .then(resultQuery =>
+
+        respuesta.push({response_type:'text', text: `Tienes un *carrito de compras activo* con el método de pago *${resultQuery[0].metodoPago}*`})
+        respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* exitosamente`})
+        if (resultQuery[0].iva==true)
         {
-            respuesta.push({response_type:'text', text: `Tienes un *carrito de compras activo* con el método de pago *${resultQuery[0].metodoPago}*`})
-            respuesta.push({response_type:'text', text: `Se agregaron *${contexto.cantidadProductos} ${contexto.infoProductoSelected.nombreProducto}* exitosamente`})
             respuesta.push({response_type:'text', text: `*Detalles adicionales:*\n*Cantidad:* ${resultQuery[0].cantidad}\n*Producto:* ${resultQuery[0].nombreProducto}\n*Precio unitario:* $${(resultQuery[0].precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${((resultQuery[0].precioProducto*1.12)*resultQuery[0].cantidad).toFixed(2)}`})
-            
+        }  
+        else 
+        {
+            respuesta.push({response_type:'text', text: `*Detalles adicionales:*\n*Cantidad:* ${resultQuery[0].cantidad}\n*Producto:* ${resultQuery[0].nombreProducto}\n*Precio unitario:* $${(resultQuery[0].precioProducto).toFixed(2)} _no graba IVA_\n*Total:* $${((resultQuery[0].precioProducto)*resultQuery[0].cantidad).toFixed(2)}`})
+        }
             if(!contexto.hasOwnProperty('menuCarrito'))
             {                
                 menuCarrito = []
@@ -956,7 +955,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             delete contexto.categoriaUltimoNivel
             delete contexto.productoSelected
             delete contexto.infoProductoSelected
-        })
     }
     else if(strAccion=='presentarCarritoDeCompras')
     {           
@@ -965,10 +963,18 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         let totalFactura= 0
         contexto.carritoActual.forEach(element => {
             let total = element.cantidad*(element.precioProducto*1.12)
+            if(element.ivaProducto==false)
+            {
+                total = element.cantidad*element.precioProducto
+                respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto).toFixed(2)} _no graba IVA_\n*Total:* $${total.toFixed(2)}`})           
+            }
+            else
+            {
+                respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
+            }
             totalFactura=totalFactura+total
-            respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
         })
-        respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio}`})
+        respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio} _incluye IVA_`})
         respuesta.push({response_type:'text', text: `*Total a pagar:* $${(totalFactura+valorGlobales.valorEnvio).toFixed(2)} _incluye IVA_`})
         txtMenu = 'Indícame qué más deseas hacer:'
         contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
@@ -982,10 +988,18 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         let totalFactura= 0
         contexto.carritoActual.forEach(element => {
             let total = element.cantidad*(element.precioProducto*1.12)
+            if(element.ivaProducto==false)
+            {
+                total = element.cantidad*element.precioProducto
+                respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto).toFixed(2)} _no graba IVA_\n*Total:* $${total.toFixed(2)}`})           
+            }
+            else
+            {
+                respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})               
+            }
             totalFactura=totalFactura+total
-            respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})           
         })
-        respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio}`})
+        respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio} _incluye IVA_`})
         respuesta.push({response_type:'text', text: `*Total a pagar:* $${(totalFactura+valorGlobales.valorEnvio).toFixed(2)} _incluye IVA_`})
         respuesta.push({response_type:'text', text: '¿Procedemos con la compra?'})
     }
@@ -995,10 +1009,18 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         let totalFactura = 0
         contexto.carritoActual.forEach(element => {
             let total = element.cantidad*(element.precioProducto*1.12)
+            if(element.ivaProducto==false)
+            {
+                total = element.cantidad*element.precioProducto
+                respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto).toFixed(2)} _no graba IVA_\n*Total:* $${total.toFixed(2)}`})           
+            }
+            else
+            {
+                respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})               
+            }
             totalFactura=totalFactura+total
-            respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})
         })
-        respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio}`})
+        respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio} _incluye IVA_`})
         respuesta.push({response_type:'text', text: `*Total a pagar:* $${(totalFactura+valorGlobales.valorEnvio).toFixed(2)} _incluye IVA_`})
         respuesta.push({response_type: 'text', text: 'Por favor, seleccione el *número del registro* que quieras quitar de tu carrito'})
     }
@@ -1010,7 +1032,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             if(resultQuery.length==0)
             {
                 respuesta.push({response_type:'text',text:'Actualmente no tiene un carrito de compras activo'})
-                respuesta.push({response_type:'text', text: 'Indícame qué más deseas hacer: \n- Ver el *catálogo de productos*\n- Volver al *menú principal*'})
+                respuesta.push({response_type: 'text', text: `Recuerda que estoy aquí para ayudarte con:\n   *1) Consulta de productos* 💻\n   *2) Información de tiendas* 🏢\n   *3) Requerimientos del cliente* 📋\n   *4) Información de métodos de pago* 💳`})
+                contexto['setearMenuPrincipal'] = 'si'
                 delete contexto.carritoActual
                 delete contexto.menuCarrito
                 delete contexto.identificadorMetodoPagoCarrito
@@ -1024,14 +1047,27 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 carritoActual = []
                 let numeroRegistro = 1
                 resultQuery.forEach(element => {
-                    carritoActual.push({p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, nombreProducto: element.nombreProducto, cantidad: element.cantidad, precioProducto: element.precioProducto, metodoPago : element.metodoPago})
-                    let total = element.cantidad*element.precioProducto
+                        carritoActual.push({    
+                            p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, 
+                            nombreProducto: element.nombreProducto, cantidad: element.cantidad,
+                            precioProducto: element.precioProducto, metodoPago : element.metodoPago,
+                            ivaProducto: element.iva
+                        })
+                    let total = element.cantidad*(element.precioProducto*1.12)
+                    if(element.ivaProducto==false)
+                    {
+                        total = element.cantidad*element.precioProducto
+                        respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto).toFixed(2)} _no graba IVA_\n*Total:* $${total.toFixed(2)}`})           
+                    }
+                    else
+                    {
+                        respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})               
+                    }
                     totalFactura=totalFactura+total
-                    respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${element.precioProducto}\n*Total:* $${total}`})
                     numeroRegistro++
                 })
                 contexto['carritoActual'] = carritoActual
-                respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio}`})
+                respuesta.push({response_type:'text', text: `*Costo de envío:* $${valorGlobales.valorEnvio} _incluye IVA_`})
                 respuesta.push({response_type:'text', text: `*Total a pagar:* $${(totalFactura+valorGlobales.valorEnvio).toFixed(2)} _incluye IVA_`})
                 txtMenu = 'Indícame qué más deseas hacer:'
                 contexto.menuCarrito.forEach(itemMenu => { txtMenu = `${txtMenu}\n*${itemMenu.opcion})* ${itemMenu.accion}`})
@@ -1162,6 +1198,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 filaCuerpo = ''
                 numero = 0
                 var totalFactura = 0
+                let totalProductosSinIva = 0
                 contexto.carritoActual.forEach(element =>
                     {
                         let total = element.cantidad*element.precioProducto
@@ -1172,6 +1209,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                                         <td>${element.precioProducto}</td>
                                                         <td>${total.toFixed(2)}</td>
                                                     </tr>`
+                        if(element.ivaProducto==false)
+                        {
+                            totalProductosSinIva=totalProductosSinIva+element.precioProducto
+                        }
                         totalFactura = totalFactura + total
                         numero = element.p
                     })
@@ -1179,20 +1220,20 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     <td>${numero+1}</td>
                     <td>1</td>
                     <td>VALOR DE ENVÍO</td>
-                    <td>3.51</td>
-                    <td>3.51</td>
+                    <td>3.56</td>
+                    <td>3.56</td>
                 </tr>`
                 filaCuerpo = filaCuerpo +  `<tr>
                                                 <td colspan="3">SUBTOTAL</td>
-                                                <td colspan="3">${(totalFactura+3.51).toFixed(2)}</td>
+                                                <td colspan="3">${(totalFactura+3.56).toFixed(2)}</td>
                                             </tr>
                                             <tr>
                                                 <td colspan="3">IVA</td>
-                                                <td colspan="3">${((totalFactura+3.51)*0.12).toFixed(2)}</td>
+                                                <td colspan="3">${((totalFactura+3.56-totalProductosSinIva)*0.12).toFixed(2)}</td>
                                             </tr>
                                             <tr>
                                                 <td colspan="3">TOTAL A PAGAR</td>
-                                                <td colspan="3">$${((totalFactura+3.51)*1.12).toFixed(2)}</td>
+                                                <td colspan="3">$${((totalFactura+3.56)+(totalFactura-totalProductosSinIva+3.56*0.12)).toFixed(2)}</td>
                                             </tr>`
                                                             
                 var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `
