@@ -60,7 +60,6 @@ watsonController.ControlMensajes = async (req, res) => {
         {
             contextoAnterior['idClienteCanalMensajeria'] = objMensajeria.idClienteCanalMensajeria
         }
-        console.log(objMensajeria)
         if(objMensajeria.numeroReferencia!=null)
         {
             contextoAnterior['numeroReferencia'] = objMensajeria.numeroReferencia
@@ -71,7 +70,7 @@ watsonController.ControlMensajes = async (req, res) => {
         }
 
         var idCliente = (objMensajeria.idCliente == undefined ) ? 0 : objMensajeria.idCliente;
-
+        
         var carritoCompras = await sqlController.gestionCarritoCompras(idClienteCanalMensajeria,0,0,null,0,2)
         if(carritoCompras.length>0)
         {
@@ -96,6 +95,10 @@ watsonController.ControlMensajes = async (req, res) => {
             menuCarrito.push({opcion: 5, accion: `*Abandonar carrito* de compras ❌`})
             contextoAnterior['menuCarrito'] = menuCarrito
         } 
+        else 
+        {
+            delete contextoAnterior.carritoActual
+        }
 
         var cabeceraVenta = await sqlController.gestionCabeceraVenta(contextoAnterior.numeroReferencia,null,null,null,null,null,null, null,null,null,null,null,null,null,null,null,null,null,null,2)
         if(cabeceraVenta.length>0)
@@ -1056,7 +1059,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
     else if(strAccion=='enviarLinkPago'){
         // datosCP.order_description = datosCP.order_description.replace(/\s/g,'%20')
         await sqlController.gestionCabeceraVenta(contexto.numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5)
-        console.log(contexto.numeroReferencia)
         respuesta.push({
             response_type:'text',
             text: `${subdominioComandato.url}/pago?numeroreferencia=${contexto.numeroReferencia}`

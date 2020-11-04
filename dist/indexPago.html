@@ -2868,7 +2868,7 @@ body.is-menu-visible #menu {
       window.onload = function() {
 
       const queryString = window.location.search;
-      urlComandato = 'http://0da601b6a1fe.ngrok.io'
+      urlComandato = 'https://1f5a696f669a.ngrok.io'
       const urlParams = new URLSearchParams(queryString);
       $.ajax({
           url :  `${urlComandato}/pago/gestionlugares`,
@@ -3264,15 +3264,15 @@ body.is-menu-visible #menu {
 
     let paymentCheckout = new PaymentCheckout.modal({
 
-      //client_app_code: 'CHATBOTSTG-EC-CLIENT', // Client Credentials
-      //client_app_key: 'od9xqwIxCxD4jInSVnORPUtb9yxJLT', // Client Credentials
-      //locale: 'es', // User's preferred language (es, en, pt). English will be used by default.
-      //env_mode: 'stg', // `prod`, `stg`, `local` to change environment. Default is `stg`
-
-      client_app_code: 'CHATBOT-EC-CLIENT', // Client Credentials
-      client_app_key: 'vEx1FlT7ywQKH4kuiq43bX4YAjd49R', // Client Credentials
+      client_app_code: 'CHATBOTSTG-EC-CLIENT', // Client Credentials
+      client_app_key: 'od9xqwIxCxD4jInSVnORPUtb9yxJLT', // Client Credentials
       locale: 'es', // User's preferred language (es, en, pt). English will be used by default.
-      env_mode: 'prod', // `prod`, `stg`, `local` to change environment. Default is `stg`
+      env_mode: 'stg', // `prod`, `stg`, `local` to change environment. Default is `stg`
+
+      // client_app_code: 'CHATBOT-EC-CLIENT', // Client Credentials
+      // client_app_key: 'vEx1FlT7ywQKH4kuiq43bX4YAjd49R', // Client Credentials
+      // locale: 'es', // User's preferred language (es, en, pt). English will be used by default.
+      // env_mode: 'prod', // `prod`, `stg`, `local` to change environment. Default is `stg`
 
       onOpen: function () {        
         console.log('modal opened');
