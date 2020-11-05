@@ -570,8 +570,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
     let query
     var resultSQL = []
     var datos = {}
-    query = `EXEC [dbo].[sp_ConsultarProductosAlternos]
-                @tipoPago = N'${metodoPago}',
+    query = `EXEC [dbo].[sp_ConsultarProductoAlterno]
+                @metodoPago = N'${metodoPago}',
                 @nombreProducto = N'${productoSelected}'`
     await request.query(query)
     .then(async data =>{

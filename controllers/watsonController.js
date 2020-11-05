@@ -1104,8 +1104,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         const metodoPago = contexto.metodoPagoCarrito
         const productoSelected = contexto.productoActualMP
         var result = await sqlController.ConsultarProductoAlterno(metodoPago,productoSelected)
-        console.log(result)
-        if(result[0].idProducto==undefined)
+        if(result.length==0)
         {
             respuesta.push({
                 response_type:'text',
