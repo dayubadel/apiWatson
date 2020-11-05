@@ -1101,67 +1101,77 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         })
     }
     else if(strAccion == "consultarAlternativaProducto"){
-        const metodoPago = contexto.tipoPago
-        const productoSelected = contexto.productoSelected
-        await sqlController.ConsultarProductoAlterno(metodoPago,productoSelected)
-        .then(result => {
-            let tipoResultado = result[0].tipoResultado
-            var menuMostradoProductos = {
-                "tipoMenu" : "",
-                'menuMostrado' : [],
-                "actionNodeAnterior" : strAccion,
-                "pasoAnterior" : categoriaUltimoNivel
-            };
-            respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos que te podrían interesar con ese *método de pago*:`})
-            let resultMapped = result.reduce((acc, item) => {
-                (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
-                    return acc;
-                }, []);
-            var num =1;
-
-            resultMapped.forEach(elementProducto => {
-                var carTexto = "";
-                var urlImagen ="";
-                var nombreProducto ="";
-                elementProducto.forEach(elementCaracteristica =>
-                    {
-                        if(elementCaracteristica['nombre']=="imagen")
-                        {
-                            urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
-                        }
-                        else if(elementCaracteristica['nombre']=="nombreProducto")
-                        {
-                            nombreProducto = elementCaracteristica['value']
-                            menuMostradoProductos.menuMostrado.push({
-                                "pocision": num,
-                                "nombre" : nombreProducto,
-                                "tipoCategoria": "productosEspecificos"
-                            });
-                        }
-                        else if(elementCaracteristica['nombre']!="idProducto")
-                        {
-                            carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
-                        }
-                    })
-
-                    respuesta.push({
-                        response_type: "image",
-                        title: `*${num}) ${nombreProducto}*\n${carTexto}`,
-                        source: urlImagen
-                    })
-                    num++;
-            })
-
+        const metodoPago = contexto.metodoPagoCarrito
+        const productoSelected = contexto.productoActualMP
+        var result = await sqlController.ConsultarProductoAlterno(metodoPago,productoSelected)
+        console.log(result)
+        if(result[0].idProducto==undefined)
+        {
             respuesta.push({
-                response_type: "text",
-                text: `Por favor, selecciona el *número* del producto que te interesa`
-            });
-            if(contexto.hasOwnProperty('menuMostradoProductos')){
-                delete contexto.menuMostradoProductos
-            }
-            contexto['menuMostradoProductos'] = menuMostradoProductos;
-        })
-
+                response_type:'text',
+                text: `Recuerda que puedes usar la palabra *catálogo* para seguir navegando en nuestros *productos*.`
+            })
+        }
+        else 
+        {
+                let tipoResultado = result[0].tipoResultado
+                var menuMostradoProductos = {
+                    "tipoMenu" : "",
+                    'menuMostrado' : [],
+                    "actionNodeAnterior" : strAccion,
+                    "pasoAnterior" : categoriaUltimoNivel
+                };
+                respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos que te podrían interesar con ese *método de pago*:`})
+                let resultMapped = result.reduce((acc, item) => {
+                    (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
+                        return acc;
+                    }, []);
+                var num =1;
+    
+                resultMapped.forEach(elementProducto => {
+                    var carTexto = "";
+                    var urlImagen ="";
+                    var nombreProducto ="";
+                    elementProducto.forEach(elementCaracteristica =>
+                        {
+                            if(elementCaracteristica['nombre']=="imagen")
+                            {
+                                urlImagen = JSON.parse(elementCaracteristica['value'])[0].ImageUrl
+                            }
+                            else if(elementCaracteristica['nombre']=="nombreProducto")
+                            {
+                                nombreProducto = elementCaracteristica['value']
+                                menuMostradoProductos.menuMostrado.push({
+                                    "pocision": num,
+                                    "nombre" : nombreProducto,
+                                    "tipoCategoria": "productosEspecificos"
+                                });
+                            }
+                            else if(elementCaracteristica['nombre']!="idProducto")
+                            {
+                                carTexto = `${carTexto} ${(carTexto == '') ? '' : '\n'} *- ${elementCaracteristica['nombre']}:* ${elementCaracteristica['value']}`
+                            }
+                        })
+    
+                        respuesta.push({
+                            response_type: "image",
+                            title: `*${num}) ${nombreProducto}*\n${carTexto}`,
+                            source: urlImagen
+                        })
+                        num++;
+                })
+    
+                respuesta.push({
+                    response_type: "text",
+                    text: `Por favor, selecciona el *número* del producto que te interesa`
+                });
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
+    
+        }
+      
     }           
     else if(strAccion == 'enviarCorreoCompraFinalizada')
     {
