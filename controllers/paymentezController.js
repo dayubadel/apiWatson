@@ -144,7 +144,8 @@ paymentezController.RespuestaPago = async (req, res) => {
                 response_type:'text',
                 text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero el sistema de Paymentez está presentando problemas.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
             })
-        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
+        //descomentar en prod
+        //paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
         res.send(
         {
             estado: false,
@@ -172,7 +173,8 @@ paymentezController.RespuestaPago = async (req, res) => {
                     response_type:'text',
                     text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero tiene problemas con su tarjeta.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
                 })
-            paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
+            //descomentar en prod
+            //paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
             res.send(
                 {
                     estado: false,
@@ -363,7 +365,8 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
                 response_type:'text',
                 text: `Estimados, les saluda Dora.\nUn cliente ha finalizado exitosamente el pago de una compra.\nSin embargo, el servicio web de facturación automática ha fallado en los 3 intentos.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
             })
-        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
+        //descomentar en prod
+        //paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
     }
 
     return facuturaCreada

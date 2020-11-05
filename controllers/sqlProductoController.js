@@ -31,6 +31,7 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
                     @urlWeb = N'${objProducto.url}',
                     @isMarketplace = ${objProducto.isMarketPlace},
                     @isActive = ${objProducto.isActive},
+                    @iva = ${objProducto.iva},
                     @arrImagenes = N'${JSON.stringify(objProducto.imagenes)}',
                     @arrCaracteristicas = N'${JSON.stringify(objProducto.caracteristicas).replace(/[{}"]+/g,'')}',
                     @arrCategorias = N'${JSON.stringify(objProducto.categorias).replace(/[{\]["]+/g,'').replace(/(},)+/g,'^').replace('}','')}'
