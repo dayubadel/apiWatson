@@ -1233,7 +1233,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                             </tr>
                                             <tr>
                                                 <td colspan="3">TOTAL A PAGAR</td>
-                                                <td colspan="3">$${((totalFactura+3.56)+(totalFactura-totalProductosSinIva+3.56*0.12)).toFixed(2)}</td>
+                                                <td colspan="3">$${((totalFactura+3.56)+((totalFactura-totalProductosSinIva+3.56)*0.12)).toFixed(2)}</td>
                                             </tr>`
                                                             
                 var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table><br><h4>Correo enviado automáticamente desde la asistente virtual Dora</h4>  `

@@ -63,14 +63,12 @@ paymentezController.GenerarToken = async (apiLogin, apiKey) => {
 
 
 paymentezController.GestionFactura = async (req, res) => {
-    // console.log(req.body)
     let opcion = req.body.opcion
     var respuestaSql
     if(opcion == 1)
     {
         var numeroReferencia = req.body.numeroReferencia
         respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
-        // console.log(numeroReferencia)
     }
     else if(opcion == 2)
     {
@@ -81,7 +79,6 @@ paymentezController.GestionFactura = async (req, res) => {
                                         datosFactura.nombre_receptor, datosFactura.ciudad, datosFactura.calle_principal,datosFactura.calle_secundaria,
                                         datosFactura.numero_calle,datosFactura.referencia_entrega,null,null,null,null,null,null,null,4)    
     }
-    // console.log(respuestaSql)
     if(respuestaSql.length==0)
     {
         res.send({estado: false, mensaje: 'Ocurrió un error con el número de referencia del pedido.'})
@@ -277,20 +274,20 @@ paymentezController.sendEmailClienteVentas = async (objCabecera, correo, opcion)
         <td>${numero}</td>
         <td>1</td>
         <td>VALOR DE ENVÍO</td>
-        <td>3.51</td>
-        <td>3.51</td>
+        <td>3.56</td>
+        <td>3.56</td>
     </tr>`
     filaCuerpo = filaCuerpo +  `<tr>
                                     <td colspan="3">SUBTOTAL</td>
-                                    <td colspan="3">${(totalFactura+3.51).toFixed(2)}</td>
+                                    <td colspan="3">${(totalFactura+3.56).toFixed(2)}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3">IVA</td>
-                                    <td colspan="3">${((totalFactura+3.51)*0.12).toFixed(2)}</td>
+                                    <td colspan="3">${((totalFactura+3.56)*0.12).toFixed(2)}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3">TOTAL A PAGAR</td>
-                                    <td colspan="3">$${((totalFactura+3.51)*1.12).toFixed(2)}</td>
+                                    <td colspan="3">$${((totalFactura+3.56)*1.12).toFixed(2)}</td>
                                 </tr>`
                                             
     var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
