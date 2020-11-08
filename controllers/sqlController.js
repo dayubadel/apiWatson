@@ -891,10 +891,48 @@ sqlController.gestionDevolucion = async (numeroReferencia, opcion) =>
     await request.query(query)
     .then(async data => {
         if (data.recordset != undefined && data.recordset.length > 0) {
+            }
+    }) 
+    .catch(err => {
+            console.log("Error al gestionar la devolución")
+            console.log(err)
+            throw new Error('Error al registrar en BD')
+    }) 
+    return resultSQL
+}
+
+sqlController.gestionCajeros = async (codigo, telefono, opcion)=>
+{
+    console.log (codigo, telefono, opcion)
+    let query
+    var resultSQL =[]
+    var datos = {}
+    if(opcion==1)
+    {
+        query = `[dbo].[sp_GestionCajeros]
+        @codigo = N'${codigo}',
+        @telefono = N'${telefono}',
+        @opcion = ${opcion}`
+    }
+
+    await request.query(query)
+    .then(async data => {
+        if (data.recordset != undefined && data.recordset.length > 0) {
+            data.recordset.forEach(element => 
+                {
+                    datos = 
+                    {
+                        idCajero : element.idCajero,
+                        nombre : element.nombre,
+                        codigo : element.codigo
+                    }
+                    resultSQL.push(datos)
+                 }
+            )
         }
     }) 
     .catch(err => {
-            console.log("Error al gestionar la devolucion")
+            console.log("Error al gestionar los cajeros")
             console.log(err)
             throw new Error('Error al registrar en BD')
     }) 
