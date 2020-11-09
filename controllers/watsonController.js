@@ -1393,7 +1393,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
     }
     else if(strAccion == 'enviarCorreoDevolucion')
     {            
-        sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,2)
+        sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,null,2)
         let objCabecera = await sqlController.gestionCabeceraVenta(contexto.numeroReferenciaDevolucion,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
         objCabecera = objCabecera[0]
         let current_datetime = objCabecera.fechaFinalizacion
@@ -1430,7 +1430,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
     }
     else if(strAccion == 'enviarCorreoDevolucionAutomatica')
     {            
-        sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,2)
+        sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,null,2)
         let objCabecera = await sqlController.gestionCabeceraVenta(contexto.numeroReferenciaDevolucion,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
         objCabecera = objCabecera[0]
         let current_datetime = objCabecera.fechaFinalizacion
@@ -1477,9 +1477,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }
         else
         {
+            contexto['idCajero'] = cajero[0].idCajero
             respuesta.push({response_type:'text', text:`Un gusto saludarte, ${cajero[0].nombre}.` })
             respuesta.push({response_type:'text', text:'Has ingresado a la devolución automática.'})
-            respuesta.push({response_type:'text', text:'Recuerda que debes tener a la mano el correo que envié para el proceso. Cuando lo solicite, deberás ingresar el *número de referencia* y el *identificador de pago* de la compra del cliente.'})
+            respuesta.push({response_type:'text', text:'Recuerda que debes tener a la mano el correo que envié para el proceso, porque cuando lo solicite, deberás ingresar el *número de referencia* y el *identificador de pago* de la compra del cliente.'})
             respuesta.push({response_type:'text', text:'¿Deseas continuar?'})
             contexto['cajeroAutorizado']=1        
         }
@@ -1559,7 +1560,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         var estadoRespuesta = await paymentezController.postRefound(tidPaymentez)
         if(estadoRespuesta==true)
         {  
-            sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,1)
+            console.log(contexto.idCajero)
+            sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,contexto.idCajero,1)
             respuesta.push({response_type:'text',text:'He realizado la devolución automática de forma exitosa.'})
             respuesta.push({response_type:'text',text:'Además, envié un mensaje de confirmación al correo del cliente registrado en la compra.'})
             let objCabecera = await sqlController.gestionCabeceraVenta(contexto.numeroReferenciaDevolucion,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
@@ -1578,7 +1580,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let tituloCliente = `Devolución de compra - Factura: #${objCabecera.numeroReferencia} `
             let cabeceraCliente = `<div>    
                                 <p>Estimado cliente, he completado con éxito la devolución de una compra. </p>
-                                <p>Gracias por su confinza.</p>
+                                <p>Gracias por su confianza.</p>
                                 <p>A continuación, se muestran sus datos relevantes.</p>
                                 <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
                                 <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
@@ -1597,7 +1599,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }
         else
         {                
-            sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,2)
+            sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,null,2)
             let objCabecera = await sqlController.gestionCabeceraVenta(contexto.numeroReferenciaDevolucion,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
             let current_datetime = objCabecera.fechaFinalizacion
             let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 

@@ -7,6 +7,7 @@ const canalesMensajeriaController = require('./canalesMensajeriaController');
 const { json } = require("body-parser");
 const { stringify } = require("querystring");
 const sha256 = require('js-sha256');
+const { valorGlobales } = require("../config/config.js");
 var https = require('follow-redirects').https;
 
 const paymentezController = {}   
@@ -99,7 +100,8 @@ paymentezController.GestionFactura = async (req, res) => {
                 order_vat : factura.valorNetoIva,
                 order_reference :  factura.numeroReferencia,
                 order_installments_type: tipoPago,
-                order_taxable_amount : factura.valorNeto + factura.valorEnvio,
+                //order_taxable_amount : factura.valorNeto + factura.valorEnvio,
+                order_taxable_amount : (factura.valorNetoIva*100)/config.valorGlobales.IVAPercent,
                 order_tax_percentage : config.valorGlobales.IVAPercent,
                 first_name : factura.nombres,
                 last_name : factura.apellidos,

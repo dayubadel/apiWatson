@@ -876,7 +876,7 @@ sqlController.gestionNotificacion = async (idClienteCanalMensajeria, motivoNotif
     return resultSQL
 }
 
-sqlController.gestionDevolucion = async (numeroReferencia, opcion) =>
+sqlController.gestionDevolucion = async (numeroReferencia, idCajero, opcion) =>
 {
     let query
     var resultSQL =[]
@@ -885,6 +885,7 @@ sqlController.gestionDevolucion = async (numeroReferencia, opcion) =>
     {
         query = `[dbo].[Sp_GestionDevolucion]
         @numeroReferencia = N'${numeroReferencia}',
+        @idCajero = ${idCajero},
         @opcion = ${opcion}`
     }
 
