@@ -92,6 +92,7 @@ paymentezController.GestionFactura = async (req, res) => {
             tipoPago = 2
         else if (factura.identificadorMetodoPago == 5)
             tipoPago = 3
+        let valor = (factura.valorNetoIva*100)/config.valorGlobales.IVAPercent
         var facuturaPaymentez =
             {
                 user_id : factura.idClienteCanalMensajeria.toString(),
@@ -101,7 +102,7 @@ paymentezController.GestionFactura = async (req, res) => {
                 order_reference :  factura.numeroReferencia,
                 order_installments_type: tipoPago,
                 //order_taxable_amount : factura.valorNeto + factura.valorEnvio,
-                order_taxable_amount : (factura.valorNetoIva*100)/config.valorGlobales.IVAPercent,
+                order_taxable_amount :  Math.round( valor * 100) / 100,
                 order_tax_percentage : config.valorGlobales.IVAPercent,
                 first_name : factura.nombres,
                 last_name : factura.apellidos,

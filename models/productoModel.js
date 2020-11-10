@@ -2,7 +2,7 @@
 class Producto {
     constructor(idVitex, modelo, nombre, idRefSAP, stockCC, stockOtroPago, 
         precioCC, precioOtroPago, cuotasPrecioCC, plazoGarantia, 
-        imagenes, marca, caracteristicas, categorias, isMarketPlace, url, isActive){
+        imagenes, marca, caracteristicas, categorias, isMarketPlace, url, isActive, iva){
             this.idVitex = idVitex || "";
             this.modelo = modelo || "";
             this.nombre = nombre || "";
@@ -21,6 +21,7 @@ class Producto {
             this.isMarketPlace = isMarketPlace || 0;
             this.url = url || ''
             this.isActive = isActive || 0;
+            this.iva = iva || 0;
 
         }
 }

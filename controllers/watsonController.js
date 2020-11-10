@@ -1560,7 +1560,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         var estadoRespuesta = await paymentezController.postRefound(tidPaymentez)
         if(estadoRespuesta==true)
         {  
-            console.log(contexto.idCajero)
             sqlController.gestionDevolucion(contexto.numeroReferenciaDevolucion,contexto.idCajero,1)
             respuesta.push({response_type:'text',text:'He realizado la devolución automática de forma exitosa.'})
             respuesta.push({response_type:'text',text:'Además, envié un mensaje de confirmación al correo del cliente registrado en la compra.'})
@@ -1579,7 +1578,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             }
             let tituloCliente = `Devolución de compra - Factura: #${objCabecera.numeroReferencia} `
             let cabeceraCliente = `<div>    
-                                <p>Estimado cliente, he completado con éxito la devolución de una compra. </p>
+                                <p>Estimado/a, he completado con éxito la devolución de una compra. </p>
                                 <p>Gracias por su confianza.</p>
                                 <p>A continuación, se muestran sus datos relevantes.</p>
                                 <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
@@ -1594,8 +1593,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                 <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago.toUpperCase()}</label><br>
                                 </div>`
             let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
-            var contenido = `${cabeceraCliente}${pieDeCorreo}`             
-            mailController.enviarEmailCliente(objCabecera.email, tituloCliente, contenido) 
+            var contenido = `${cabeceraCliente}${pieDeCorreo}`  
+            //descomentar en prod
+            //let correoVentas = 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com'      
+            var destinatario = objCabecera.email;
+            mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
         }
         else
         {                

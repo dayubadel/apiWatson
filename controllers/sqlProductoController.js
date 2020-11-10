@@ -38,7 +38,7 @@ sqlProductoController.gestionProductos = async(arrProductos) =>{
         `
     });
 
-    // console.log(query)
+    //console.log(query)
     await request.query(query)
     .then(async data => {
         // if (data.recordset != undefined && data.recordset.length > 0) {
