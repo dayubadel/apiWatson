@@ -258,9 +258,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         }else if(strAccion == 'consultarMarcasPorCategoriaUltimoNivel'){
             contexto.categoriaUltimoNivel = contexto.varAnterior
         }else if(strAccion == 'consultarProductosPorMarcaPorCategoriaUltimoNivel'){
-            console.log(contexto.varAnterior)
+            console.log("*******************************************")
+            console.log(contexto.varAnterior, contexto.valorSelected)
             contexto.categoriaUltimoNivel = contexto.varAnterior
-            contexto.marca = 'Imaco'
+            contexto.marcaProductos = contexto.valorSelected
         }else if(strAccion == 'consultarAlternativaProducto'){
             contexto.categoriaUltimoNivel = contexto.varAnterior
         }
@@ -1047,21 +1048,21 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 carritoActual = []
                 let numeroRegistro = 1
                 resultQuery.forEach(element => {
-                        carritoActual.push({    
+                    carritoActual.push({    
                             p : numeroRegistro, idDetalleVenta: element.idDetalleVenta, 
                             nombreProducto: element.nombreProducto, cantidad: element.cantidad,
                             precioProducto: element.precioProducto, metodoPago : element.metodoPago,
                             ivaProducto: element.iva
-                        })
+                    })
                     let total = element.cantidad*(element.precioProducto*1.12)
                     if(element.ivaProducto==false)
                     {
                         total = element.cantidad*element.precioProducto
-                        respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto).toFixed(2)} _no graba IVA_\n*Total:* $${total.toFixed(2)}`})           
+                        respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto).toFixed(2)} _no graba IVA_\n*Total:* $${total.toFixed(2)}`})           
                     }
                     else
                     {
-                        respuesta.push({response_type:'text',text:`*Registro ${element.p}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})               
+                        respuesta.push({response_type:'text',text:`*Registro ${numeroRegistro}*\n*Cantidad:* ${element.cantidad}\n*Producto:* ${element.nombreProducto}\n*Precio unitario:* $${(element.precioProducto*1.12).toFixed(2)} _incluye IVA_\n*Total:* $${total.toFixed(2)}`})               
                     }
                     totalFactura=totalFactura+total
                     numeroRegistro++
@@ -1370,7 +1371,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contexto['validacionDevolucion']='correo'
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                 }
-                else if(hoy.getHours()>17 || ( hoy.getHours()>17 && hoy.getMinutes()>10))
+                else if(hoy.getHours()>17 || ( hoy.getHours()>19 && hoy.getMinutes()>10))
                 {
                     respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 17:50, dentro de las primeras 24 horas posteriores a la compra.'})
                     respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})
@@ -1423,9 +1424,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         cabeceraCliente = `${cabeceraCliente} Los datos de la compra y de la tarjeta están en su sistema de facturación.`
         let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
         var contenido = `${cabeceraCliente}${pieDeCorreo}` 
-        let correoVentas = 'dayana.bailon@gaiaconsultores.biz'  
+        //let correoVentas = 'dayana.bailon@gaiaconsultores.biz'  
         //descomentar en prod
-        //let correoVentas = 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com'            
+        let correoVentas = 'dayana.bailon@gaiaconsultores.biz;ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com'            
         mailController.enviarEmailCliente(correoVentas, tituloCliente, contenido) 
     }
     else if(strAccion == 'enviarCorreoDevolucionAutomatica')
@@ -1460,9 +1461,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         cabeceraCliente = `${cabeceraCliente} Los datos de la compra y de la tarjeta están en su sistema de facturación.`
         let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
         var contenido = `${cabeceraCliente}${pieDeCorreo}` 
-        let correoVentas = 'dayana.bailon@gaiaconsultores.biz'  
+        //let correoVentas = 'dayana.bailon@gaiaconsultores.biz'  
         //descomentar en prod
-        //let correoVentas = 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com'            
+        let correoVentas = 'dayana.bailon@gaiaconsultores.biz;ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;'            
         mailController.enviarEmailCliente(correoVentas, tituloCliente, contenido) 
     }
     else if(strAccion=='ValidarCodigoDevolucionCajero')
@@ -1533,7 +1534,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contexto['validacionDevolucion']='correo'
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                 }
-                else if(hoy.getHours()>17 || ( hoy.getHours()>17 && hoy.getMinutes()>10))
+                else if(hoy.getHours()>19 || ( hoy.getHours()>19 && hoy.getMinutes()>10))
                 {
                     respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 17:50, dentro de las primeras 24 horas posteriores a la compra.'})
                     respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para para que gestionen la devolución manual.'})
@@ -1549,7 +1550,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                     contexto['validacionDevolucion']='si'
                     contexto['tidPaymentezDevolucion']=objCabecera[0].tidPaymentez
-                    contexto['valorTotalDevolucion']=objCabecera[0].valorTotalOrden
+                    contexto['valorTotalDevolucion']= Math.round(objCabecera[0].valorTotalOrden*100)/100
                 }
             }
         }
@@ -1595,9 +1596,11 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
             var contenido = `${cabeceraCliente}${pieDeCorreo}`  
             //descomentar en prod
-            //let correoVentas = 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com'      
-            var destinatario = objCabecera.email;
+            let destinatario = 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;'      
+            let cliente = objCabecera.email;
+            mailController.enviarEmailCliente(cliente, tituloCliente, contenido) 
             mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
+
         }
         else
         {                
@@ -1630,7 +1633,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             cabeceraCliente = `${cabeceraCliente} Los datos de la compra y de la tarjeta están en su sistema de facturación.`
             let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
             var contenido = `${cabeceraCliente}${pieDeCorreo}` 
-            let correoVentas = 'dayana.bailon@gaiaconsultores.biz'              
+            //descomentar en prod
+            let correoVentas = 'dayana.bailon@gaiaconsultores.biz;ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;'      
+            //let correoVentas = 'dayana.bailon@gaiaconsultores.biz'              
             mailController.enviarEmailCliente(correoVentas, tituloCliente, contenido) 
             respuesta.push({response_type:'text',text:'Ha ocurrido un problema con el proceso automático de devolución.'})
             respuesta.push({response_type:'text',text:'He enviado un correo al personal correspondiente de Comandato para que realicen el proceso de forma manual.'})

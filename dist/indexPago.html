@@ -2868,7 +2868,7 @@ body.is-menu-visible #menu {
       window.onload = function() {
 
       const queryString = window.location.search;
-      urlComandato = 'https://647364b87d57.ngrok.io'
+      urlComandato = 'https://f089af81813a.ngrok.io'
       const urlParams = new URLSearchParams(queryString);
       $.ajax({
           url :  `${urlComandato}/pago/gestionlugares`,
@@ -2914,6 +2914,14 @@ body.is-menu-visible #menu {
                     icon: 'error',
                     title: 'Error',
                     text: 'Esta compra ya ha sido pagada.'
+                  })
+                }
+                else if(data.resultado.stockDisponible==0)
+                {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Disculpa, pero ya no tenemos stock para todos los productos de tu carrito.'
                   })
                 }
                 else
@@ -3075,7 +3083,7 @@ body.is-menu-visible #menu {
 
     async function validarCompraPagada(numeroReferencia)
     {
-      var compraPagada = false
+      var compraPagada = false, stockDisponible = 0
       await  $.ajax({            
             url: `${urlComandato}/pago/gestionfactura`,
             type: "post",
@@ -3085,22 +3093,31 @@ body.is-menu-visible #menu {
             {
               if(data.estado==true)
               {
-                compraPagada = data.resultado.finalizado
+                compraPagada = data.resultado.finalizado,
+                stockDisponible = data.resultado.stockDisponible
               }
             }
           });
-      return compraPagada
+      return ({compraPagada: compraPagada,stockDisponible:stockDisponible} )
     }
 
     async function pasarDatos()
     {            
-       let facturaPagada = await validarCompraPagada(order_reference)
-        if(facturaPagada==true)
+       let factura = await validarCompraPagada(order_reference)
+        if(factura.compraPagada==true)
         {
           Swal.fire({
             icon: 'error',
             title: 'Error',
             text: 'Esta compra ya ha sido pagada'
+          })
+        }
+        else if(factura.stockDisponible==0)
+        {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Disculpa, pero ya no tenemos stock para todos los productos de tu carrito.'
           })
         }
         else 
@@ -3321,8 +3338,6 @@ body.is-menu-visible #menu {
         });
       }
     });
-
-    console.log(document)
 
 
     let btnOpenCheckout = document.querySelector('.js-payment-checkout');

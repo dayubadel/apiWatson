@@ -165,7 +165,8 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
                         numeroEntrega : element.numeroEntrega,
                         referenciaEntrega : element.referenciaEntrega,
                         idCabeceraVenta : element.idCabeceraVenta,
-                        idCanalMensajeria : element.identificadorCanal
+                        idCanalMensajeria : element.identificadorCanal,
+                        stockDisponible : element.stockDisponible
                     }
                     resultSQL.push(datos)
                 }

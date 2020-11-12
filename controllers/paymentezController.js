@@ -97,21 +97,22 @@ paymentezController.GestionFactura = async (req, res) => {
             {
                 user_id : factura.idClienteCanalMensajeria.toString(),
                 order_description : 'Chatbot_Dora',
-                order_amount : factura.valorTotalOrden,
-                order_vat : factura.valorNetoIva,
+                order_amount :  Math.round(factura.valorTotalOrden * 100)/100,
+                order_vat :  Math.round(factura.valorNetoIva*100)/100,
                 order_reference :  factura.numeroReferencia,
                 order_installments_type: tipoPago,
                 //order_taxable_amount : factura.valorNeto + factura.valorEnvio,
                 order_taxable_amount :  Math.round( valor * 100) / 100,
                 order_tax_percentage : config.valorGlobales.IVAPercent,
-                first_name : factura.nombres,
-                last_name : factura.apellidos,
+                first_name : factura.nombresCabecera,
+                last_name : factura.apellidosCabecera,
                 phone : factura.numeroTelefono,
                 tipo_identificacion : factura.tipoIdentificacion,
                 numero_identificacion : factura.numIdentificacion,
                 email : factura.email,
                 idConversacionCanal : factura.idConversacionCanal,
-                finalizado : factura.finalizado
+                finalizado : factura.finalizado,
+                stockDisponible : factura.stockDisponible
             }
         res.send({estado: true, resultado: facuturaPaymentez})
     }
@@ -127,7 +128,7 @@ paymentezController.GetFormulario = (req, res) => {
 }
 
 paymentezController.RespuestaPago = async (req, res) => {    
-    var grupoWhatsapp = '593980841352-1484834721@g.us' //'593963206990-1601935738@g.us'//
+    var grupoWhatsapp =  '593963206990-1601935738@g.us'//comandato '593980841352-1484834721@g.us' 
     var respuesta = []
     var respuestaGrupoWhatsap = []
     const transaction = req.body.myjson.transaction;
@@ -148,7 +149,7 @@ paymentezController.RespuestaPago = async (req, res) => {
                 text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero el sistema de Paymentez está presentando problemas.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
             })
         //descomentar en prod
-        //paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
         res.send(
         {
             estado: false,
@@ -177,7 +178,7 @@ paymentezController.RespuestaPago = async (req, res) => {
                     text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero tiene problemas con su tarjeta.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
                 })
             //descomentar en prod
-            //paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
+            paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
             res.send(
                 {
                     estado: false,
@@ -261,6 +262,7 @@ paymentezController.sendEmailClienteVentas = async (objCabecera, correo, opcion)
     filaCuerpo = ''
     numero = 1
     var totalFactura = 0
+    let totalProductosSinIva = 0
     var elementosFactura = await sqlPaymentezController.gestionCarritoCompras(objCabecera.idClienteCanalMensajeria,objCabecera.numeroReferencia,null,null,null,null,4)
     elementosFactura.forEach(element =>
         {
@@ -272,6 +274,10 @@ paymentezController.sendEmailClienteVentas = async (objCabecera, correo, opcion)
                                             <td>${element.precioProducto}</td>
                                             <td>${total.toFixed(2)}</td>
                                         </tr>`
+                                        if(element.ivaProducto==false)
+                                        {
+                                            totalProductosSinIva=totalProductosSinIva+element.precioProducto
+                                        }
             totalFactura = totalFactura + total
             numero++
         })
@@ -288,12 +294,12 @@ paymentezController.sendEmailClienteVentas = async (objCabecera, correo, opcion)
                                 </tr>
                                 <tr>
                                     <td colspan="3">IVA</td>
-                                    <td colspan="3">${((totalFactura+3.56)*0.12).toFixed(2)}</td>
+                                    <td colspan="3">${((totalFactura+3.56-totalProductosSinIva)*0.12).toFixed(2)}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3">TOTAL A PAGAR</td>
-                                    <td colspan="3">$${((totalFactura+3.56)*1.12).toFixed(2)}</td>
-                                </tr>`
+                                    <td colspan="3">$${((totalFactura+3.56)+((totalFactura-totalProductosSinIva+3.56)*0.12)).toFixed(2)}</td>
+                                    </tr>`
                                             
     var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
     let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
@@ -362,14 +368,14 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
         let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
         paymentezController.sendEmailClienteVentas(datosCabecera[0],correoVentas,1)
         var respuestaGrupoWhatsap = []
-        var grupoWhatsapp = '593980841352-1484834721@g.us' //'593963206990-1601935738@g.us'
+        var grupoWhatsapp = '593963206990-1601935738@g.us' // comandato '593980841352-1484834721@g.us'
         respuestaGrupoWhatsap.push(
             {
                 response_type:'text',
                 text: `Estimados, les saluda Dora.\nUn cliente ha finalizado exitosamente el pago de una compra.\nSin embargo, el servicio web de facturación automática ha fallado en los 3 intentos.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
             })
         //descomentar en prod
-        //paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
     }
 
     return facuturaCreada
@@ -389,7 +395,7 @@ paymentezController.CallWS = async (jsonCompra) => {
         return soapCreateOrder(paramsWS)
     })
     .then(clientRes => {
-        // console.log("res",clientRes)
+         console.log("res",clientRes)
         if(clientRes.CreateOrderResult.O_TIPOM == 'S'){
             facturaCreada = true
         }else{
