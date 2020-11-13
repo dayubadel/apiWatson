@@ -1105,22 +1105,43 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         const metodoPago = contexto.metodoPagoCarrito
         const productoSelected = contexto.productoActualMP
         var result = await sqlController.ConsultarProductoAlterno(metodoPago,productoSelected)
-        if(result.length==0)
+        console.log(result)
+        var menuMostradoProductos = {
+            "tipoMenu" : "",
+            'menuMostrado' : [],
+            "actionNodeAnterior" : strAccion,
+            "pasoAnterior" : categoriaUltimoNivel
+        };
+        if(result[0].idProducto==undefined && result[0].totalProductos>0)
         {
-            respuesta.push({
-                response_type:'text',
-                text: `Recuerda que puedes usar la palabra *catálogo* para seguir navegando en nuestros *productos*.`
-            })
+            menuMostradoProductos.tipoMenu = 'marcaProductos';
+                var txtMarcas = '';
+                respuesta.push({
+                    response_type: "text",
+                    text:`Recuerda que tenemos otras marcas disponibles:`
+                })
+                let num=1
+                result.forEach(marca => {
+                    txtMarcas = `${txtMarcas}${(txtMarcas == '')? '' : '\n'} *${num}) ${marca.nombreMarca}*`//+marca.totalProductos => total de productos dentro de la marca => por si acaso, saber que esta ahi
+                    menuMostradoProductos.menuMostrado.push({
+                        "pocision": num,
+                        "nombre" : marca.nombreMarca,
+                        "tipoCategoria": "marcaProductos"
+                    });
+                    num++;
+                });
+                respuesta.push({
+                    response_type: "text",
+                    text: txtMarcas
+                });
+                if(contexto.hasOwnProperty('menuMostradoProductos')){
+                    delete contexto.menuMostradoProductos
+                }
+                contexto['menuMostradoProductos'] = menuMostradoProductos;
         }
         else 
         {
                 let tipoResultado = result[0].tipoResultado
-                var menuMostradoProductos = {
-                    "tipoMenu" : "",
-                    'menuMostrado' : [],
-                    "actionNodeAnterior" : strAccion,
-                    "pasoAnterior" : categoriaUltimoNivel
-                };
                 respuesta.push({response_type: "text", text:`Disponemos de los siguientes productos que te podrían interesar con ese *método de pago*:`})
                 let resultMapped = result.reduce((acc, item) => {
                     (acc[item.idProducto] = acc[item.idProducto] || []).push({'nombre':item.nombreCaracteristicaK, 'value': item.caracteristicaValue});
