@@ -1,14 +1,14 @@
 {
   "name": "apibasewatson",
   "version": "1.0.0",
-  "description": "api generica para nuevas implementaciones",
+  "description": "API para comunicar el servicio de IBM Watson con una base de datos y APIs externas de mensajería.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "author": "Angel Ochoa, Bryan Garcia, Gabriel Loor, Dayana Bailón",
+  "author": "Dayana Bailón & Bryan García",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",

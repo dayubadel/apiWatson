@@ -328,8 +328,8 @@ set excelBaseReporte = Nothing
 Set emailObj      = CreateObject("CDO.Message")
 
 emailObj.From = "chatbot1@comandato.com"
-emailObj.To = "bryan.garcia@gaiaconsultores.biz"
-emailObj.Cc = "dayana.bailon@gaiaconsultores.biz"
+emailObj.To = "dayana.bailon@gaiaconsultores.biz"
+emailObj.Cc = "bryan.garcia@gaiaconsultores.biz"
 
 emailObj.Subject  = "Reporte Didario Dora"
 ' emailObj.TextBody = "Test kenvio ass"

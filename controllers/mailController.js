@@ -1,5 +1,6 @@
 var nodemailer = require('nodemailer');
 const JSONTransport = require('nodemailer/lib/json-transport');
+const config = require('../config/config');
 
 
 var mailController = {}
@@ -17,11 +18,9 @@ var transporter = nodemailer.createTransport({
 
 mailController.enviarEmail = async (subject, content) =>
 {
-    console.log(subject, content)
     var mailOptions = {
         from: 'chatbot1@comandato.com',
-     //   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
-        to: 'dayana.bailon@gaiaconsultores.biz',
+        to: config.destinatarios.desarrolladora,
         subject: subject,
         html: content
       };
@@ -41,7 +40,6 @@ mailController.enviarEmailCliente = async (destination, subject, content) =>
     console.log(subject, content)
     var mailOptions = {
         from: 'chatbot1@comandato.com',
-     //   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
         to: destination,
         subject: subject,
         html: content
@@ -60,8 +58,7 @@ mailController.enviarEmailCliente = async (destination, subject, content) =>
 mailController.MailErrorWSFacturacion = (jsonEnviado) => {
     var mailOptions = {
       from: 'chatbot1@comandato.com',
-  //   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
-      to: 'dayana.bailon@gaiaconsultores.biz',
+      to: config.destinatarios.desarrolladora,
       subject: 'Error de comunicación con WS de Facturacion Automática',
       html: `<!DOCTYPE html>
       <html>
@@ -91,8 +88,7 @@ mailController.MailErrorWSFacturacion = (jsonEnviado) => {
 mailController.MailErrorPaymentez = (jsonEnviado, transaction) => {
   var mailOptions = {
     from: 'chatbot1@comandato.com',
-//   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
-    to: 'dayana.bailon@gaiaconsultores.biz',
+    to: config.destinatarios.desarrolladora,
     subject: 'Error en pago de tarjeta con Paymentez',
     html: `<!DOCTYPE html>
     <html>
@@ -127,8 +123,7 @@ transporter.sendMail(mailOptions, function(error, info){
 mailController.MailErrorWSTickets = (datos) => {
   var mailOptions = {
     from: 'chatbot1@comandato.com',
-//   to: 'cabad@comandato.com;diego.aviles@comandato.com;manuel.ramirez@comandato.com;julian.munoz@comandato.com,dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
-    to: 'dayana.bailon@gaiaconsultores.biz',
+    to: config.destinatarios.desarrolladora,
     subject: 'Error de comunicación con WS de Tickets o Notificaciones',
     html: `<!DOCTYPE html>
     <html>
