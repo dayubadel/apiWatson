@@ -1601,7 +1601,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let tituloCliente = `Devolución de compra - Factura: #${objCabecera.numeroReferencia} `
             let cabeceraCliente = `<div>    
                                 <p>Estimado/a, he completado con éxito la devolución de una compra. </p>
-                                <p>Gracias por su confianza.</p>
+                                <p>Gracias por la confianza.</p>
                                 <p>A continuación, se muestran sus datos relevantes.</p>
                                 <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
                                 <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>

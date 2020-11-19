@@ -137,7 +137,7 @@ paymentezController.RespuestaPago = async (req, res) => {
     if(transaction.hasOwnProperty("type")){
         respuesta.push({
             response_type:'text',
-            text: 'Ha ocurrido un error con su pago, por favor intente nuevamente.' 
+            text: 'Ha ocurrido un error con el pago, por favor intente nuevamente.' 
         })
         var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
         mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
@@ -154,14 +154,14 @@ paymentezController.RespuestaPago = async (req, res) => {
         {
             estado: false,
             type: "Error de servidor",
-            mensaje: 'Ha ocurrido un error con su pago, por favor intente nuevamente.'
+            mensaje: 'Ha ocurrido un error con el pago, por favor intente nuevamente.'
         })
     }
     else if(transaction.hasOwnProperty("status")){
         if(transaction.status == "failure"){     
             respuesta.push({
                 response_type:'text',
-                text: 'Lamentamos informarle que su tarjeta ha sido rechazada.' 
+                text: 'Lamentamos informarle que la tarjeta ha sido rechazada.' 
             })       
             paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
             // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
@@ -183,7 +183,7 @@ paymentezController.RespuestaPago = async (req, res) => {
                 {
                     estado: false,
                     type: "Error con la tarjeta",
-                    mensaje: 'Lamentamos informarle que su tarjeta ha sido rechazada.'
+                    mensaje: 'Lamentamos informarle que la tarjeta ha sido rechazada.'
                 })
         }
         else
@@ -191,7 +191,7 @@ paymentezController.RespuestaPago = async (req, res) => {
             let card = req.body.myjson.card
             let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,transaction.authorization_code,6)
             paymentezController.sendEmailClienteVentas(datosCabecera[0],null,2)
-            var mensajeF = `Su pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
+            var mensajeF = `Tu pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
             respuesta.push({
                 response_type:'text',
                 text: `${mensajeF}` 
@@ -220,8 +220,8 @@ paymentezController.sendEmailClienteVentas = async (objCabecera, correo, opcion)
         nombreCliente = objCabecera.nombresCabecera
     }
     var tituloCliente = `Comandato / Compra exitosa mediante Asistente Virtual Dora - Factura: #${objCabecera.numeroReferencia} `
-    var encabezado= `<div><p>Su pago ha sido procesado exitosamente a través del asistente virtual.</p>
-                    <p>A continuación, se muestran los datos de su compra.</p>`
+    var encabezado= `<div><p>Tu pago ha sido procesado exitosamente a través del asistente virtual.</p>
+                    <p>A continuación, se muestran los datos de la compra.</p>`
     var direccionCorreo = objCabecera.email
     if(opcion==1)
     {
@@ -372,7 +372,7 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
         respuestaGrupoWhatsap.push(
             {
                 response_type:'text',
-                text: `Estimados, les saluda Dora.\nUn cliente ha finalizado exitosamente el pago de una compra.\nSin embargo, el servicio web de facturación automática ha fallado en los 3 intentos.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+                text: `Estimados, les saluda Dora.\nUn cliente ha finalizado exitosamente el pago de una compra.\nSin embargo, el servicio de facturación automática del proceso del chatbot Dora ha fallado en los 3 intentos.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
             })
         //descomentar en prod
         paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
