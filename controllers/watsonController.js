@@ -743,6 +743,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         
         await sqlController.consultarProductosPorMarcaPorCategoriaUltimoNivel(categoriaUltimoNivel, marcaProductos)
         .then(async result => {
+            console.log(result)
             let tipoResultado = result[0].tipoResultado
             if(tipoResultado=="marcas")
             {
@@ -1105,13 +1106,12 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         const metodoPago = contexto.metodoPagoCarrito
         const productoSelected = contexto.productoActualMP
         var result = await sqlController.ConsultarProductoAlterno(metodoPago,productoSelected)
-        console.log(result)
         var menuMostradoProductos = {
             "tipoMenu" : "",
             'menuMostrado' : [],
             "actionNodeAnterior" : strAccion,
-            "pasoAnterior" : categoriaUltimoNivel
-        };
+            "pasoAnterior" : contexto.categoriaUltimoNivel
+        }
         if(result[0].idProducto==undefined && result[0].totalProductos>0)
         {
             menuMostradoProductos.tipoMenu = 'marcaProductos';
@@ -1129,15 +1129,14 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                         "tipoCategoria": "marcaProductos"
                     });
                     num++;
-                });
+                })
+                contexto['menuMostradoProductos'] = menuMostradoProductos
+                console.log("aaaaaaaaaaaaaa",result)
+                contexto['categoriaUltimoNivel'] = result[0].categoriaUltimoNivel
                 respuesta.push({
                     response_type: "text",
                     text: txtMarcas
-                });
-                if(contexto.hasOwnProperty('menuMostradoProductos')){
-                    delete contexto.menuMostradoProductos
-                }
-                contexto['menuMostradoProductos'] = menuMostradoProductos;
+                })
         }
         else 
         {
