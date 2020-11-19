@@ -1601,8 +1601,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let tituloCliente = `Devolución de compra - Factura: #${objCabecera.numeroReferencia} `
             let cabeceraCliente = `<div>    
                                 <p>Estimado/a, he completado con éxito la devolución de una compra. </p>
-                                <p>Gracias por la confianza.</p>
-                                <p>A continuación, se muestran sus datos relevantes.</p>
+                                <p>A continuación, se muestran la información relevante.</p>
                                 <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
                                 <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
                                 <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
@@ -1617,11 +1616,10 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
             var contenido = `${cabeceraCliente}${pieDeCorreo}`  
             //descomentar en prod
-            let destinatario = 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;'      
+            let destinatario = 'dayana.bailon@gaiaconsultores.biz;ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;caja1.tiendaweb@comandato.com;'      
             let cliente = objCabecera.email;
             mailController.enviarEmailCliente(cliente, tituloCliente, contenido) 
             mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
-
         }
         else
         {                
