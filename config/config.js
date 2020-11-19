@@ -33,6 +33,15 @@ module.exports = {
         // url : 'ccapi.paymentez.com',
         path : '/v2/transaction/refund/'
     },
+    destinatarios : {
+        desarrolladora : 'dayana.bailon@gaiaconsultores.biz;',
+        ventas : 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;',
+        caja: 'caja1.tiendaweb@comandato.com;caja2.tiendaweb@comandato.com;caja3.tiendaweb@comandato.com;mrodriguez@comandato.com;',
+        servicioCliente: 'sac@comandato.com;',
+        soporteTecnico: '',
+        grupoWhatsApp: '593980841352-1484834721@g.us',
+        grupoWhatsAppDesarrolladora: '593963206990-1601935738@g.us'
+    },
     // sql: {
     //     config_sql : {
     //         user : 'sa',

@@ -7,7 +7,6 @@ const canalesMensajeriaController = require('./canalesMensajeriaController');
 const { json } = require("body-parser");
 const { stringify } = require("querystring");
 const sha256 = require('js-sha256');
-const { valorGlobales } = require("../config/config.js");
 var https = require('follow-redirects').https;
 
 const paymentezController = {}   
@@ -128,7 +127,7 @@ paymentezController.GetFormulario = (req, res) => {
 }
 
 paymentezController.RespuestaPago = async (req, res) => {    
-    var grupoWhatsapp =  '593963206990-1601935738@g.us'//comandato '593980841352-1484834721@g.us' 
+    var grupoWhatsapp =  config.destinatarios.grupoWhatsAppDesarrolladora 
     var respuesta = []
     var respuestaGrupoWhatsap = []
     const transaction = req.body.myjson.transaction;
@@ -364,11 +363,11 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 
     if(!facuturaCreada){
         mailController.MailErrorWSFacturacion(jsonCompra);
-        let correoVentas = 'dayana.bailon@gaiaconsultores.biz'
+        let destinatario = config.destinatarios.desarrolladora
         let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
-        paymentezController.sendEmailClienteVentas(datosCabecera[0],correoVentas,1)
+        paymentezController.sendEmailClienteVentas(datosCabecera[0],destinatario,1)
         var respuestaGrupoWhatsap = []
-        var grupoWhatsapp = '593963206990-1601935738@g.us' // comandato '593980841352-1484834721@g.us'
+        var grupoWhatsapp = config.destinatarios.grupoWhatsAppDesarrolladora
         respuestaGrupoWhatsap.push(
             {
                 response_type:'text',

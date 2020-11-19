@@ -1445,10 +1445,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         cabeceraCliente = `${cabeceraCliente} Los datos de la compra y de la tarjeta están en su sistema de facturación.`
         let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
         var contenido = `${cabeceraCliente}${pieDeCorreo}` 
-        //let correoVentas = 'dayana.bailon@gaiaconsultores.biz'  
         //descomentar en prod
-        let correoVentas = 'dayana.bailon@gaiaconsultores.biz;ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com'            
-        mailController.enviarEmailCliente(correoVentas, tituloCliente, contenido) 
+        let destinatario = config.destinatarios.desarrolladora
+        mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
     }
     else if(strAccion == 'enviarCorreoDevolucionAutomatica')
     {            
@@ -1482,10 +1481,9 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         cabeceraCliente = `${cabeceraCliente} Los datos de la compra y de la tarjeta están en su sistema de facturación.`
         let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
         var contenido = `${cabeceraCliente}${pieDeCorreo}` 
-        //let correoVentas = 'dayana.bailon@gaiaconsultores.biz'  
         //descomentar en prod
-        let correoVentas = 'dayana.bailon@gaiaconsultores.biz;ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;'            
-        mailController.enviarEmailCliente(correoVentas, tituloCliente, contenido) 
+        let destinatario = config.destinatarios.desarrolladora
+        mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
     }
     else if(strAccion=='ValidarCodigoDevolucionCajero')
     {
@@ -1616,7 +1614,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
             var contenido = `${cabeceraCliente}${pieDeCorreo}`  
             //descomentar en prod
-            let destinatario = 'dayana.bailon@gaiaconsultores.biz;ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;caja1.tiendaweb@comandato.com;'      
+            let destinatario = config.destinatarios.desarrolladora
             let cliente = objCabecera.email;
             mailController.enviarEmailCliente(cliente, tituloCliente, contenido) 
             mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
@@ -1653,9 +1651,8 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
             var contenido = `${cabeceraCliente}${pieDeCorreo}` 
             //descomentar en prod
-            let correoVentas = 'dayana.bailon@gaiaconsultores.biz;ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;'      
-            //let correoVentas = 'dayana.bailon@gaiaconsultores.biz'              
-            mailController.enviarEmailCliente(correoVentas, tituloCliente, contenido) 
+            let destinatario = config.destinatarios.desarrolladora           
+            mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
             respuesta.push({response_type:'text',text:'Ha ocurrido un problema con el proceso automático de devolución.'})
             respuesta.push({response_type:'text',text:'He enviado un correo al personal correspondiente de Comandato para que realicen el proceso de forma manual.'})
         }
