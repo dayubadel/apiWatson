@@ -15,11 +15,12 @@ module.exports = {
         idPaginaFacebook : '1977616389118850'
     },
     wsFacturacion: {
-        token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
+        token: 'WaOeSuob9n/Su6erRro8NlcBjPLcaJ2DPi8rlu1bMM2H8SitO4ZrIzapdxlsOWU6/F72UxLZny4=',
+       // token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
         urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL'
     },
     wsTickets: {
-        token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
+        token: 'WaOeSuob9n/Su6erRro8NlcBjPLcaJ2DPi8rlu1bMM2H8SitO4ZrIzapdxlsOWU6/F72UxLZny4=',
         urlSoapTickets : 'https://appchatbot.comandato.com/wsChatBot.asmx?WSDL'
     },   
     subdominioComandato : {
@@ -39,7 +40,7 @@ module.exports = {
         ventas : 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;',
         caja: 'caja1.tiendaweb@comandato.com;caja2.tiendaweb@comandato.com;caja3.tiendaweb@comandato.com;mrodriguez@comandato.com;',
         servicioCliente: 'sac@comandato.com;',
-        soporteTecnico: '',
+        soporteTecnico: 'egranja@comandato.com;fjaccini@hotmail.com;',
         grupoWhatsApp: '593980841352-1484834721@g.us',
         grupoWhatsAppDesarrolladora: '593963206990-1601935738@g.us'
     },
