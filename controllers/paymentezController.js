@@ -127,7 +127,7 @@ paymentezController.GetFormulario = (req, res) => {
 }
 
 paymentezController.RespuestaPago = async (req, res) => {    
-    var grupoWhatsapp =  config.destinatarios.grupoWhatsAppDesarrolladora 
+    var grupoWhatsapp =  config.destinatarios.grupoWhatsApp 
     var respuesta = []
     var respuestaGrupoWhatsap = []
     const transaction = req.body.myjson.transaction;
@@ -363,11 +363,11 @@ paymentezController.WSFacturacion = async (numeroReferencia) => {
 
     if(!facuturaCreada){
         mailController.MailErrorWSFacturacion(jsonCompra);
-        let destinatario = config.destinatarios.desarrolladora
+        let destinatario = `${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`
         let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
         paymentezController.sendEmailClienteVentas(datosCabecera[0],destinatario,1)
         var respuestaGrupoWhatsap = []
-        var grupoWhatsapp = config.destinatarios.grupoWhatsAppDesarrolladora
+        var grupoWhatsapp = config.destinatarios.grupoWhatsApp
         respuestaGrupoWhatsap.push(
             {
                 response_type:'text',

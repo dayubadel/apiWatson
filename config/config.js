@@ -9,6 +9,7 @@ module.exports = {
         IVAPercent : 12,
         valorEnvio : 3.99,
         urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL',
+        //uriWhatsappLocal : 'http://localhost:8011/sendmessage',
         uriWhatsapp : 'http://localhost:8011/sendmessage',
         uriMessenger : 'https://186.3.247.227:8443/wts',
         idPaginaFacebook : '1977616389118850'
@@ -25,16 +26,16 @@ module.exports = {
         url : 'https://049f326c7f3f.ngrok.io'
     },
     refoundPaymentez : {
-        apiLogin: 'CHATBOTSTG-EC-SERVER',
-        apiKey: 'gNSpExwDkOEeqich5Jc9A3QJg7fqES',
-        url : 'ccapi-stg.paymentez.com',
-        // apiLogin: 'CHATBOT-EC-SERVER',
-        // apiKey: 'ZsWJNYnTEr6kle7N8fauU6qrJshQJG',
-        // url : 'ccapi.paymentez.com',
+        // apiLogin: 'CHATBOTSTG-EC-SERVER',
+        // apiKey: 'gNSpExwDkOEeqich5Jc9A3QJg7fqES',
+        // url : 'ccapi-stg.paymentez.com',
+        apiLogin: 'CHATBOT-EC-SERVER',
+        apiKey: 'ZsWJNYnTEr6kle7N8fauU6qrJshQJG',
+        url : 'ccapi.paymentez.com',
         path : '/v2/transaction/refund/'
     },
     destinatarios : {
-        desarrolladora : 'dayana.bailon@gaiaconsultores.biz;',
+        equipoGaia : 'dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
         ventas : 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;',
         caja: 'caja1.tiendaweb@comandato.com;caja2.tiendaweb@comandato.com;caja3.tiendaweb@comandato.com;mrodriguez@comandato.com;',
         servicioCliente: 'sac@comandato.com;',

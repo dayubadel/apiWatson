@@ -1,6 +1,6 @@
-dim username : username = "sa"
-dim password : password = "1234"
-dim dataSource : dataSource = "."
+dim username : username = "userGaia"
+dim password : password = "Gaia2020"
+dim dataSource : dataSource = "192.168.100.3"
 dim dataB : dataB = "chatbotComandato"
 
 'var para reporte diario
@@ -328,8 +328,12 @@ set excelBaseReporte = Nothing
 Set emailObj      = CreateObject("CDO.Message")
 
 emailObj.From = "chatbot1@comandato.com"
-emailObj.To = "dayana.bailon@gaiaconsultores.biz"
-emailObj.Cc = "bryan.garcia@gaiaconsultores.biz"
+emailObj.To = "ventasweb@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;sac@comandato.com;"
+emailObj.Cc = "manuel.ramirez@comandato.com;diego.aviles@comandato.com;dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;"
+
+
+        caja: 'caja1.tiendaweb@comandato.com;caja2.tiendaweb@comandato.com;caja3.tiendaweb@comandato.com;mrodriguez@comandato.com;',
+        servicioCliente: 'sac@comandato.com;',
 
 emailObj.Subject  = "Reporte Didario Dora"
 ' emailObj.TextBody = "Test kenvio ass"

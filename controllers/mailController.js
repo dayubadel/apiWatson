@@ -20,7 +20,8 @@ mailController.enviarEmail = async (subject, content) =>
 {
     var mailOptions = {
         from: 'chatbot1@comandato.com',
-        to: config.destinatarios.desarrolladora,
+        to: config.destinatarios.ventas,
+        cc: config.destinatarios.equipoGaia,
         subject: subject,
         html: content
       };
@@ -58,7 +59,8 @@ mailController.enviarEmailCliente = async (destination, subject, content) =>
 mailController.MailErrorWSFacturacion = (jsonEnviado) => {
     var mailOptions = {
       from: 'chatbot1@comandato.com',
-      to: config.destinatarios.desarrolladora,
+      to: config.destinatarios.soporteTecnico,
+      cc: config.destinatarios.equipoGaia,
       subject: 'Error de comunicación con WS de Facturacion Automática',
       html: `<!DOCTYPE html>
       <html>
@@ -88,7 +90,8 @@ mailController.MailErrorWSFacturacion = (jsonEnviado) => {
 mailController.MailErrorPaymentez = (jsonEnviado, transaction) => {
   var mailOptions = {
     from: 'chatbot1@comandato.com',
-    to: config.destinatarios.desarrolladora,
+    to: config.destinatarios.ventas,
+    cc: config.destinatarios.equipoGaia,
     subject: 'Error en pago de tarjeta con Paymentez',
     html: `<!DOCTYPE html>
     <html>
@@ -123,7 +126,8 @@ transporter.sendMail(mailOptions, function(error, info){
 mailController.MailErrorWSTickets = (datos) => {
   var mailOptions = {
     from: 'chatbot1@comandato.com',
-    to: config.destinatarios.desarrolladora,
+    to: config.destinatarios.soporteTecnico,
+    cc: config.destinatarios.equipoGaia,
     subject: 'Error de comunicación con WS de Tickets o Notificaciones',
     html: `<!DOCTYPE html>
     <html>
