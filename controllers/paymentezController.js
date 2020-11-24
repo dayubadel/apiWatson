@@ -169,11 +169,6 @@ paymentezController.RespuestaPago = async (req, res) => {
             respuestaGrupoWhatsap.push(
                 {
                     response_type:'text',
-                    text: 'Esto es una prueba.'
-                })
-            respuestaGrupoWhatsap.push(
-                {
-                    response_type:'text',
                     text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero tiene problemas con su tarjeta.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
                 })
             //descomentar en prod

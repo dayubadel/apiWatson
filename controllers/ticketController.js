@@ -3,6 +3,7 @@ const util = require('util')
 const config = require("../config/config.js");
 const mailController = require('./mailController');
 const mail = require("./mailController");
+const canalesMensajeriaController = require('./canalesMensajeriaController');
 
 const ticketController = {}
 
@@ -31,6 +32,7 @@ ticketController.EnviarTicket = async (motivoTicket,detalleTicket,nombres,numIde
             return soapCreateOrder(paramsWS)
         })
         .then(clientRes => {
+            console.log(clientRes)
             if(clientRes.CreateTicketResult.O_TIPOM == 'S'){
                numeroSecuencia = clientRes.CreateTicketResult.O_MENSAJE 
             }
@@ -42,9 +44,19 @@ ticketController.EnviarTicket = async (motivoTicket,detalleTicket,nombres,numIde
     }
     if(numeroSecuencia==null)
     {
+        var respuestaGrupoWhatsap = []
+        var grupoWhatsapp = config.destinatarios.grupoWhatsApp
+        respuestaGrupoWhatsap.push(
+            {
+                response_type:'text',
+                text: `Estimados, les saluda Dora.\nEl servicio web de tickets ha fallado después de 3 intentos.\nHe enviado un correo electrónico con los datos del requerimiento del cliente.`
+            })
+        ticketController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
         mailController.MailErrorWSTickets(JSON.stringify(paramsWS))
     }
     return numeroSecuencia
 }
-
+ticketController.sendWhatsapp = (objRespuesta, idWhatsapp) => {
+    canalesMensajeriaController.enviarMensajeWhatsapp(objRespuesta,idWhatsapp)
+}
 module.exports = ticketController;

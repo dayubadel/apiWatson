@@ -9,22 +9,21 @@ module.exports = {
         IVAPercent : 12,
         valorEnvio : 3.99,
         urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL',
-        //uriWhatsappLocal : 'http://localhost:8011/sendmessage',
         uriWhatsapp : 'http://localhost:8011/sendmessage',
         uriMessenger : 'https://186.3.247.227:8443/wts',
         idPaginaFacebook : '1977616389118850'
     },
     wsFacturacion: {
-        token: 'WaOeSuob9n/Su6erRro8NlcBjPLcaJ2DPi8rlu1bMM2H8SitO4ZrIzapdxlsOWU6/F72UxLZny4=',
+        token: 'WaOeSuob9n/Su6erRro8Nlr+cj/4c2g14G3rZWvbouEgPt+CbkC6ljLrNo27aokC',
        // token: 'WaOeSuob9n9jhZMkSuuCq+bo3PHpL9oYrzlBbFM1OcKrBHyr871R3Q==',
         urlSoapFactuacion : 'https://appchatbot.comandato.com:4433/wsChatBot_Orden.asmx?WSDL'
     },
     wsTickets: {
-        token: 'WaOeSuob9n/Su6erRro8NlcBjPLcaJ2DPi8rlu1bMM2H8SitO4ZrIzapdxlsOWU6/F72UxLZny4=',
+        token: 'WaOeSuob9n/Su6erRro8Nlr+cj/4c2g14G3rZWvbouEgPt+CbkC6ljLrNo27aokC',
         urlSoapTickets : 'https://appchatbot.comandato.com/wsChatBot.asmx?WSDL'
     },   
     subdominioComandato : {
-        url : 'https://049f326c7f3f.ngrok.io'
+        url : 'https://api.df1.app:8010'
     },
     refoundPaymentez : {
         // apiLogin: 'CHATBOTSTG-EC-SERVER',
@@ -40,8 +39,8 @@ module.exports = {
         ventas : 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;',
         caja: 'caja1.tiendaweb@comandato.com;caja2.tiendaweb@comandato.com;caja3.tiendaweb@comandato.com;mrodriguez@comandato.com;',
         servicioCliente: 'sac@comandato.com;',
-        soporteTecnico: 'egranja@comandato.com;fjaccini@hotmail.com;',
-        grupoWhatsApp: '593980841352-1484834721@g.us',
+        soporteTecnico: 'egranja@comandato.com;nelson.villegas@comandato.com;fjaccini@hotmail.com;',
+        grupoWhatsApp: '593987648370-1606160160@g.us',
         grupoWhatsAppDesarrolladora: '593963206990-1601935738@g.us'
     },
     // sql: {
@@ -57,29 +56,30 @@ module.exports = {
     //         }
     //     }
     //   }
-     sql: {
-         config_sql : {
-             user : 'sa',
-             password: 'dayu2020',
-             server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
-             port: 1433,
-             database: 'chatbotComandato',
-             options:{
-               'encrypt' : true,
-               'enableArithAbort': true
-             }
-         }
-        }
-    // sql: {
-    //     config_sql : {
-    //         user : 'userGaia',
-    //         password: 'Gaia2020',
-    //         server: '192.168.100.3',
-    //         port: 8282,
-    //         database: 'chatbotComandato',
-    //         options:{
-    //           'encrypt' : true,  
-    //           'enableArithAbort': true
-    //         }
+    //  sql: {
+    //      config_sql : {
+    //          user : 'sa',
+    //          password: 'dayu2020',
+    //          server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
+    //          port: 1433,
+    //          database: 'chatbotComandato',
+    //          options:{
+    //            'encrypt' : true,
+    //            'enableArithAbort': true
+    //          }
+    //      }
     //     }
+    sql: {
+        config_sql : {
+            user : 'userGaia',
+            password: 'Gaia2020',
+            server: '192.168.100.3',
+            port: 8282,
+            database: 'chatbotComandatoV2',
+            options:{
+              'encrypt' : true,  
+              'enableArithAbort': true
+            }
+        }
+    }   
 }

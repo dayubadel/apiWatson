@@ -1402,7 +1402,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 else 
                 {
                     respuesta.push({response_type: 'text', text:'He encontrado tu compra, necesito un último dato de confirmación para proceder.'})
-                    respuesta.push({response_type: 'text', text:`En el mismo correo de confirmación del pago, te envié el *identificador del pago*.`})
+                    respuesta.push({response_type: 'text', text:`En el mismo correo de confirmación del pago, te envié el *identificador del pago* que inicia con letras y termina con números.`})
                     respuesta.push({response_type: 'text', text:`Por favor ingresa ese *identificador del pago*.`})
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                     contexto['validacionDevolucion']='si'
@@ -1445,7 +1445,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
         var contenido = `${cabeceraCliente}${pieDeCorreo}` 
         //descomentar en prod
-        let destinatario = `${config.destinatarios.cajero}${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`
+        let destinatario = `${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`
         mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
     }
     else if(strAccion == 'enviarCorreoDevolucionAutomatica')
@@ -1481,7 +1481,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
         let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
         var contenido = `${cabeceraCliente}${pieDeCorreo}` 
         //descomentar en prod
-        let destinatario = `${config.destinatarios.cajero}${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`
+        let destinatario = `${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`
         mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
     }
     else if(strAccion=='ValidarCodigoDevolucionCajero')
@@ -1563,7 +1563,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                 else 
                 {
                     respuesta.push({response_type: 'text', text:'He encontrado la compra, necesito un último dato de confirmación para proceder.'})
-                    respuesta.push({response_type: 'text', text:`En el mismo correo, te envié el *identificador del pago*.`})
+                    respuesta.push({response_type: 'text', text:`En el mismo correo, te envié el *identificador del pago* que inicia con letras y termina con números.`})
                     respuesta.push({response_type: 'text', text:`Por favor ingresa ese *identificador del pago*.`})
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                     contexto['validacionDevolucion']='si'
@@ -1604,6 +1604,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                                 <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
                                 <label><strong>Fecha de compra:</strong> ${formattedDate}</label><br>
                                 <label><strong>Fecha de devolución:</strong> ${formattedDateDevolucion}</label><br>
+                                <label><strong>Valor de devolución:</strong> ${contexto.valorTotalDevolucion}</label><br>
                                 <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
                                 <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
                                 <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
@@ -1613,7 +1614,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
             var contenido = `${cabeceraCliente}${pieDeCorreo}`  
             //descomentar en prod
-            let destinatario = `${config.destinatarios.cajero};${config.destinatarios.ventas};${config.destinatarios.equipoGaia}`
+            let destinatario = `${config.destinatarios.caja}${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`
             let cliente = objCabecera.email;
             mailController.enviarEmailCliente(cliente, tituloCliente, contenido) 
             mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
@@ -1650,7 +1651,7 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
             var contenido = `${cabeceraCliente}${pieDeCorreo}` 
             //descomentar en prod
-            let destinatario = `${config.destinatarios.cajero}${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`      
+            let destinatario = `${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`      
             mailController.enviarEmailCliente(destinatario, tituloCliente, contenido) 
             respuesta.push({response_type:'text',text:'Ha ocurrido un problema con el proceso automático de devolución.'})
             respuesta.push({response_type:'text',text:'He enviado un correo al personal correspondiente de Comandato para que realicen el proceso de forma manual.'})
