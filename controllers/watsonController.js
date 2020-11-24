@@ -1131,7 +1131,6 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
                     num++;
                 })
                 contexto['menuMostradoProductos'] = menuMostradoProductos
-                console.log("aaaaaaaaaaaaaa",result)
                 contexto['categoriaUltimoNivel'] = result[0].categoriaUltimoNivel
                 respuesta.push({
                     response_type: "text",
@@ -1379,21 +1378,23 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             }
             else
             {
-                let hoy = new Date();
-                let fechaHoy = hoy.getFullYear()+'-'+(hoy.getMonth()+1)+'-'+hoy.getDate();
+                let hoy = new Date()
+                hoy.setHours(hoy.getHours()-5)
                 let fCompra = objCabecera[0].fechaFinalizacion
-                let fechaCompra = fCompra.getFullYear()+'-'+(fCompra.getMonth()+1)+'-'+fCompra.getDate();
-                if(fechaHoy!=fechaCompra)
+                console.log(new Date(fCompra))
+                var diferenciasEnFecha = hoy.getTime()- fCompra.getTime()
+                var diferenciaEnHoras = diferenciasEnFecha / (1000 * 3600)
+                if(diferenciaEnHoras>24)
                 {
-                    respuesta.push({response_type: 'text', text:'Solo puedo realizar devoluciones automáticas si lo solicitas antes de las 17:50, dentro de 24 horas posteriores a la compra.'})
+                    respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 17:45, dentro de las primeras 24 horas posteriores a la compra.'})
                     respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})
                     respuesta.push({response_type: 'text', text:'¿Deseas que envíe dicho correo?'})
                     contexto['validacionDevolucion']='correo'
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                 }
-                else if(hoy.getHours()>17 || ( hoy.getHours()>19 && hoy.getMinutes()>10))
+                else if(hoy.getDate>18 || (hoy.getHours()>18 && hoy.getMinutes()>45))
                 {
-                    respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 17:50, dentro de las primeras 24 horas posteriores a la compra.'})
+                    respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 17:45, dentro de las primeras 24 horas posteriores a la compra.'})
                     respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})
                     respuesta.push({response_type: 'text', text:'¿Deseas que envíe dicho correo?'})
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
@@ -1540,21 +1541,23 @@ watsonController.AccionesNode = async (strAccion, result, idClienteCanalMensajer
             }
             else
             {
-                let hoy = new Date();
-                let fechaHoy = hoy.getFullYear()+'-'+(hoy.getMonth()+1)+'-'+hoy.getDate();
+                let hoy = new Date()
+                hoy.setHours(hoy.getHours()-5)
                 let fCompra = objCabecera[0].fechaFinalizacion
-                let fechaCompra = fCompra.getFullYear()+'-'+(fCompra.getMonth()+1)+'-'+fCompra.getDate();
-                if(fechaHoy!=fechaCompra)
+                console.log(new Date(fCompra))
+                var diferenciasEnFecha = hoy.getTime()- fCompra.getTime()
+                var diferenciaEnHoras = diferenciasEnFecha / (1000 * 3600)
+                if(diferenciaEnHoras>24)
                 {
-                    respuesta.push({response_type: 'text', text:'Solo puedo realizar devoluciones automáticas si lo solicitas antes de las 17:50, dentro de 24 horas posteriores a la compra.'})
-                    respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que gestionen la devolución manual.'})
+                    respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 17:45, dentro de las primeras 24 horas posteriores a la compra.'})
+                    respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para que ellos se encarguen del trámite'})
                     respuesta.push({response_type: 'text', text:'¿Deseas que envíe dicho correo?'})
                     contexto['validacionDevolucion']='correo'
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia
                 }
-                else if(hoy.getHours()>19 || ( hoy.getHours()>19 && hoy.getMinutes()>10))
+                else if(hoy.getDate>18 || (hoy.getHours()>18 && hoy.getMinutes()>45))
                 {
-                    respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 17:50, dentro de las primeras 24 horas posteriores a la compra.'})
+                    respuesta.push({response_type: 'text', text: 'Solo puedo realizar devoluciones automáticas si las solicitas antes de las 17:45, dentro de las primeras 24 horas posteriores a la compra.'})
                     respuesta.push({response_type: 'text', text:'Sin embargo, puedo enviar un correo a Comandato para para que gestionen la devolución manual.'})
                     respuesta.push({response_type: 'text', text:'¿Deseas que envíe dicho correo?'})
                     contexto['numeroReferenciaDevolucion'] = objCabecera[0].numeroReferencia

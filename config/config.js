@@ -35,13 +35,13 @@ module.exports = {
         path : '/v2/transaction/refund/'
     },
     destinatarios : {
-        equipoGaia : 'dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
-        ventas : 'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;',
-        caja: 'caja1.tiendaweb@comandato.com;caja2.tiendaweb@comandato.com;caja3.tiendaweb@comandato.com;mrodriguez@comandato.com;',
-        servicioCliente: 'sac@comandato.com;',
-        soporteTecnico: 'egranja@comandato.com;nelson.villegas@comandato.com;fjaccini@hotmail.com;',
-        grupoWhatsApp: '593987648370-1606160160@g.us',
-        grupoWhatsAppDesarrolladora: '593963206990-1601935738@g.us'
+        equipoGaia : 'dayana.bailon@gaiaconsultores.biz;',//bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;',
+        ventas : '',//'ventasweb@comandato.com;michael.guerrero@comandato.com;ventasweb1@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;avarenius@comandato.com;',
+        caja: '',//'caja1.tiendaweb@comandato.com;caja2.tiendaweb@comandato.com;caja3.tiendaweb@comandato.com;mrodriguez@comandato.com;',
+        servicioCliente:'',// 'sac@comandato.com;',
+        soporteTecnico: '',//'egranja@comandato.com;nelson.villegas@comandato.com;fjaccini@hotmail.com;',
+        grupoWhatsApp: '',//'593987648370-1606160160@g.us',
+        grupoWhatsAppDesarrolladora:'',// '593963206990-1601935738@g.us'
     },
     // sql: {
     //     config_sql : {
@@ -56,30 +56,30 @@ module.exports = {
     //         }
     //     }
     //   }
-    //  sql: {
-    //      config_sql : {
-    //          user : 'sa',
-    //          password: 'dayu2020',
-    //          server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
-    //          port: 1433,
-    //          database: 'chatbotComandato',
-    //          options:{
-    //            'encrypt' : true,
-    //            'enableArithAbort': true
-    //          }
-    //      }
-    //     }
-    sql: {
-        config_sql : {
-            user : 'userGaia',
-            password: 'Gaia2020',
-            server: '192.168.100.3',
-            port: 8282,
-            database: 'chatbotComandatoV2',
-            options:{
-              'encrypt' : true,  
-              'enableArithAbort': true
-            }
+     sql: {
+         config_sql : {
+             user : 'sa',
+             password: 'dayu2020',
+             server: 'DESKTOP-5G64M37\\DAYUSQLSERVER',
+             port: 1433,
+             database: 'chatbotComandato',
+             options:{
+               'encrypt' : true,
+               'enableArithAbort': true
+             }
+         }
         }
-    }   
+    // sql: {
+    //     config_sql : {
+    //         user : 'userGaia',
+    //         password: 'Gaia2020',
+    //         server: '192.168.100.3',
+    //         port: 8282,
+    //         database: 'chatbotComandatoV2',
+    //         options:{
+    //           'encrypt' : true,  
+    //           'enableArithAbort': true
+    //         }
+    //     }
+    // }   
 }
