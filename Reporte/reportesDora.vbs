@@ -1,7 +1,7 @@
 dim username : username = "userGaia"
 dim password : password = "Gaia2020"
-dim dataSource : dataSource = "192.168.100.3"
-dim dataB : dataB = "chatbotComandato"
+dim dataSource : dataSource = "192.168.100.3,8282"
+dim dataB : dataB = "chatbotComandatoV2"
 
 'var para reporte diario
 dim objExcelReporte
@@ -17,12 +17,12 @@ excRowLog = initExcelReporte
 
 dim fechaReporte
 fechaReporte = Day(NOW) & "-" & Month(NOW) & "-" & YEAR(NOW) &".xlsx"
-nombreReporte = "C:\GAIA\APIs Chats\WatsonComandato\apiWatson\Reporte\Reportes_Generados\" & fechaReporte
+nombreReporte = "C:\GAIA\chatbotComandato\apiWatson-master\Reporte\Reportes_Generados\" & fechaReporte
 
 Set objExcelReporte = CreateObject("Excel.Application")
 objExcelReporte.Visible = True
 
-set excelBaseReporte =  objExcelReporte.Workbooks.Open("C:\GAIA\APIs Chats\WatsonComandato\apiWatson\Reporte\REPORTES DORA.xlsx") 'abre excel en 2 plano
+set excelBaseReporte =  objExcelReporte.Workbooks.Open("C:\GAIA\chatbotComandato\apiWatson-master\Reporte\REPORTES DORA.xlsx") 'abre excel en 2 plano
 
 set workSheetR1 = excelBaseReporte.WorkSheets("Intenciones Clientes")
 set workSheetR2 = excelBaseReporte.WorkSheets("INTENCION DE COMPRAR")
@@ -109,12 +109,12 @@ Do While NOT rst.EOF
     workSheetR2.Cells(excRowLog, 2) = rst.fields(1)
     workSheetR2.Cells(excRowLog, 3) = rst.fields(2)
     workSheetR2.Cells(excRowLog, 4) = rst.fields(3)
-    workSheetR2.Cells(excRowLog, 5) = rst.fields(4)
-    workSheetR2.Cells(excRowLog, 6) = rst.fields(5)
-    workSheetR2.Cells(excRowLog, 7) = rst.fields(6)
-    workSheetR2.Cells(excRowLog, 8) = rst.fields(7)
-    workSheetR2.Cells(excRowLog, 9) = rst.fields(8)
-    workSheetR2.Cells(excRowLog, 10) = rst.fields(9)
+    'workSheetR2.Cells(excRowLog, 5) = rst.fields(4)
+    'workSheetR2.Cells(excRowLog, 6) = rst.fields(5)
+    'workSheetR2.Cells(excRowLog, 7) = rst.fields(6)
+    'workSheetR2.Cells(excRowLog, 8) = rst.fields(7)
+    'workSheetR2.Cells(excRowLog, 9) = rst.fields(8)
+    'workSheetR2.Cells(excRowLog, 10) = rst.fields(9)
 
     rst.MoveNext
     excRowLog = excRowLog + 1
@@ -330,15 +330,10 @@ Set emailObj      = CreateObject("CDO.Message")
 emailObj.From = "chatbot1@comandato.com"
 emailObj.To = "ventasweb@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;sac@comandato.com;"
 emailObj.Cc = "manuel.ramirez@comandato.com;diego.aviles@comandato.com;dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;"
-
-
-        caja: 'caja1.tiendaweb@comandato.com;caja2.tiendaweb@comandato.com;caja3.tiendaweb@comandato.com;mrodriguez@comandato.com;',
-        servicioCliente: 'sac@comandato.com;',
-
-emailObj.Subject  = "Reporte Didario Dora"
+emailObj.Subject  = "Dora - Reporte Diario / Generado automáticamente por la asistente virtual."
 ' emailObj.TextBody = "Test kenvio ass"
 ' emailObj.TextBody = "Test envio masasail"
-emailObj.HTMLBody = "<p>Estimados</p><br><p>En la presente se adjunta el reporte diario de chatbot con la informacion de intenciones de clientes, productos solicitados y carritos de compras creados.</p><p>Saludos</p>"
+emailObj.HTMLBody = "<p>Estimados</p><br><p>En la presente se adjunta el reporte diario de chatbot con la información de intenciones de clientes, productos solicitados, carritos de compras creados, modificados o abandonados, carritos olvidados y tickets o requerimientos levantados.</p><p>Saludos</p>"
 emailObj.AddAttachment (nombreReporte)  
 
 Set emailConfig = emailObj.Configuration
