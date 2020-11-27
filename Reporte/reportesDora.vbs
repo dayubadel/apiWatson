@@ -329,7 +329,7 @@ Set emailObj      = CreateObject("CDO.Message")
 
 emailObj.From = "chatbot1@comandato.com"
 emailObj.To = "ventasweb@comandato.com;cabad@comandato.com;julian.munoz@comandato.com;sac@comandato.com;"
-emailObj.Cc = "manuel.ramirez@comandato.com;diego.aviles@comandato.com;dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;"
+emailObj.Cc = "manuel.ramirez@comandato.com;diego.aviles@comandato.com;gonzalo.balladares@comandato.com;dayana.bailon@gaiaconsultores.biz;bryan.garcia@gaiaconsultores.biz;luismiguel.patino@gaiaconsultores.biz;jessica.obrien@gaiaconsultores.biz;"
 emailObj.Subject  = "Dora - Reporte Diario / Generado automáticamente por la asistente virtual."
 ' emailObj.TextBody = "Test kenvio ass"
 ' emailObj.TextBody = "Test envio masasail"
