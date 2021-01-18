@@ -159,7 +159,7 @@ productoController.ActualizarEntidades = async (req, res) =>{
 
         await (async () => {
             for (const key of entidadesArray) {
-                console.log(key)
+                console.log("entidad",key)
                 let objParams = await sqlProductoController.ObtenerEntidades(key)
                 .then(results => {
                     let params = { 
@@ -177,9 +177,10 @@ productoController.ActualizarEntidades = async (req, res) =>{
                     })
                     return params
                 })
+            
+               // console.log(JSON.stringify(objParams,null,4))
                 await assistant.updateEntity(objParams)
 
-                // console.log(JSON.stringify(objParams,null,4))
 
             }
             if(req != undefined){

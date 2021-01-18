@@ -26,12 +26,12 @@ module.exports = {
         url : 'https://api.df1.app:8010'
     },
     refoundPaymentez : {
-        // apiLogin: 'CHATBOTSTG-EC-SERVER',
-        // apiKey: 'gNSpExwDkOEeqich5Jc9A3QJg7fqES',
-        // url : 'ccapi-stg.paymentez.com',
-        apiLogin: 'CHATBOT-EC-SERVER',
-        apiKey: 'ZsWJNYnTEr6kle7N8fauU6qrJshQJG',
-        url : 'ccapi.paymentez.com',
+        apiLogin: 'CHATBOTSTG-EC-SERVER',
+        apiKey: 'gNSpExwDkOEeqich5Jc9A3QJg7fqES',
+        url : 'ccapi-stg.paymentez.com',
+        // apiLogin: 'CHATBOT-EC-SERVER',
+        // apiKey: 'ZsWJNYnTEr6kle7N8fauU6qrJshQJG',
+        // url : 'ccapi.paymentez.com',
         path : '/v2/transaction/refund/'
     },
     destinatarios : {
