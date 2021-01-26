@@ -1,6 +1,7 @@
 const mssql = require('mssql');
 const { sql } = require('../config/config');
 var request = new mssql.Request();
+const logger = require('../models/winston')
 
 var sqlController = {}
 
@@ -48,7 +49,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
         }
     })
     .catch(err => {
-
+        logger.error({tittle:'Error al gestionar el contexto base',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
         console.log("error al gestionar el contexto base")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -108,7 +109,7 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, textoUsuario, te
     .then(async data => {
     })
     .catch(err => {
-
+        logger.error({titulo:'Error al registrar mensaje en BD',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("error al registrar mensaje en bd")
         console.log(err)
     })
@@ -149,7 +150,8 @@ sqlController.gestionMensajes = async(idClienteCanalMensajeria, textoUsuario, te
           
         }
     })
-    .catch(err => {
+    .catch(err => {        
+        logger.error({titulo:'Error al consultar las tiendas por ciudad',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Ha ocurrido un error al consultar las tiendas por ciudad")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -179,8 +181,9 @@ sqlController.consultarSectoresAgrupadosPorCiudad = async(ciudad) => {
          
        }
    })
-   .catch(err => {
-       console.log("Ha ocurrido un error al consultar los sectores agrupados por ciudad")
+   .catch(err => {        
+    logger.error({titulo:'Error al consultar los sectores agrupados por ciudad',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
+    console.log("Ha ocurrido un error al consultar los sectores agrupados por ciudad")
        console.log(err)
        throw new Error('Error al registrar en BD')
    })
@@ -222,6 +225,7 @@ sqlController.consultarTiendasPorCiudadPorSector = async(ciudad, sector) => {
        }
    })
    .catch(err => {
+        logger.error({titulo:'Error al consultar las tiendas por ciudad y por sector',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
        console.log("Ha ocurrido un error al consultar las tiendas por ciudad y por sector")
        console.log(err)
        throw new Error('Error al registrar en BD')
@@ -263,6 +267,7 @@ sqlController.consultarTiendasPorNombreTienda = async(nombreTienda) => {
         }
     })
     .catch(err => {
+        logger.error({titulo:'Error al consultar las tiendas por nombre tienda',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Ha ocurrido un error al consultar las tiendas por nombre tienda")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -308,6 +313,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
         }
     })
     .catch(err => {
+        logger.error({titulo:'Error al actualizar el cliente',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Ha ocurrido un error al actualizar el cliente")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -346,6 +352,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
         }
     })
     .catch(err => {
+        logger.error({titulo:'Error al consultar cliente por id',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Error al consultar cliente por id")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -379,6 +386,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
         }
     })
     .catch(err => {
+        logger.error({titulo:'Error al ingresar la valoracion del chatbot ingresada por el cliente',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Ha ocurrido un error al ingresar la valoracion")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -409,6 +417,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
         }
     })
     .catch(err => {
+        logger.error({titulo:'Error al consultar categorias hijas por nombre categoría',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Error al consultar categorias hijos por nombre categoria")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -438,6 +447,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
         }
     })
     .catch(err => {
+        logger.error({titulo:'Error al consultar todas las categorias nivel inferior o nivel cero',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Error al ejecutar [dbo][sp_ConsultarCategoriasNivelMasBajo]")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -473,6 +483,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
         }
     })
     .catch(err => {
+        logger.error({titulo:'Error al consultar todas las marcas por categoria ultimo nivel',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Error al consultar marcas por categoria ultimo nivel")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -506,6 +517,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
          }
      })
      .catch(err => {
+        logger.error({titulo:'Error al consultar los productos por marca y por categoria ultimo nivel',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
         console.log("Error al consultar los productos por marca y por categoria ultimo nivel")
         console.log(err)
         throw new Error('Error al registrar en BD')
@@ -559,7 +571,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
          }
      })
      .catch(err => {
-        console.log("Error al consultar los productos por marca y por categoria ultimo nivel")
+        logger.error({titulo:'Error al consultar la informacion completa de un producto',type:'Model-DB',file:'sqlController.js',detalle: err.originalError.info})
+        console.log("Error al consultar la informacion completa de un producto")
         console.log(err)
         throw new Error('Error al registrar en BD')
     })
@@ -593,7 +606,8 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
             }
         })
         .catch(err => {
-        console.log("Error al consultar los productos por marca y por categoria ultimo nivel")
+        logger.error({tittle:'Error al consultar el producto alterno',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
+        console.log("Error al consultar el producto alterno")
         console.log(err)
         throw new Error('Error al registrar en BD')
     })
@@ -649,6 +663,7 @@ sqlController.actualizarCliente = async(idCliente, nombres, cedula, numeroTelefo
             }
      })
      .catch(err => {
+        logger.error({tittle:'Error al gestionar el carrito de compras',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
          console.log("Error al gestionar el carrito de compras")
          console.log(err)
          throw new Error('Error al registrar en BD')
@@ -791,6 +806,7 @@ sqlController.gestionCabeceraVenta = async (numeroReferencia, nombresCabecera, a
         }
     })
     .catch(err => {
+        logger.error({tittle:'Error al gestionar la cabecera venta',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
             console.log("Error al gestionar cabecera venta")
             console.log(err)
             throw new Error('Error al registrar en BD')
@@ -821,6 +837,7 @@ sqlController.InsertarProductoSeleccionado = ( idClienteCanalMensajeria, nombreC
        }
    })
    .catch(err => {
+    logger.error({tittle:'Error al insertar el producto seleccionado para reporteria',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
            console.log("Error al insertar producto seleccionado")
            console.log(err)
            throw new Error('Error al registrar en BD')
@@ -870,6 +887,7 @@ sqlController.gestionNotificacion = async (idClienteCanalMensajeria, motivoNotif
         }
     }) 
     .catch(err => {
+        logger.error({tittle:'Error al gestionar la notificacion',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
             console.log("Error al gestionar la notificacion")
             console.log(err)
             throw new Error('Error al registrar en BD')
@@ -896,6 +914,7 @@ sqlController.gestionDevolucion = async (numeroReferencia, idCajero, opcion) =>
             }
     }) 
     .catch(err => {
+        logger.error({tittle:'Error al gestionar la devolucion',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
             console.log("Error al gestionar la devolución")
             console.log(err)
             throw new Error('Error al registrar en BD')
@@ -934,6 +953,7 @@ sqlController.gestionCajeros = async (codigo, telefono, opcion)=>
         }
     }) 
     .catch(err => {
+        logger.error({tittle:'Error al gestionar los cajeros',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
             console.log("Error al gestionar los cajeros")
             console.log(err)
             throw new Error('Error al registrar en BD')

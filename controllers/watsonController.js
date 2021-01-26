@@ -9,6 +9,7 @@ const ticketController = require('./ticketController.js');
 const paymentezController = require('./paymentezController.js');
 const { columns } = require('mssql');
 // const pedidoModel = require('./../models/pedido.js')
+var logger = require('../models/winston');
 
 const id_workspace = config.Watson.id_workspace
 const apikey = config.Watson.apikey
@@ -29,7 +30,7 @@ watsonController.ControlMensajes = async (req, res) => {
 
     let idChat = req.body.idChat //es el idConversacionCanal
     let txtMsg = req.body.textMensajeReq
-    let idCanal = req.body.idCanal
+    let idCanal = req.body.id
     try {
         console.log(idCanal,idChat)
         let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
