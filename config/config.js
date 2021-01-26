@@ -41,7 +41,7 @@ module.exports = {
         servicioCliente:'',// 'sac@comandato.com;',
         soporteTecnico: '',//'egranja@comandato.com;nelson.villegas@comandato.com;fjaccini@hotmail.com;',
         grupoWhatsApp: '',//'593987648370-1606160160@g.us',
-        grupoWhatsAppDesarrolladora:'',// '593963206990-1601935738@g.us'
+        grupoWhatsAppDesarrolladora: '593963206990-1601935738@g.us' 
     },
     // sql: {
     //     config_sql : {

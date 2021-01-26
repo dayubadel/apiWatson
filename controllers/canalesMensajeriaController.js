@@ -18,7 +18,7 @@ canalesMensajeriaController.enviarMensajeWhatsapp = (objMensajeWatson, idWhatsap
 
     })
     .catch(err => {
-        //si sudede erro, enviar a grupo de soporte el mensaje
+        logger.error({tittle:'Error al enviar un mensaje por whatsapp',type:'Controller',file:'canalesMensajeriaController.js',details: err.originalError.info})
         console.log(err)
     })
 }
@@ -41,7 +41,7 @@ canalesMensajeriaController.EnviarMensajeMessenger = (objMensajeWatson, idPerfil
         console.log(resWhatapp)
     })
     .catch(err => {
-        //si sudede erro, enviar a grupo de soporte el mensaje
+        logger.error({tittle:'Error al enviar un mensaje por messenger',type:'Controller',file:'canalesMensajeriaController.js',details: err.originalError.info})
         console.log(err)
     })
 }
