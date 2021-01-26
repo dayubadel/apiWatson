@@ -10,6 +10,7 @@ const paymentezController = require('./paymentezController.js');
 const { columns } = require('mssql');
 // const pedidoModel = require('./../models/pedido.js')
 const canalesMensajeriaController = require('./canalesMensajeriaController');
+const logger = require('../models/winston');
 
 
 const id_workspace = config.Watson.id_workspace
@@ -32,7 +33,7 @@ watsonController.ControlMensajes = async (req, res) => {
 
     let idChat = req.body.idChat //es el idConversacionCanal
     let txtMsg = req.body.textMensajeReq
-    let idCanal = req.body.idCanal
+    let idCanal = req.body.idCana
     try {
         console.log(idCanal,idChat)
         let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
@@ -207,8 +208,9 @@ watsonController.ControlMensajes = async (req, res) => {
         res.send(watsonResponse.result.output.generic)
 
     } catch (error) {
-        console.log(error)
-        respuestaGrupoWhatsap.push({response_type:'text', text: `Estimados, ha ocurrido un error a nivel interno de la chatbot Dora. Por favor revisar el log.`})
+        console.log(error)        
+        logger.error({tittle:'Error al gestionar el contexto',type:'Controller',file:'watsonController.js',details: error})
+        respuestaGrupoWhatsap.push({response_type:'text', text: `*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, revisar el log.`})
         paymentezController.sendWhatsapp(respuestaGrupoWhatsap, config.destinatarios.grupoWhatsAppDesarrolladora)
         res.status(400).send('')
     }

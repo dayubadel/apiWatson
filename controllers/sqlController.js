@@ -49,7 +49,7 @@ sqlController.gestionContexto = async(contexto, idClienteCanalMensajeria, idCana
         }
     })
     .catch(err => {
-        logger.error({tittle:'Error al gestionar el contexto base',type:'Model-DB',file:'sqlController.js',details: err.originalError.info})
+        logger.error({tittle:'Error al gestionar el contexto base',type:'Model-DB',file:'sqlController.js',details: err})
         console.log("error al gestionar el contexto base")
         console.log(err)
         throw new Error('Error al registrar en BD')
