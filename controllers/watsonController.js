@@ -209,7 +209,7 @@ watsonController.ControlMensajes = async (req, res) => {
 
     } catch (error) {
         console.log(error)        
-        logger.error({tittle:'Error al gestionar el contexto',type:'Controller',file:'watsonController.js',details: error})
+        logger.error({tittle:'Error al gestionar el contexto a nivel de controlador',type:'Controller',file:'watsonController.js',method:'ControlMensajes',details: error})
         respuestaGrupoWhatsap.push({response_type:'text', text: `*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, revisar el log.`})
         paymentezController.sendWhatsapp(respuestaGrupoWhatsap, config.destinatarios.grupoWhatsAppDesarrolladora)
         res.status(400).send('')
