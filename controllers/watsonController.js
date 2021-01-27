@@ -33,7 +33,7 @@ watsonController.ControlMensajes = async (req, res) => {
 
     let idChat = req.body.idChat //es el idConversacionCanal
     let txtMsg = req.body.textMensajeReq
-    let idCanal = req.body.idCana
+    let idCanal = req.body.idCanal
     try {
         console.log(idCanal,idChat)
         let objMensajeria = await sqlController.gestionContexto(null,null, idCanal,idChat,1) //consulta el contexto anterior
@@ -211,7 +211,7 @@ watsonController.ControlMensajes = async (req, res) => {
         console.log(error)        
         logger.error({tittle:'Error al gestionar el contexto a nivel de controlador',type:'Controller',file:'watsonController.js',method:'ControlMensajes',details: error})
         respuestaGrupoWhatsap.push({response_type:'text', text: `*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, revisar el log.`})
-        paymentezController.sendWhatsapp(respuestaGrupoWhatsap, config.destinatarios.grupoWhatsAppDesarrolladora)
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsap, config.destinatarios.grupoWhatsAppDesarrolladora)
         res.status(400).send('')
     }
 }
