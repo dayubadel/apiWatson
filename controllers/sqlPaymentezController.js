@@ -1,9 +1,12 @@
 const mssql = require('mssql');
 const { sql } = require('../config/config');
 var request = new mssql.Request();
-
+const logger = require('../models/winston');
+const canalesMensajeriaController = require('../controllers/canalesMensajeriaController');
+const { error } = require('winston');
 
 var sqlPaymentezController = {}
+var respuestaGrupoWhatsappp = []
 sqlPaymentezController.getDatosToWS = async (numeroReferencia) => {
 
     let query
@@ -22,9 +25,11 @@ sqlPaymentezController.getDatosToWS = async (numeroReferencia) => {
        }
         // return resultSQL
     })
-    .catch(err => {
-            console.log(err)
-            console.log(err)
+    .catch(error => {
+            console.log(error)
+            logger.error({tittle:'Error al consultar los datos a nivel de BD para enviar al web service de facturacion automatica',type:'Model-BD',file:'sqlPaymentezController.js',method:'getDatosToWS',details: error})
+            respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error interno de la Api a nivel de base de datos, revisar el log.`})
+            canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)    
             throw new Error('Error al registrar en BD')
     })
     // console.log(resultSQL)
@@ -63,9 +68,12 @@ sqlPaymentezController.GestionLugares = async (provincia, opcion) =>
                })
        }
    })
-   .catch(err => {
+   .catch(error => {
            console.log("Error al gestionar lugares")
-           console.log(err)
+           console.log(error)
+            logger.error({tittle:'Error al consultar los datos a nivel de BD de provincias y ciudades',type:'Model-BD',file:'sqlPaymentezController.js',method:'GestionLugares',details: error})
+            respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error inerno de la Api a nivel de base de datos, revisar el log.`})
+            canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)    
            throw new Error('Error al registrar en BD')
    })
    return resultSQL
@@ -173,9 +181,12 @@ sqlPaymentezController.gestionCabeceraVenta = async (numeroReferencia, nombresCa
                 )
         }
     })
-    .catch(err => {
+    .catch(error => {
             console.log("Error al gestionar cabecera venta")
-            console.log(err)
+            console.log(error)
+            logger.error({tittle:'Error al gestionar los datos de la cabecera venta a nivel de base de datos',type:'Model-BD',file:'sqlPaymentezController.js',method:'gestionCabeceraVenta',details: error})
+            respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error interno de la Api a nivel de base de datos, revisar el log.`})
+            canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)    
             throw new Error('Error al registrar en BD')
     })
     return resultSQL
@@ -236,9 +247,12 @@ sqlPaymentezController.gestionCarritoCompras = async (idClienteCanalMensajeria, 
                      })             
             }
      })
-     .catch(err => {
+     .catch(error => {
          console.log("Error al gestionar el carrito de compras")
-         console.log(err)
+         console.log(error)
+         logger.error({tittle:'Error al gestionar al gestionar el carrito de compras a nivel de base de datos',type:'Model-BD',file:'sqlPaymentezController.js',method:'gestionCarritoCompras',details: error})
+         respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error interno de la Api a nivel de base de datos, revisar el log.`})
+         canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)    
          throw new Error('Error al registrar en BD')
      })
      return resultSQL
@@ -263,9 +277,13 @@ sqlPaymentezController.gestionCarritoCompras = async (idClienteCanalMensajeria, 
         if (data.recordset != undefined && data.recordset.length > 0) {          
         }
     })
-    .catch(err => {
+    .catch(error => {
         console.log("Ha ocurrido un error al ingresar el histórico del pago")
-        console.log(err)
+        console.log(error)
+        logger.error({tittle:'Error al gestionar al insertar el historico de un pago a nivel de base de datos',type:'Model-BD',file:'sqlPaymentezController.js',method:'insertarHistoricoPago',details: error})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error interno de la Api a nivel de base de datos, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)    
+      
         throw new Error('Error al registrar en BD')
     })
     return resultSQL
