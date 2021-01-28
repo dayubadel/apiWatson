@@ -8,7 +8,10 @@ const Producto = require("../models/productoModel");
 const Marca = require("../models/marcaModel");
 const Caracteristica = require("../models/caracteristicaModel")
 const Categoria = require("../models/categoriaModel")
+const logger = require('../models/winston');
+const canalesMensajeriaController = require('../controllers/canalesMensajeriaController');
 
+var respuestaGrupoWhatsappp = []
 
 const id_workspace = config.Watson.id_workspace
 const apikey = config.Watson.apikey
@@ -129,6 +132,9 @@ productoController.RegistrarProductos = async (req, res) => {
         res.send({success:1})
     } catch (error) {
         console.log(error)
+        logger.error({tittle:'Error al registrar en la base de datos los productos enviados mediante la Api desde Comandato.',type:'Controller',file:'productoController.js',method:'RegistrarProductos',details: error})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar registrar en la base de datos de Dora los productos enviados a través de la Api desde Comandato, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
         res.status(500).send({
             success:0,
             msg: error.message
@@ -189,6 +195,9 @@ productoController.ActualizarEntidades = async (req, res) =>{
 
     } catch (error) {
         console.log(error)
+        logger.error({tittle:'Error al actualizar las entidades en IBM Watson mediante la Api.',type:'Controller',file:'productoController.js',method:'ActualizarEntidades',details: error})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar actualizar las entidades en IBM Watson mediante la Api, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
         if(req != undefined){
             res.status(500).send({
                 success:0,
