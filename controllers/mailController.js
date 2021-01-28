@@ -6,7 +6,7 @@ const canalesMensajeriaController = require('./canalesMensajeriaController.js')
 
 var mailController = {}
 
-var respuestaGrupoWhatsap = []
+var respuestaGrupoWhatsapp = []
 
 var transporter = nodemailer.createTransport({
   host: 'mail.comandato.com',
@@ -33,8 +33,8 @@ mailController.enviarEmail = async (subject, content) =>
         if (error) {
           console.log(error);  
           logger.error({tittle:'Error al intentar enviar un correo electronico',type:'Controller',file:'mailController.js',method:'enviarEmail',details: error})
-          respuestaGrupoWhatsap.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
-          canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsap,config.destinatarios.grupoWhatsAppDesarrolladora)
+          respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
+          canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
         } else {
           console.log('Email sent: ' + info.response);
         }
@@ -56,8 +56,8 @@ mailController.enviarEmailCliente = async (destination, subject, content) =>
         if (error) {
           console.log(error);   
           logger.error({tittle:'Error al intentar enviar un correo electronico',type:'Controller',file:'mailController.js',method:'enviarEmailCliente',details: error})
-          respuestaGrupoWhatsap.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
-          canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsap,config.destinatarios.grupoWhatsAppDesarrolladora)
+          respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
+          canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
         } else {
           console.log('Email sent: ' + info.response);
         }
@@ -90,8 +90,8 @@ mailController.MailErrorWSFacturacion = (jsonEnviado) => {
       if (error) {
         console.log(error);
         logger.error({tittle:'Error al intentar enviar un correo electronico',type:'Controller',file:'mailController.js',method:'MailErrorWSFacturacion',details: error})
-        respuestaGrupoWhatsap.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
-        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsap,config.destinatarios.grupoWhatsAppDesarrolladora)
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
       } else {
         console.log('Email sent: ' + info.response);
       }
@@ -128,8 +128,8 @@ transporter.sendMail(mailOptions, function(error, info){
     if (error) {
       console.log(error);
       logger.error({tittle:'Error al intentar enviar un correo electronico',type:'Controller',file:'mailController.js',method:'MailErrorPaymentez',details: error})
-      respuestaGrupoWhatsap.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
-      canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsap,config.destinatarios.grupoWhatsAppDesarrolladora)
+      respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
+      canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
     } else {
       console.log('Email sent: ' + info.response);
     }
@@ -161,8 +161,8 @@ mailController.MailErrorWSTickets = (datos) => {
     if (error) {
       console.log(error);
       logger.error({tittle:'Error al intentar enviar un correo electronico',type:'Controller',file:'mailController.js',method:'MailErrorWSTickets',details: error})
-      respuestaGrupoWhatsap.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
-      canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsap,config.destinatarios.grupoWhatsAppDesarrolladora)
+      respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error a nivel interno de la Api, al intentar enviar un correo, revisar el log.`})
+      canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
     } else {
       console.log('Email sent: ' + info.response);
     }

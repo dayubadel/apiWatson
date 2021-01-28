@@ -8,8 +8,10 @@ const { json } = require("body-parser");
 const { stringify } = require("querystring");
 const sha256 = require('js-sha256');
 var https = require('follow-redirects').https;
+const logger = require('../models/winston');
 
 const paymentezController = {}   
+var respuestaGrupoWhatsappp = []
 
 paymentezController.postRefound  = async (tidPaymentez) => {
     const url = config.refoundPaymentez.url
@@ -40,6 +42,9 @@ paymentezController.postRefound  = async (tidPaymentez) => {
         res.on("error", function (error) {            
           estado = false
           console.error(error);
+          logger.error({tittle:'Error al ejecutar el método web Refound de Paymentez',type:'Controller',file:'paymentezController.js',method:'postRefound',details: error})
+          respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar ejecutar el método Refound de Paymentez, revisar el log.`})
+          canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
         });
       });
       var postData = JSON.stringify({"transaction":{"id":tidPaymentez}});
@@ -81,45 +86,62 @@ paymentezController.GestionFactura = async (req, res) => {
     }
     if(respuestaSql.length==0)
     {
+        logger.error({tittle:'Error al intentar consultar una factura con el número de referencia del pedido.',type:'Controller',file:'paymentezController.js',method:'GestionFactura',details: 'Error al enviar la consulta a nivel de base de datos.'})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar cargar los datos de la factura del cliente, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
         res.send({estado: false, mensaje: 'Ocurrió un error con el número de referencia del pedido.'})
     }
     else
     {
-        let factura = respuestaSql[0]
-        var tipoPago = 0
-        if(factura.identificadorMetodoPago == 3)
-            tipoPago = 2
-        else if (factura.identificadorMetodoPago == 5)
-            tipoPago = 3
-        let valor = (factura.valorNetoIva*100)/config.valorGlobales.IVAPercent
-        var facuturaPaymentez =
-            {
-                user_id : factura.idClienteCanalMensajeria.toString(),
-                order_description : 'Chatbot_Dora',
-                order_amount :  Math.round(factura.valorTotalOrden * 100)/100,
-                order_vat :  Math.round(factura.valorNetoIva*100)/100,
-                order_reference :  factura.numeroReferencia,
-                order_installments_type: tipoPago,
-                //order_taxable_amount : factura.valorNeto + factura.valorEnvio,
-                order_taxable_amount :  Math.round( valor * 100) / 100,
-                order_tax_percentage : config.valorGlobales.IVAPercent,
-                first_name : factura.nombresCabecera,
-                last_name : factura.apellidosCabecera,
-                phone : factura.numeroTelefono,
-                tipo_identificacion : factura.tipoIdentificacion,
-                numero_identificacion : factura.numIdentificacion,
-                email : factura.email,
-                idConversacionCanal : factura.idConversacionCanal,
-                finalizado : factura.finalizado,
-                stockDisponible : factura.stockDisponible
+        try {
+            let factura = respuestaSql[0]
+            var tipoPago = 0
+            if(factura.identificadorMetodoPago == 3)
+                tipoPago = 2
+            else if (factura.identificadorMetodoPago == 5)
+                tipoPago = 3
+            let valor = (factura.valorNetoIva*100)/config.valorGlobales.IVAPercent
+            var facuturaPaymentez =
+                {
+                    user_id : factura.idClienteCanalMensajeria.toString(),
+                    order_description : 'Chatbot_Dora',
+                    order_amount :  Math.round(factura.valorTotalOrden * 100)/100,
+                    order_vat :  Math.round(factura.valorNetoIva*100)/100,
+                    order_reference :  factura.numeroReferencia,
+                    order_installments_type: tipoPago,
+                    //order_taxable_amount : factura.valorNeto + factura.valorEnvio,
+                    order_taxable_amount :  Math.round( valor * 100) / 100,
+                    order_tax_percentage : config.valorGlobales.IVAPercent,
+                    first_name : factura.nombresCabecera,
+                    last_name : factura.apellidosCabecera,
+                    phone : factura.numeroTelefono,
+                    tipo_identificacion : factura.tipoIdentificacion,
+                    numero_identificacion : factura.numIdentificacion,
+                    email : factura.email,
+                    idConversacionCanal : factura.idConversacionCanal,
+                    finalizado : factura.finalizado,
+                    stockDisponible : factura.stockDisponible
+                }
+                res.send({estado: true, resultado: facuturaPaymentez}) 
+            } catch (error) {
+                logger.error({tittle:'Error al setear todos los valores de la cabecera de una factura.',type:'Controller',file:'paymentezController.js',method:'GestionFactura',details: error})
+                respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar cargar los datos de la cabecera de la factura del cliente, revisar el log.`})
+                canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+                res.send({estado: false, mensaje: 'Ocurrió al establecer los valores de la cabecera del pedido.'})
             }
-        res.send({estado: true, resultado: facuturaPaymentez})
     }
 }
 
 paymentezController.GestionLugares= async (req, res) => {
-    var resultadoSql =  await sqlPaymentezController.GestionLugares(req.body.provincia,req.body.opcion)
-    res.send({estado: true, resultado: resultadoSql})
+    try {        
+        var resultadoSql =  await sqlPaymentezController.GestionLugares(req.body.provincia,req.body.opcion)
+        res.send({estado: true, resultado: resultadoSql})
+    } catch (error) {
+        logger.error({tittle:'Error al consultar las provincias o ciudades por provincia.',type:'Controller',file:'paymentezController.js',method:'GestionLugares',details: error})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar consultar las provincias o ciudades por provincia, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+        res.send({estado: false, mensaje: 'Ocurrió un error al consultar las provincias o ciudades.'})
+    }
 }
 
 paymentezController.GetFormulario = (req, res) => {
@@ -127,257 +149,289 @@ paymentezController.GetFormulario = (req, res) => {
 }
 
 paymentezController.RespuestaPago = async (req, res) => {    
-    var grupoWhatsapp =  config.destinatarios.grupoWhatsApp 
-    var respuesta = []
-    var respuestaGrupoWhatsap = []
-    const transaction = req.body.myjson.transaction;
-    let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
-    sqlPaymentezController.insertarHistoricoPago(respuestaSql[0].idCabeceraVenta,transaction.carrier_code,transaction.message,transaction.id,transaction.status, JSON.stringify(transaction))
-    if(transaction.hasOwnProperty("type")){
-        respuesta.push({
-            response_type:'text',
-            text: 'Ha ocurrido un error con el pago, por favor intente nuevamente.' 
-        })
-        var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
-        mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
-        paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
-        // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
-        respuestaGrupoWhatsap.push(
-            {
-                response_type:'text',
-                text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero el sistema de Paymentez está presentando problemas.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
-            })
-        //descomentar en prod
-        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
-        res.send(
-        {
-            estado: false,
-            type: "Error de servidor",
-            mensaje: 'Ha ocurrido un error con el pago, por favor intente nuevamente.'
-        })
-    }
-    else if(transaction.hasOwnProperty("status")){
-        if(transaction.status == "failure"){     
+    try 
+    {
+        var grupoWhatsapp =  config.destinatarios.grupoWhatsApp 
+        var respuesta = []
+        const transaction = req.body.myjson.transaction;
+        let respuestaSql = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+        sqlPaymentezController.insertarHistoricoPago(respuestaSql[0].idCabeceraVenta,transaction.carrier_code,transaction.message,transaction.id,transaction.status, JSON.stringify(transaction))
+        if(transaction.hasOwnProperty("type")){
             respuesta.push({
                 response_type:'text',
-                text: 'Lamentamos informarle que la tarjeta ha sido rechazada.' 
-            })       
-            paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
-            // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+                text: 'Ha ocurrido un error con el pago, por favor intente nuevamente.' 
+            })
             var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
             mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
-            respuestaGrupoWhatsap.push(
-                {
-                    response_type:'text',
-                    text: 'Esto es una prueba.'
-                })
-            respuestaGrupoWhatsap.push(
-                {
-                    response_type:'text',
-                    text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero tiene problemas con su tarjeta.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
-                })
-            //descomentar en prod
-            paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
-            res.send(
-                {
-                    estado: false,
-                    type: "Error con la tarjeta",
-                    mensaje: 'Lamentamos informarle que la tarjeta ha sido rechazada.'
-                })
-        }
-        else
-        {
-            let card = req.body.myjson.card
-            let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,transaction.authorization_code,6)
-            paymentezController.sendEmailClienteVentas(datosCabecera[0],null,2)
-            var mensajeF = `Tu pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
-            respuesta.push({
-                response_type:'text',
-                text: `${mensajeF}` 
-            })
             paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
             // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
-            paymentezController.WSFacturacion(transaction.dev_reference)
-            res.send(
+            respuestaGrupoWhatsapp.push(
                 {
-                    estado: true,
-                    type: "¡Transacción exitosa!",
-                    mensaje: mensajeF
+                    response_type:'text',
+                    text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero el sistema de Paymentez está presentando problemas.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
                 })
+            //descomentar en prod
+            paymentezController.sendWhatsapp(respuestaGrupoWhatsapp,grupoWhatsapp)
+            res.send(
+            {
+                estado: false,
+                type: "Error de servidor",
+                mensaje: 'Ha ocurrido un error con el pago, por favor intente nuevamente.'
+            })
         }
+        else if(transaction.hasOwnProperty("status")){
+            if(transaction.status == "failure"){     
+                respuesta.push({
+                    response_type:'text',
+                    text: 'Lamentamos informarle que la tarjeta ha sido rechazada.' 
+                })       
+                paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
+                // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+                var datosJsonFacutura = await paymentezController.getDatosFactura(transaction.dev_reference)
+                mailController.MailErrorPaymentez(datosJsonFacutura,transaction)
+                respuestaGrupoWhatsapp.push(
+                    {
+                        response_type:'text',
+                        text: 'Esto es una prueba.'
+                    })
+                respuestaGrupoWhatsapp.push(
+                    {
+                        response_type:'text',
+                        text: `Estimados, les saluda Dora.\nUn cliente está intentando pagar, pero tiene problemas con su tarjeta.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+                    })
+                //descomentar en prod
+                paymentezController.sendWhatsapp(respuestaGrupoWhatsapp,grupoWhatsapp)
+                res.send(
+                    {
+                        estado: false,
+                        type: "Error con la tarjeta",
+                        mensaje: 'Lamentamos informarle que la tarjeta ha sido rechazada.'
+                    })
+            }
+            else
+            {
+                let card = req.body.myjson.card
+                let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(transaction.dev_reference,null,null,null,null,null,null,null,null,null,null,null,null,card.type,transaction.amount,transaction.installments,card.bin,card.number,transaction.id,transaction.authorization_code,6)
+                paymentezController.sendEmailClienteVentas(datosCabecera[0],null,2)
+                var mensajeF = `Tu pago ha sido procesado correctamente con el siguiente número de orden de compra: ${transaction.dev_reference}`                 
+                respuesta.push({
+                    response_type:'text',
+                    text: `${mensajeF}` 
+                })
+                paymentezController.EnviarMensajeCanal(respuestaSql[0].idCanalMensajeria,respuesta,respuestaSql[0].idConversacionCanal)
+                // paymentezController.sendWhatsapp(respuesta,respuestaSql[0].idConversacionCanal)
+                paymentezController.WSFacturacion(transaction.dev_reference)
+                res.send(
+                    {
+                        estado: true,
+                        type: "¡Transacción exitosa!",
+                        mensaje: mensajeF
+                    })
+            }
+        }
+    } catch (error) {
+        logger.error({tittle:'Error durante el procesamiento del pago por tarjeta de credito o debito',type:'Controller',file:'paymentezController.js',method:'RespuestaPago',details: error})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar procesar el pago por tarjeta de crédito / débito de un cliente, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+        res.send({estado: false, mensaje: 'Ocurrió un error durante el procesamiento del pago por tarjeta.'})
     }
 }
 
 paymentezController.sendEmailClienteVentas = async (objCabecera, correo, opcion) => {
-    let current_datetime = objCabecera.fechaFinalizacion
-    let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
-    var tipoIdentificacion = 'Cédula'
-    var nombreCliente = `${objCabecera.nombresCabecera} ${objCabecera.apellidosCabecera}`
-    if(objCabecera.tipoIdentificacion=='rucECU')
+    try 
     {
-        tipoIdentificacion='RUC'
-        nombreCliente = objCabecera.nombresCabecera
-    }
-    var tituloCliente = `Comandato / Compra exitosa mediante Asistente Virtual Dora - Factura: #${objCabecera.numeroReferencia} `
-    var encabezado= `<div><p>Tu pago ha sido procesado exitosamente a través del asistente virtual.</p>
-                    <p>A continuación, se muestran los datos de la compra.</p>`
-    var direccionCorreo = objCabecera.email
-    if(opcion==1)
-    {
-        tituloCliente = `Falla en la facturación automática - Factura: #${objCabecera.numeroReferencia}`
-        encabezado = `<div><p>Estimados,</p>
-        <p>Un cliente ha pagado con éxito una compra. Pero la facturación automática ha fallado después de 3 intentos</p>
-        <p>A continuación se muestran los datos del cliente y de la compra.</p>`
-        direccionCorreo=correo
-    }
-    let cabeceraCliente = `${encabezado}
-                        <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
-                        <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
-                        <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
-                        <label><strong>Fecha:</strong> ${formattedDate}</label><br>
-                        <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
-                        <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
-                        <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
-                        <label><strong>Correo electrónico:</strong> ${objCabecera.email}</label><br>
-                        <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago.toUpperCase()}</label><br>
-                        </div>`
-    let datosEntrega = `<div>
-                            <p>Los datos para realizar la entrega del producto son:</p>
-                            <label><strong>Persona que recibirá el producto:</strong> ${objCabecera.nombreReceptor.toUpperCase()}</label><br>
-                            <label><strong>Provincia:</strong> ${objCabecera.provincia.toUpperCase()}</label><br>
-                            <label><strong>Ciudad:</strong> ${objCabecera.ciudad.toUpperCase()}</label><br>
-                            <label><strong>Dirección:</strong> ${objCabecera.callePrincipalEntrega.toUpperCase()}</label><br> 
-                            <label><strong>Número de calle:</strong> ${objCabecera.numeroEntrega.toUpperCase()}</label><br> 
-                            <label><strong>Calle secundaria:</strong> ${objCabecera.calleSecundariaEntrega.toUpperCase()}</label><br>
-                            <label><strong>Referencia adicional:</strong> ${objCabecera.referenciaEntrega.toUpperCase()}</label><br>
-                        </div>`
-    var cabeceraTabla = `<tr>
-                        <th>N</th>
-                        <th>Cantidad</th>
-                        <th>Producto</th>
-                        <th>Precio Unitario</th>
-                        <th>Precio Total</th>
-                    </tr>`
-    filaCuerpo = ''
-    numero = 1
-    var totalFactura = 0
-    let totalProductosSinIva = 0
-    var elementosFactura = await sqlPaymentezController.gestionCarritoCompras(objCabecera.idClienteCanalMensajeria,objCabecera.numeroReferencia,null,null,null,null,4)
-    elementosFactura.forEach(element =>
+        let current_datetime = objCabecera.fechaFinalizacion
+        let formattedDate = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() 
+        var tipoIdentificacion = 'Cédula'
+        var nombreCliente = `${objCabecera.nombresCabecera} ${objCabecera.apellidosCabecera}`
+        if(objCabecera.tipoIdentificacion=='rucECU')
         {
-            let total = element.cantidad*element.precioProducto
+            tipoIdentificacion='RUC'
+            nombreCliente = objCabecera.nombresCabecera
+        }
+        var tituloCliente = `Comandato / Compra exitosa mediante Asistente Virtual Dora - Factura: #${objCabecera.numeroReferencia} `
+        var encabezado= `<div><p>Tu pago ha sido procesado exitosamente a través del asistente virtual.</p>
+                        <p>A continuación, se muestran los datos de la compra.</p>`
+        var direccionCorreo = objCabecera.email
+        if(opcion==1)
+        {
+            tituloCliente = `Falla en la facturación automática - Factura: #${objCabecera.numeroReferencia}`
+            encabezado = `<div><p>Estimados,</p>
+            <p>Un cliente ha pagado con éxito una compra. Pero la facturación automática ha fallado después de 3 intentos</p>
+            <p>A continuación se muestran los datos del cliente y de la compra.</p>`
+            direccionCorreo=correo
+        }
+        let cabeceraCliente = `${encabezado}
+                            <label><strong>Referencia:</strong> ${objCabecera.numeroReferencia}</label><br>
+                            <label><strong>Identificador del pago:</strong> ${objCabecera.tidPaymentez}</label><br>
+                            <label><strong>Código de autorización del pago:</strong> ${objCabecera.codigoAutorizacionPaymentez}</label><br>
+                            <label><strong>Fecha:</strong> ${formattedDate}</label><br>
+                            <label><strong>${tipoIdentificacion}:</strong> ${objCabecera.numIdentificacion}</label><br>
+                            <label><strong>Cliente:</strong> ${nombreCliente.toUpperCase()}</label><br>
+                            <label><strong>Teléfono:</strong> ${objCabecera.numeroTelefono}</label><br>
+                            <label><strong>Correo electrónico:</strong> ${objCabecera.email}</label><br>
+                            <label><strong>Método de pago:</strong> ${objCabecera.descripcionMetodoPago.toUpperCase()}</label><br>
+                            </div>`
+        let datosEntrega = `<div>
+                                <p>Los datos para realizar la entrega del producto son:</p>
+                                <label><strong>Persona que recibirá el producto:</strong> ${objCabecera.nombreReceptor.toUpperCase()}</label><br>
+                                <label><strong>Provincia:</strong> ${objCabecera.provincia.toUpperCase()}</label><br>
+                                <label><strong>Ciudad:</strong> ${objCabecera.ciudad.toUpperCase()}</label><br>
+                                <label><strong>Dirección:</strong> ${objCabecera.callePrincipalEntrega.toUpperCase()}</label><br> 
+                                <label><strong>Número de calle:</strong> ${objCabecera.numeroEntrega.toUpperCase()}</label><br> 
+                                <label><strong>Calle secundaria:</strong> ${objCabecera.calleSecundariaEntrega.toUpperCase()}</label><br>
+                                <label><strong>Referencia adicional:</strong> ${objCabecera.referenciaEntrega.toUpperCase()}</label><br>
+                            </div>`
+        var cabeceraTabla = `<tr>
+                            <th>N</th>
+                            <th>Cantidad</th>
+                            <th>Producto</th>
+                            <th>Precio Unitario</th>
+                            <th>Precio Total</th>
+                        </tr>`
+        filaCuerpo = ''
+        numero = 1
+        var totalFactura = 0
+        let totalProductosSinIva = 0
+        var elementosFactura = await sqlPaymentezController.gestionCarritoCompras(objCabecera.idClienteCanalMensajeria,objCabecera.numeroReferencia,null,null,null,null,4)
+        elementosFactura.forEach(element =>
+            {
+                let total = element.cantidad*element.precioProducto
+                filaCuerpo = filaCuerpo + `<tr>
+                                                <td>${numero}</td>
+                                                <td>${element.cantidad}</td>
+                                                <td>${element.nombreProducto}</td>
+                                                <td>${element.precioProducto}</td>
+                                                <td>${total.toFixed(2)}</td>
+                                            </tr>`
+                                            if(element.ivaProducto==false)
+                                            {
+                                                totalProductosSinIva=totalProductosSinIva+element.precioProducto
+                                            }
+                totalFactura = totalFactura + total
+                numero++
+            })
             filaCuerpo = filaCuerpo + `<tr>
-                                            <td>${numero}</td>
-                                            <td>${element.cantidad}</td>
-                                            <td>${element.nombreProducto}</td>
-                                            <td>${element.precioProducto}</td>
-                                            <td>${total.toFixed(2)}</td>
+            <td>${numero}</td>
+            <td>1</td>
+            <td>VALOR DE ENVÍO</td>
+            <td>3.56</td>
+            <td>3.56</td>
+        </tr>`
+        filaCuerpo = filaCuerpo +  `<tr>
+                                        <td colspan="3">SUBTOTAL</td>
+                                        <td colspan="3">${(totalFactura+3.56).toFixed(2)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3">IVA</td>
+                                        <td colspan="3">${((totalFactura+3.56-totalProductosSinIva)*0.12).toFixed(2)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3">TOTAL A PAGAR</td>
+                                        <td colspan="3">$${((totalFactura+3.56)+((totalFactura-totalProductosSinIva+3.56)*0.12)).toFixed(2)}</td>
                                         </tr>`
-                                        if(element.ivaProducto==false)
-                                        {
-                                            totalProductosSinIva=totalProductosSinIva+element.precioProducto
-                                        }
-            totalFactura = totalFactura + total
-            numero++
-        })
-        filaCuerpo = filaCuerpo + `<tr>
-        <td>${numero}</td>
-        <td>1</td>
-        <td>VALOR DE ENVÍO</td>
-        <td>3.56</td>
-        <td>3.56</td>
-    </tr>`
-    filaCuerpo = filaCuerpo +  `<tr>
-                                    <td colspan="3">SUBTOTAL</td>
-                                    <td colspan="3">${(totalFactura+3.56).toFixed(2)}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3">IVA</td>
-                                    <td colspan="3">${((totalFactura+3.56-totalProductosSinIva)*0.12).toFixed(2)}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3">TOTAL A PAGAR</td>
-                                    <td colspan="3">$${((totalFactura+3.56)+((totalFactura-totalProductosSinIva+3.56)*0.12)).toFixed(2)}</td>
-                                    </tr>`
-                                            
-    var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
-    let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
-    var contenido = `${cabeceraCliente}${tabla}${datosEntrega}${pieDeCorreo}`
-    mailController.enviarEmailCliente(direccionCorreo, tituloCliente, contenido)
+                                                
+        var tabla = `<table style="text-align:center;border:1px solid blak" class="table-responsive">${cabeceraTabla}${filaCuerpo}</table>`
+        let pieDeCorreo = `<h4>Correo enviado automáticamente desde la asistente virtual Dora.</h4>`
+        var contenido = `${cabeceraCliente}${tabla}${datosEntrega}${pieDeCorreo}`
+        mailController.enviarEmailCliente(direccionCorreo, tituloCliente, contenido)        
+    } 
+    catch (error) 
+    {
+        logger.error({tittle:'Error al enviar el correo electronico para confirmacion de compra a un cliente',type:'Controller',file:'paymentezController.js',method:'sendEmailClienteVentas',details: error})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar enviar el correo de confirmación de compra de un cliente, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+    }
 }
 
 
 paymentezController.getDatosFactura = async (numeroReferencia) => {
-    var jsonCompra = {}
-    var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
-    if(data.length > 0){
-        data.forEach(tabla => {
-            if(tabla[0].tipoTabla == 'Cabecera'){
-                    let orden = tabla[0];
-                    delete orden.tipoTabla
-                    jsonCompra.orden = orden
-            }
-            if(tabla[0].tipoTabla == 'Detalle'){
-                tabla.forEach(tblDetalle => {
-                    delete tblDetalle.tipoTabla
-                });
-                let detalle = tabla
-                jsonCompra.orden.items = tabla
-            }
-        });
+    try {
+        var jsonCompra = {}
+        var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
+        if(data.length > 0){
+            data.forEach(tabla => {
+                if(tabla[0].tipoTabla == 'Cabecera'){
+                        let orden = tabla[0];
+                        delete orden.tipoTabla
+                        jsonCompra.orden = orden
+                }
+                if(tabla[0].tipoTabla == 'Detalle'){
+                    tabla.forEach(tblDetalle => {
+                        delete tblDetalle.tipoTabla
+                    });
+                    let detalle = tabla
+                    jsonCompra.orden.items = tabla
+                }
+            });
+        }
+        return jsonCompra        
+    } catch (error) {
+        logger.error({tittle:'Error al preparar los datos de la factura del cliente antes de enviarlo al servicio web de facturacion de Comandato',type:'Controller',file:'paymentezController.js',method:'getDatosFactura',details: error})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al preparar los datos de la factura antes de ser enviados al servicio web de facturación automática de Comandato, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsapp,grupoWhatsapp)
     }
-    return jsonCompra
 }
 
 paymentezController.WSFacturacion = async (numeroReferencia) => {
-    var facuturaCreada = false
-    // const soapUrl = config.wsFacturacion.urlSoapFactuacion
-    var jsonCompra = {}
-    var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
-    if(data.length > 0){
-        data.forEach(tabla => {
-            if(tabla[0].tipoTabla == 'Cabecera'){
-                    let orden = tabla[0];
-                    delete orden.tipoTabla
-                    jsonCompra.orden = orden
-            }
-            if(tabla[0].tipoTabla == 'Detalle'){
-                tabla.forEach(tblDetalle => {
-                    delete tblDetalle.tipoTabla
-                });
-                let detalle = tabla
-                jsonCompra.orden.items = tabla
-            }
-        });
-    }
-
-    await (async () => {        
-        for (let i = 0; i < 3; i++) {
-            // console.log(jsonCompra)
-            facuturaCreada = await paymentezController.CallWS(jsonCompra)
-            if(facuturaCreada == true){
-                break;
-            }      
+    try {
+        var facuturaCreada = false
+        // const soapUrl = config.wsFacturacion.urlSoapFactuacion
+        var jsonCompra = {}
+        var data  = await sqlPaymentezController.getDatosToWS(numeroReferencia)
+        if(data.length > 0){
+            data.forEach(tabla => {
+                if(tabla[0].tipoTabla == 'Cabecera'){
+                        let orden = tabla[0];
+                        delete orden.tipoTabla
+                        jsonCompra.orden = orden
+                }
+                if(tabla[0].tipoTabla == 'Detalle'){
+                    tabla.forEach(tblDetalle => {
+                        delete tblDetalle.tipoTabla
+                    });
+                    let detalle = tabla
+                    jsonCompra.orden.items = tabla
+                }
+            });
         }
-    })()
 
-    if(!facuturaCreada){
-        mailController.MailErrorWSFacturacion(jsonCompra);
-        let destinatario = `${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`
-        let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
-        paymentezController.sendEmailClienteVentas(datosCabecera[0],destinatario,1)
-        var respuestaGrupoWhatsap = []
-        var grupoWhatsapp = config.destinatarios.grupoWhatsApp
-        respuestaGrupoWhatsap.push(
-            {
-                response_type:'text',
-                text: `Estimados, les saluda Dora.\nUn cliente ha finalizado exitosamente el pago de una compra.\nSin embargo, el servicio de facturación automática del proceso del chatbot Dora ha fallado en los 3 intentos.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
-            })
-        //descomentar en prod
-        paymentezController.sendWhatsapp(respuestaGrupoWhatsap,grupoWhatsapp)
+        await (async () => {        
+            for (let i = 0; i < 3; i++) {
+                // console.log(jsonCompra)
+                facuturaCreada = await paymentezController.CallWS(jsonCompra)
+                if(facuturaCreada == true){
+                    break;
+                }      
+            }
+        })()
+
+        if(!facuturaCreada){
+            mailController.MailErrorWSFacturacion(jsonCompra);
+            let destinatario = `${config.destinatarios.ventas}${config.destinatarios.equipoGaia}`
+            let datosCabecera = await sqlPaymentezController.gestionCabeceraVenta(numeroReferencia,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2)
+            paymentezController.sendEmailClienteVentas(datosCabecera[0],destinatario,1)
+            var grupoWhatsapp = config.destinatarios.grupoWhatsApp
+            respuestaGrupoWhatsapp.push(
+                {
+                    response_type:'text',
+                    text: `Estimados, les saluda Dora.\nUn cliente ha finalizado exitosamente el pago de una compra.\nSin embargo, el servicio de facturación automática del proceso del chatbot Dora ha fallado en los 3 intentos.\nHe enviado un correo electrónico con los datos del cliente y de la compra.`
+                })
+            //descomentar en prod
+            logger.error({tittle:'Error al ejecutar el servicio web de facturacion automatica despues de 3 intentos',type:'Controller',file:'paymentezController.js',method:'WSFacturacion',details: 'Error en el servicio web de Comandato'})
+            respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error con el servicio web de facturación automática después de 3 intentos, revisar el log.`})
+            canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+            paymentezController.sendWhatsapp(respuestaGrupoWhatsapp,grupoWhatsapp)
+        }
+
+        return facuturaCreada
+    } catch (error) {
+        logger.error({tittle:'Error durante la ejecucion del servicio web de facturacion automatica de Comandato',type:'Controller',file:'paymentezController.js',method:'WSFacturacion',details: error})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Ha ocurrido un error al intentar ejecutar el servicio web de facturación automática, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsapp,grupoWhatsapp)
     }
-
-    return facuturaCreada
 }
 
 paymentezController.CallWS = async (jsonCompra) => {
@@ -399,11 +453,19 @@ paymentezController.CallWS = async (jsonCompra) => {
             facturaCreada = true
         }else{
             facturaCreada = false
+            logger.error({tittle:'Error en la respuesta del servicio web de facturacion automatica de Comandato.',type:'Controller',file:'paymentezController.js',method:'CallWS',details: clientRes})
+            respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Error en la respuesta del servicio web de facturación automática, revisar el log.`})
+            canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+            paymentezController.sendWhatsapp(respuestaGrupoWhatsapp,grupoWhatsapp)
         }
     })
     .catch(err => {
         console.log("error de comunicacion",err)
         facturaCreada = false
+        logger.error({tittle:'Error en la comunicacion con el servicio web de facturacion automatica de Comandato.',type:'Controller',file:'paymentezController.js',method:'CallWS',details: clientRes})
+        respuestaGrupoWhatsapp.push({type:'text',text:`*Proyecto:* ChatbotDora - Comandato\n*Api:* WatsonComandato\n*Mensaje:* Error en la comunicación con el servicio web de facturación automática, revisar el log.`})
+        canalesMensajeriaController.enviarMensajeWhatsapp(respuestaGrupoWhatsapp,config.destinatarios.grupoWhatsAppDesarrolladora)
+        paymentezController.sendWhatsapp(respuestaGrupoWhatsapp,grupoWhatsapp)
             // res.send(err)
     })
 
