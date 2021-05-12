@@ -17,7 +17,7 @@
     "js-sha256": "^0.9.0",
     "mssql": "^6.2.0",
     "node-fetch": "^2.6.1",
-    "nodemailer": "^6.4.11",
+    "nodemailer": "^6.4.16",
     "soap": "^0.33.0"
   },
   "devDependencies": {
